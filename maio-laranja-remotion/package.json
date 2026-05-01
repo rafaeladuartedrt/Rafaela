@@ -1,0 +1,23 @@
+{
+  "name": "maio-laranja-remotion",
+  "version": "1.0.0",
+  "description": "Reels Institucional — Maio Laranja TJRS 2025",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render MaioLaranja out/maio-laranja-tjrs.mp4",
+    "render": "remotion render MaioLaranja out/maio-laranja-tjrs.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p",
+    "render-prores": "remotion render MaioLaranja out/maio-laranja-tjrs.mov --codec=prores --prores-profile=4444"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.257",
+    "@remotion/google-fonts": "4.0.257",
+    "remotion": "4.0.257",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "typescript": "5.6.3"
+  }
+}
