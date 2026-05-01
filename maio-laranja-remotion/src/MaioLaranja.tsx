@@ -1,7 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence, useCurrentFrame } from 'remotion';
-import { loadFont as loadAnton } from '@remotion/google-fonts/Anton';
-import { loadFont as loadNunito } from '@remotion/google-fonts/Nunito';
+import { AbsoluteFill, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { SCENES, WIPE_DURATION } from './constants';
 import { SceneAbertura } from './components/SceneAbertura';
 import { SceneDado1 } from './components/SceneDado1';
@@ -12,13 +10,37 @@ import { SceneCTA } from './components/SceneCTA';
 import { SceneEncerramento } from './components/SceneEncerramento';
 import { SceneWipe } from './components/SceneWipe';
 
-loadAnton();
-loadNunito();
+// Carrega fontes locais (evita dependência de rede no render)
+const fontFaces = `
+  @font-face {
+    font-family: 'Anton';
+    font-style: normal;
+    font-weight: 400;
+    src: url('${staticFile('fonts/Anton-Regular.ttf')}') format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400;
+    src: url('${staticFile('fonts/Nunito-Regular.ttf')}') format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 700;
+    src: url('${staticFile('fonts/Nunito-Bold.ttf')}') format('truetype');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 900;
+    src: url('${staticFile('fonts/Nunito-Black.ttf')}') format('truetype');
+  }
+`;
 
 export const MaioLaranja: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Frames de transição — no início de cada cena (exceto a primeira)
   const wipeFrames = [
     SCENES.dado1.from,
     SCENES.dado2.from,
@@ -30,6 +52,8 @@ export const MaioLaranja: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: '#111111', overflow: 'hidden' }}>
+      <style>{fontFaces}</style>
+
       {/* Cena 1 — Abertura */}
       <Sequence from={SCENES.abertura.from} durationInFrames={SCENES.abertura.durationInFrames + WIPE_DURATION}>
         <SceneAbertura />
@@ -65,7 +89,7 @@ export const MaioLaranja: React.FC = () => {
         <SceneEncerramento />
       </Sequence>
 
-      {/* Wipes de transição — renderizados sobre todas as cenas */}
+      {/* Wipes de transição */}
       {wipeFrames.map((triggerFrame, i) => (
         <SceneWipe
           key={triggerFrame}
