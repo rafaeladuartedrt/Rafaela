@@ -1,0 +1,23 @@
+{
+  "name": "missoes-logo-reveal",
+  "version": "1.0.0",
+  "description": "Logo reveal — Missões da Justiça e Cidadania (400 anos)",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio",
+    "render": "bash scripts/render_all.sh"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.257",
+    "@remotion/cli": "4.0.257",
+    "@remotion/renderer": "^4.0.257",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.257"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "typescript": "5.6.3"
+  }
+}
