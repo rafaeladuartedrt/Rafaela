@@ -1,0 +1,12 @@
+{
+  "name": "palacio-da-justica-traco-themis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "themis": "node tools/build_themis.mjs",
+    "render": "node tools/render.mjs"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  }
+}
