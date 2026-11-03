@@ -25,7 +25,7 @@ Animação de 60 s para Reels (1080 × 1920, 30 fps), gerada por código. O Pal�
 npm install
 node tools/build_themis.mjs
 NODE_PATH=$(npm root -g) node tools/render.mjs --w 1080 --h 1920 --from 0 --to 1800 --out out/frames --workers 3
-ffmpeg -framerate 30 -i out/frames/f%05d.jpg -c:v libx264 -pix_fmt yuv420p -crf 18 -movflags +faststart entregaveis/palacio_master_silent.mp4
+ffmpeg -framerate 30 -i out/frames/f%05d.jpg -c:v libx264 -pix_fmt yuv420p -crf 18 -preset slow -movflags +faststart -an entregaveis/palacio_master_silent_crf18.mp4
 ```
 Prévia de um quadro: `node tools/render.mjs --w 540 --h 960 --from 900 --to 901 --out out/prev`.
 

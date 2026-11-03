@@ -27,3 +27,14 @@ Formato 1080 × 1920 (9:16), 30 fps, 60 s (1800 quadros). Master sem áudio.
 - Nenhum plano com câmera parada por mais de 1,5 s: todo plano tem deriva, dolly, crane ou órbita contínuos.
 - Easing cúbico, exponencial ou senoidal em todos os movimentos.
 - Sem textos, logos, datas ou letreiros. As cotas e legendas dos desenhos viraram traços abstratos ou foram omitidas.
+
+## Verificação final do master
+
+- **Arquivo:** `entregaveis/palacio_master_silent.mp4`, H.264, yuv420p, 1080 × 1920, 30 fps, 1800 quadros, exatamente 60,0 s, sem faixa de áudio.
+- **Quadros pretos:** nenhum (ffmpeg `blackdetect`, limite de 0,03 s).
+- **Câmera parada:** nenhum trecho acima de 1,5 s (ffmpeg `freezedetect`).
+- **Texto ou escrita legível:** nenhum. Conferido na folha de contato e nos quadros de corte, do hall e dos estudos. Cotas, legendas, carimbos, letreiro, brasão, bandeiras e a inscrição do livro foram omitidos.
+- **Imagens de acervo:** nenhuma. Papel, traço, hachura, prédio, Themis, entorno e luz são gerados por código.
+- **Último quadro:** papel em branco, fechando o ciclo.
+- **Folha de contato:** `entregaveis/contact_sheet.jpg`, 1 quadro a cada 2 s, 30 quadros.
+- **Compressão:** o master versionado usa CRF 23 (`-tune grain`, cerca de 89 MB) para caber no limite de 100 MB por arquivo do GitHub. Para a versão CRF 18 (cerca de 137 MB), rode o comando do README a partir dos quadros.
