@@ -1,0 +1,474 @@
+{
+ "assets": {
+  "a01_corte_longitudinal": {
+   "item": 1,
+   "file": "62. EA corte longitudinal.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 3000,
+     "h": 2068,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 3000,
+   "h": 2068,
+   "estimated": true
+  },
+  "a02_cortes_aa_bb_cc": {
+   "item": 2,
+   "file": "3. PJ12-Cortes AA BB e CC junho.tif",
+   "present": false,
+   "crops": {
+    "corte_aa": {
+     "x": 0,
+     "y": 0,
+     "w": 999,
+     "h": 1363,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    },
+    "corte_bb": {
+     "x": 999,
+     "y": 0,
+     "w": 1002,
+     "h": 1363,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    },
+    "corte_cc": {
+     "x": 2001,
+     "y": 0,
+     "w": 999,
+     "h": 1363,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 3000,
+   "h": 1363,
+   "estimated": true
+  },
+  "a03_palacio_cortes": {
+   "item": 3,
+   "file": "2. Palácio da Justiça Cortes.tif",
+   "present": false,
+   "crops": {
+    "elevacao_a": {
+     "x": 0,
+     "y": 0,
+     "w": 1500,
+     "h": 1500,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    },
+    "elevacao_b": {
+     "x": 1500,
+     "y": 0,
+     "w": 1500,
+     "h": 1500,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 3000,
+   "h": 1500,
+   "estimated": true
+  },
+  "a04_corte_aa_esc_ext": {
+   "item": 4,
+   "file": "03. p09 CORTE AA E Esc Ext eint.tif",
+   "present": true,
+   "crops": {
+    "elevacao_escada": {
+     "x": 50,
+     "y": 10,
+     "w": 1278,
+     "h": 870,
+     "reveal": "up",
+     "blocks": {
+      "escada": {
+       "rect": [
+        485,
+        75,
+        185,
+        645
+       ]
+      },
+      "embasamento": {
+       "rect": [
+        70,
+        410,
+        1000,
+        60
+       ]
+      }
+     },
+     "focus": {
+      "escada": [
+       577,
+       400
+      ]
+     },
+     "maps": {
+      "up": "maps/a04_corte_aa_esc_ext__elevacao_escada__up.png",
+      "down": "maps/a04_corte_aa_esc_ext__elevacao_escada__down.png",
+      "right": "maps/a04_corte_aa_esc_ext__elevacao_escada__right.png",
+      "luma": "maps/a04_corte_aa_esc_ext__elevacao_escada__luma.png",
+      "luma-up": "maps/a04_corte_aa_esc_ext__elevacao_escada__luma-up.png"
+     }
+    },
+    "corte_aa": {
+     "x": 1354,
+     "y": 10,
+     "w": 1237,
+     "h": 870,
+     "reveal": "up",
+     "blocks": {
+      "escada": {
+       "rect": [
+        526,
+        85,
+        130,
+        635
+       ]
+      },
+      "estrutura": {
+       "rect": [
+        0,
+        8,
+        1237,
+        105
+       ]
+      }
+     },
+     "focus": {
+      "escada": [
+       591,
+       400
+      ]
+     },
+     "maps": {
+      "up": "maps/a04_corte_aa_esc_ext__corte_aa__up.png",
+      "down": "maps/a04_corte_aa_esc_ext__corte_aa__down.png",
+      "right": "maps/a04_corte_aa_esc_ext__corte_aa__right.png",
+      "luma": "maps/a04_corte_aa_esc_ext__corte_aa__luma.png",
+      "luma-up": "maps/a04_corte_aa_esc_ext__corte_aa__luma-up.png"
+     }
+    }
+   },
+   "sourceFile": "03. p09 CORTE AA E Esc Ext eint.tif",
+   "sha256": "39bd66d74665202a29318a7382b6efdbbf9f6197efe2f32fe54b649a614de58c",
+   "w": 2634,
+   "h": 897,
+   "src": "img/a04_corte_aa_esc_ext_web8.png",
+   "master16": "img/a04_corte_aa_esc_ext.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
+  },
+  "a05_perspectiva_bico_pena": {
+   "item": 5,
+   "file": "63. EA Perspectiva.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 3000,
+     "h": 2142,
+     "reveal": "right",
+     "blocks": {
+      "brises": {
+       "rect": [
+        960.0,
+        471.24,
+        1260.0,
+        899.64
+       ]
+      }
+     },
+     "focus": {
+      "creditos": [
+       1500.0,
+       1970.64
+      ]
+     }
+    }
+   },
+   "w": 3000,
+   "h": 2142,
+   "estimated": true
+  },
+  "a06_perspectiva_themis": {
+   "item": 6,
+   "file": "14 - Perspectiva Pal Justiça.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 3000,
+     "h": 2142,
+     "reveal": "right",
+     "blocks": {},
+     "focus": {
+      "themis": [
+       2340.0,
+       963.9
+      ]
+     }
+    }
+   },
+   "w": 3000,
+   "h": 2142,
+   "estimated": true
+  },
+  "a07_perspectivas": {
+   "item": 7,
+   "file": "1. Perspectivas.tif",
+   "present": false,
+   "crops": {
+    "esquerda": {
+     "x": 0,
+     "y": 0,
+     "w": 1500,
+     "h": 1250,
+     "reveal": "right",
+     "blocks": {},
+     "focus": {}
+    },
+    "direita": {
+     "x": 1500,
+     "y": 0,
+     "w": 1500,
+     "h": 1250,
+     "reveal": "right",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 3000,
+   "h": 1250,
+   "estimated": true
+  },
+  "a08_hall": {
+   "item": 8,
+   "file": "28 Hall 2.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 3000,
+     "h": 2068,
+     "reveal": "right",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 3000,
+   "h": 2068,
+   "estimated": true
+  },
+  "a09_escadas_fotos": {
+   "item": 9,
+   "file": "conjunto_escadas-junho.tif",
+   "present": false,
+   "crops": {
+    "painel": {
+     "x": 0,
+     "y": 0,
+     "w": 3000,
+     "h": 2142,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "foto_1": {
+     "x": 0,
+     "y": 0,
+     "w": 1500,
+     "h": 1071,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "foto_2": {
+     "x": 0,
+     "y": 1071,
+     "w": 999,
+     "h": 1071,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "foto_3": {
+     "x": 999,
+     "y": 1071,
+     "w": 1002,
+     "h": 1071,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "foto_4": {
+     "x": 2001,
+     "y": 1071,
+     "w": 999,
+     "h": 1071,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "vista_de_cima": {
+     "x": 1500,
+     "y": 0,
+     "w": 1500,
+     "h": 1071,
+     "reveal": null,
+     "blocks": {},
+     "focus": {
+      "centro_espiral": [
+       750.0,
+       535.5
+      ]
+     }
+    }
+   },
+   "w": 3000,
+   "h": 2142,
+   "estimated": true
+  },
+  "a10_brises_foto": {
+   "item": 10,
+   "file": "brises.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 2250,
+     "h": 3000,
+     "reveal": "luma-up",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 2250,
+   "h": 3000,
+   "estimated": true
+  },
+  "a11_themis_2005": {
+   "item": 11,
+   "file": "36. Themis década 2005.tif",
+   "present": false,
+   "crops": {
+    "fachada": {
+     "x": 0,
+     "y": 0,
+     "w": 240,
+     "h": 449,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {
+      "themis": [
+       144.0,
+       202.05
+      ]
+     }
+    },
+    "modelo_claro": {
+     "x": 240,
+     "y": 157,
+     "w": 240,
+     "h": 269,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "modelo_escuro": {
+     "x": 481,
+     "y": 0,
+     "w": 153,
+     "h": 449,
+     "reveal": null,
+     "blocks": {},
+     "focus": {}
+    },
+    "estudo_1": {
+     "x": 634,
+     "y": 0,
+     "w": 153,
+     "h": 449,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    },
+    "estudo_2": {
+     "x": 787,
+     "y": 0,
+     "w": 153,
+     "h": 449,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    },
+    "estudo_3": {
+     "x": 940,
+     "y": 0,
+     "w": 153,
+     "h": 449,
+     "reveal": "up",
+     "blocks": {},
+     "focus": {}
+    }
+   },
+   "w": 1093,
+   "h": 449,
+   "estimated": true
+  },
+  "a12_themis_instalacao": {
+   "item": 12,
+   "file": "DSCN0039lelo.tif",
+   "present": false,
+   "crops": {
+    "inteiro": {
+     "x": 0,
+     "y": 0,
+     "w": 2250,
+     "h": 3000,
+     "reveal": null,
+     "blocks": {},
+     "focus": {
+      "base": [
+       1125.0,
+       2550.0
+      ],
+      "rosto": [
+       1125.0,
+       600.0
+      ]
+     }
+    }
+   },
+   "w": 2250,
+   "h": 3000,
+   "estimated": true
+  }
+ },
+ "optional": {
+  "trilha": null,
+  "lapis": null,
+  "logo": null,
+  "orbita": null
+ }
+}

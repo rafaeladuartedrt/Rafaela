@@ -1,0 +1,201 @@
+{
+  "_doc": [
+    "Inventario do acervo e coordenadas de recorte.",
+    "status 'confirmado': arquivo aberto e conferido; recortes em pixels nativos (rect = [x, y, w, h]).",
+    "status 'pendente': arquivo ainda nao recebido; recortes em fracao da imagem (frac = [x, y, w, h]) e marcados para conferencia quando o arquivo chegar.",
+    "blocks: retangulos/poligonos de cor ACCENT em coordenadas relativas ao recorte (px se confirmado, fracao se pendente).",
+    "focus: pontos de interesse relativos ao recorte (px ou fracao).",
+    "match: trechos do nome do arquivo usados para identificar o TIF (sem acento, minusculas)."
+  ],
+  "assets": {
+    "a01_corte_longitudinal": {
+      "item": 1,
+      "file": "62. EA corte longitudinal.tif",
+      "match": ["corte longitudinal", "62. ea"],
+      "status": "pendente",
+      "content": "Corte longitudinal com os andares identificados (Casa de maquinas, Tribunal Pleno, Cartorios, Foro de Porto Alegre, Tribunal do Juri, Portico de entrada).",
+      "estimatedAspect": 1.45,
+      "crops": {
+        "inteiro": { "frac": [0, 0, 1, 1], "reveal": "up", "conferir": true }
+      }
+    },
+    "a02_cortes_aa_bb_cc": {
+      "item": 2,
+      "file": "3. PJ12-Cortes AA BB e CC junho.tif",
+      "match": ["pj12", "cortes aa bb"],
+      "status": "pendente",
+      "content": "Tres cortes verticais lado a lado.",
+      "estimatedAspect": 2.2,
+      "crops": {
+        "corte_aa": { "frac": [0.0, 0, 0.333, 1], "reveal": "up", "conferir": true },
+        "corte_bb": { "frac": [0.333, 0, 0.334, 1], "reveal": "up", "conferir": true },
+        "corte_cc": { "frac": [0.667, 0, 0.333, 1], "reveal": "up", "conferir": true }
+      }
+    },
+    "a03_palacio_cortes": {
+      "item": 3,
+      "file": "2. Palácio da Justiça Cortes.tif",
+      "match": ["palacio da justica cortes", "2. palacio"],
+      "status": "pendente",
+      "content": "Duas elevacoes/cortes com a fachada e a escada em espiral.",
+      "estimatedAspect": 2.0,
+      "crops": {
+        "elevacao_a": { "frac": [0.0, 0, 0.5, 1], "reveal": "up", "conferir": true },
+        "elevacao_b": { "frac": [0.5, 0, 0.5, 1], "reveal": "up", "conferir": true }
+      }
+    },
+    "a04_corte_aa_esc_ext": {
+      "item": 4,
+      "file": "03. p09 CORTE AA E Esc Ext eint.tif",
+      "match": ["p09", "esc ext"],
+      "status": "confirmado",
+      "sha256": "39bd66d74665202a29318a7382b6efdbbf9f6197efe2f32fe54b649a614de58c",
+      "native": [2634, 897],
+      "dpi": 300,
+      "colorspace": "CMYK 8 bits, perfil embutido U.S. Web Coated (SWOP) v2",
+      "content": "Duas pranchas lado a lado: a esquerda, elevacao com a escada externa e a malha de brises; a direita, CORTE AA com os pavimentos (Terreo, Galeria, 1o a 7o andar) e a escada. Fundo branco, traco preto. Legenda 'CORTE AA' no canto inferior direito de cada prancha.",
+      "usefulArea": [70, 23, 2501, 837],
+      "crops": {
+        "elevacao_escada": {
+          "rect": [50, 10, 1278, 870],
+          "reveal": "up",
+          "desc": "Elevacao com a escada externa (area util x 70-1307, y 24-860).",
+          "blocks": {
+            "escada": { "rect": [485, 75, 185, 645] },
+            "embasamento": { "rect": [70, 410, 1000, 60] }
+          },
+          "focus": { "escada": [577, 400] }
+        },
+        "corte_aa": {
+          "rect": [1354, 10, 1237, 870],
+          "reveal": "up",
+          "desc": "CORTE AA com pavimentos rotulados (area util x 1374-2571, y 23-859).",
+          "blocks": {
+            "escada": { "rect": [526, 85, 130, 635] },
+            "estrutura": { "rect": [0, 8, 1237, 105] }
+          },
+          "focus": { "escada": [591, 400] }
+        }
+      }
+    },
+    "a05_perspectiva_bico_pena": {
+      "item": 5,
+      "file": "63. EA Perspectiva.tif",
+      "match": ["ea perspectiva", "63."],
+      "status": "pendente",
+      "content": "Perspectiva a bico de pena com o letreiro PALACIO DA JUSTICA e os creditos de projeto (Arq. Carlos M. Fayet e Luis F. Corona / Calculo estrutural: Prof. Eng. Ivo Wolff).",
+      "estimatedAspect": 1.4,
+      "crops": {
+        "inteiro": {
+          "frac": [0, 0, 1, 1],
+          "reveal": "right",
+          "conferir": true,
+          "blocks": { "brises": { "frac": [0.32, 0.22, 0.42, 0.42] } },
+          "focus": { "creditos": [0.5, 0.92] }
+        }
+      }
+    },
+    "a06_perspectiva_themis": {
+      "item": 6,
+      "file": "14 - Perspectiva Pal Justiça.tif",
+      "match": ["14 - perspectiva", "perspectiva pal"],
+      "status": "pendente",
+      "content": "Perspectiva detalhada com a Themis na fachada lateral direita e o entorno urbano.",
+      "estimatedAspect": 1.4,
+      "crops": {
+        "inteiro": {
+          "frac": [0, 0, 1, 1],
+          "reveal": "right",
+          "conferir": true,
+          "focus": { "themis": [0.78, 0.45] }
+        }
+      }
+    },
+    "a07_perspectivas": {
+      "item": 7,
+      "file": "1. Perspectivas.tif",
+      "match": ["1. perspectivas", "perspectivas"],
+      "status": "pendente",
+      "content": "Duas perspectivas lado a lado, de angulos diferentes.",
+      "estimatedAspect": 2.4,
+      "crops": {
+        "esquerda": { "frac": [0, 0, 0.5, 1], "reveal": "right", "conferir": true },
+        "direita": { "frac": [0.5, 0, 0.5, 1], "reveal": "right", "conferir": true }
+      }
+    },
+    "a08_hall": {
+      "item": 8,
+      "file": "28 Hall 2.tif",
+      "match": ["hall"],
+      "status": "pendente",
+      "content": "Desenho 'Vista do Hall' com pilotis, painel em relevo e pessoas.",
+      "estimatedAspect": 1.45,
+      "crops": {
+        "inteiro": { "frac": [0, 0, 1, 1], "reveal": "right", "conferir": true }
+      }
+    },
+    "a09_escadas_fotos": {
+      "item": 9,
+      "file": "conjunto_escadas-junho.tif",
+      "match": ["conjunto_escadas", "escadas"],
+      "status": "pendente",
+      "content": "Painel com 5 fotos da escada em espiral; vista de cima em caracol no canto superior direito.",
+      "estimatedAspect": 1.4,
+      "crops": {
+        "painel": { "frac": [0, 0, 1, 1], "conferir": true },
+        "foto_1": { "frac": [0, 0, 0.5, 0.5], "conferir": true },
+        "foto_2": { "frac": [0, 0.5, 0.333, 0.5], "conferir": true },
+        "foto_3": { "frac": [0.333, 0.5, 0.334, 0.5], "conferir": true },
+        "foto_4": { "frac": [0.667, 0.5, 0.333, 0.5], "conferir": true },
+        "vista_de_cima": {
+          "frac": [0.5, 0, 0.5, 0.5],
+          "conferir": true,
+          "focus": { "centro_espiral": [0.5, 0.5] }
+        }
+      }
+    },
+    "a10_brises_foto": {
+      "item": 10,
+      "file": "brises.tif",
+      "match": ["brises"],
+      "status": "pendente",
+      "content": "Foto atual da fachada com brises em contra-plongee, ceu e nuvens.",
+      "estimatedAspect": 0.75,
+      "crops": {
+        "inteiro": { "frac": [0, 0, 1, 1], "reveal": "luma-up", "conferir": true }
+      }
+    },
+    "a11_themis_2005": {
+      "item": 11,
+      "file": "36. Themis década 2005.tif",
+      "match": ["themis"],
+      "status": "pendente",
+      "content": "Composicao com etapas da Themis: desenho na fachada (esquerda), modelo claro deitado, modelo escuro em pe e tres desenhos de estudo (direita). Resolucao baixa: 1093 x 449.",
+      "native": [1093, 449],
+      "estimatedAspect": 2.434,
+      "crops": {
+        "fachada": { "frac": [0.0, 0.0, 0.22, 1.0], "reveal": "up", "conferir": true, "focus": { "themis": [0.6, 0.45] } },
+        "modelo_claro": { "frac": [0.22, 0.35, 0.22, 0.6], "conferir": true },
+        "modelo_escuro": { "frac": [0.44, 0.0, 0.14, 1.0], "conferir": true },
+        "estudo_1": { "frac": [0.58, 0.0, 0.14, 1.0], "reveal": "up", "conferir": true },
+        "estudo_2": { "frac": [0.72, 0.0, 0.14, 1.0], "reveal": "up", "conferir": true },
+        "estudo_3": { "frac": [0.86, 0.0, 0.14, 1.0], "reveal": "up", "conferir": true }
+      }
+    },
+    "a12_themis_instalacao": {
+      "item": 12,
+      "file": "DSCN0039lelo.tif",
+      "match": ["dscn0039"],
+      "status": "pendente",
+      "content": "Foto da Themis sendo instalada na fachada, com estrutura metalica e operario.",
+      "estimatedAspect": 0.75,
+      "crops": {
+        "inteiro": {
+          "frac": [0, 0, 1, 1],
+          "conferir": true,
+          "focus": { "base": [0.5, 0.85], "rosto": [0.5, 0.2] }
+        }
+      }
+    }
+  }
+}

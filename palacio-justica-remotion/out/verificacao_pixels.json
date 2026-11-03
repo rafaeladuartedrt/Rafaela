@@ -1,0 +1,16 @@
+[
+ {
+  "recorte": "a04_corte_aa_esc_ext/elevacao_escada",
+  "px": 1111860,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a04_corte_aa_esc_ext/corte_aa",
+  "px": 1076190,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ }
+]

@@ -1,0 +1,28 @@
+{
+  "name": "palacio-justica-remotion",
+  "version": "1.0.0",
+  "description": "Reels institucional TJRS — Palácio da Justiça: do traço à Themis",
+  "private": true,
+  "scripts": {
+    "prepare-assets": "python3 scripts/prepare_assets.py",
+    "check-scale": "node scripts/check-scale.ts",
+    "studio": "remotion studio",
+    "preview": "remotion render PalacioJustica out/previa_540x960.mp4 --scale=0.5 --codec=h264 --crf=18 --pixel-format=yuv420p --x264-preset=veryfast",
+    "render": "remotion render PalacioJustica out/palacio-justica_1080x1920.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p --x264-preset=slow",
+    "render-16x9": "remotion render PalacioJustica16x9 out/palacio-justica_1920x1080.mp4 --codec=h264 --crf=18 --pixel-format=yuv420p --x264-preset=slow",
+    "contact-sheet": "python3 scripts/contact_sheet.py out/previa_540x960.mp4 out/folha_de_contato.png",
+    "verify-pixels": "remotion render IntegrityCheck out/integrity --sequence --image-format=png && python3 scripts/verify_pixels.py"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.1.0",
+    "@remotion/cli": "4.0.257",
+    "remotion": "4.0.257",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "typescript": "5.6.3"
+  }
+}
