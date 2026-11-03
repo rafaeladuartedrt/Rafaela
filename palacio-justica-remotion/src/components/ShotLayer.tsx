@@ -1,5 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, OffthreadVideo, staticFile, Sequence } from 'remotion';
+import { revealDir } from '../core/types.ts';
 import type { Item, Manifest, Shot } from '../core/types.ts';
 import { cameraAt } from '../core/camera.ts';
 import { easeSoft, prog } from '../core/easing.ts';
@@ -17,9 +18,9 @@ export function revealState(it: Item, rel: number, cropW: number, cropH: number,
   if (!it.reveal) return { T: 99, soft: 0.05, p: 1 };
   const { type, from, to } = it.reveal;
   const p = prog(rel, from, to, easeSoft);
-  const along = type === 'right' ? cropW : cropH;
+  const along = revealDir(type) === 'right' ? cropW : cropH;
   const screenLen = along * it.s * z;
-  const soft = type.startsWith('luma') ? 0.1 : Math.min(0.25, Math.max(0.004, (REVEAL_SOFT_PX / Math.max(1, screenLen)) * (1 - NOISE_W)));
+  const soft = type.startsWith('stroke') ? 0.03 : type.startsWith('luma') ? 0.1 : Math.min(0.25, Math.max(0.004, (REVEAL_SOFT_PX / Math.max(1, screenLen)) * (1 - NOISE_W)));
   return { T: p * (1 + soft) + (p >= 1 ? 1 : 0), soft, p };
 }
 
@@ -43,14 +44,16 @@ const ItemView: React.FC<{ uid: string; it: Item; m: Manifest; rel: number; z: n
         <Plate uid={uid} asset={asset} crop={crop} reveal={it.reveal?.type} threshold={T} soft={soft} />
       ) : (
         <Placeholder asset={asset} crop={crop} cropName={it.crop} progress={it.reveal ? p : 1}
-          dir={!it.reveal ? 'fade' : it.reveal.type === 'right' ? 'right' : it.reveal.type.startsWith('luma') ? 'fade' : 'up'} />
+          dir={!it.reveal ? 'fade' : revealDir(it.reveal.type)} />
       )}
       {/* linha guia de lapis na frente da area revelada */}
-      {SHOW_PENCIL_GUIDE && it.reveal && (it.reveal.type === 'up' || it.reveal.type === 'right') && p > 0.01 && p < 0.99 && (() => {
-        const g = Math.min(1, Math.max(0, (T - NOISE_W * 0.5) / (1 - NOISE_W)));
+      {SHOW_PENCIL_GUIDE && it.reveal && revealDir(it.reveal.type) !== 'fade' && p > 0.01 && p < 0.99 && (() => {
+        // frente da revelacao (mesmas formulas de prepare_assets.py)
+        const stroke = it.reveal!.type.startsWith('stroke');
+        const g = Math.min(1, Math.max(0, stroke ? (T - 0.12) / (0.88 * (it.reveal!.type === 'stroke-up' ? 0.8 : 0.86)) : (T - NOISE_W * 0.5) / (1 - NOISE_W)));
         const th = 2.2 / (z * it.s);
         const op = 0.45 * Math.sin(Math.PI * p);
-        return it.reveal!.type === 'up'
+        return revealDir(it.reveal!.type) === 'up'
           ? <div style={{ position: 'absolute', left: -crop.w * 0.03, width: crop.w * 1.06, top: crop.h * (1 - g), height: th, background: GRAPHITE, opacity: op }} />
           : <div style={{ position: 'absolute', top: -crop.h * 0.03, height: crop.h * 1.06, left: crop.w * g, width: th, background: GRAPHITE, opacity: op }} />;
       })()}

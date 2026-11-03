@@ -1,4 +1,7 @@
-export type RevealType = 'up' | 'down' | 'right' | 'luma' | 'luma-up';
+export type RevealType = 'up' | 'down' | 'right' | 'luma' | 'luma-up' | 'stroke-up' | 'stroke-right';
+// direcao de base da revelacao (para placeholder, linha guia e som de lapis)
+export const revealDir = (t: RevealType): 'up' | 'right' | 'fade' =>
+  t === 'right' || t === 'stroke-right' ? 'right' : t.startsWith('luma') ? 'fade' : 'up';
 
 export interface CropInfo {
   x: number; y: number; w: number; h: number;
@@ -6,6 +9,7 @@ export interface CropInfo {
   blocks: Record<string, { rect?: number[]; poly?: number[][] }>;
   focus: Record<string, [number, number]>;
   maps?: Record<string, string>;
+  sheet?: string; // cor mediana da folha do desenho (camada de fundo separada)
 }
 export interface AssetInfo {
   item: number; file: string; present: boolean; estimated?: boolean;

@@ -163,6 +163,65 @@ def build_maps(asset_id, crop_name, crop_img16, rng):
     return out
 
 
+STROKE_MAX = 2400  # mapas de traco: resolucao nativa ate este lado maior
+
+
+def box1d(a, r, axis):
+    """media movel (janela 2r+1) ao longo de um eixo, via soma acumulada"""
+    pad = [(0, 0), (0, 0)]
+    pad[axis] = (r + 1, r)
+    c = np.cumsum(np.pad(a, pad, mode="edge"), axis=axis, dtype=np.float32)
+    n = a.shape[axis]
+    hi = np.take(c, np.arange(2 * r + 1, 2 * r + 1 + n), axis=axis)
+    lo = np.take(c, np.arange(0, n), axis=axis)
+    return (hi - lo) / (2 * r + 1)
+
+
+def build_stroke_maps(asset_id, crop_name, crop_img16, rng):
+    """Mapas 'stroke-up' e 'stroke-right': a folha branca da prancha aparece primeiro e,
+    em seguida, cada linha de tinta se desenha (horizontais correm da esquerda para a
+    direita, verticais sobem). O mapa so decide QUANDO cada pixel aparece."""
+    h, w = crop_img16.shape[:2]
+    k = min(1.0, STROKE_MAX / max(h, w))
+    mh, mw = max(2, int(round(h * k))), max(2, int(round(w * k)))
+    lum = luminance(crop_img16)
+    ink = (lum < 0.78).astype(np.float32)
+    # dilata 1 px para incluir a borda antialias das linhas
+    d = ink.copy()
+    d[1:, :] = np.maximum(d[1:, :], ink[:-1, :]); d[:-1, :] = np.maximum(d[:-1, :], ink[1:, :])
+    d[:, 1:] = np.maximum(d[:, 1:], ink[:, :-1]); d[:, :-1] = np.maximum(d[:, :-1], ink[:, 1:])
+    if k < 1:
+        d = np.asarray(Image.fromarray((d * 255).astype(np.uint8)).resize((mw, mh), Image.BOX)).astype(np.float32) / 255.0
+        d = (d > 0.04).astype(np.float32)
+    r = max(4, int(round(min(mh, mw) * 0.018)))
+    hx, vy = box1d(d, r, 1), box1d(d, r, 0)
+    horiz = (hx > vy * 1.15).astype(np.float32)
+    yy, xx = np.mgrid[0:mh, 0:mw].astype(np.float32)
+    ny, nx = yy / (mh - 1), xx / (mw - 1)
+    noise = smooth_noise(mh, mw, rng)
+    out = {}
+    for name in ("stroke-up", "stroke-right"):
+        if name == "stroke-up":
+            b = 1 - ny
+            t_h = 0.80 * b + 0.20 * nx
+            t_v = 0.80 * b + 0.20 * (0.15 + 0.7 * noise)
+        else:
+            b = nx
+            t_h = 0.86 * nx + 0.14 * (0.3 + 0.4 * noise)
+            t_v = 0.86 * nx + 0.14 * (1 - ny)
+        t_ink = horiz * t_h + (1 - horiz) * t_v + 0.035 * (noise - 0.5)
+        t_ink = 0.12 + 0.88 * np.clip(t_ink, 0, 1)
+        t_sheet = 0.015 + 0.07 * b + 0.02 * noise
+        m = np.where(d > 0.5, t_ink, t_sheet)
+        m = np.clip(m, 0, 1)
+        fn = f"{asset_id}__{crop_name}__{name}.png"
+        dith = (rng.random(m.shape) - rng.random(m.shape)) / 255.0
+        q = np.clip((m + dith * 0.5) * 255.0 + 0.5, 0, 255).astype(np.uint8)  # sem normalizar: tempos absolutos
+        Image.fromarray(q, "L").save(os.path.join(MAP_OUT, fn), optimize=True)
+        out[name] = f"maps/{fn}"
+    return out
+
+
 def resolve_rect(c, W, H):
     if "rect" in c:
         return [int(v) for v in c["rect"]]
@@ -242,6 +301,12 @@ def main():
             ce["focus"] = {k: ([v[0] * w, v[1] * h] if frac_mode else v) for k, v in c.get("focus", {}).items()}
             if img16 is not None:
                 ce["maps"] = build_maps(aid, cname, img16[y:y + h, x:x + w], rng)
+                ce["maps"].update(build_stroke_maps(aid, cname, img16[y:y + h, x:x + w], rng))
+                # cor tipica da folha (mediana dos pixels claros): usada so na camada de fundo
+                sub_ = img16[y:y + h, x:x + w]
+                light = sub_[luminance(sub_) >= 0.78]
+                med = np.median(light, axis=0) if len(light) else np.array([65535] * 3)
+                ce["sheet"] = "#%02x%02x%02x" % tuple(int(round(v / 257)) for v in med)
             entry["crops"][cname] = ce
         manifest["assets"][aid] = entry
 

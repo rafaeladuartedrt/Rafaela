@@ -17,6 +17,11 @@ export const Plate: React.FC<{
   );
   return (
     <svg width={crop.w} height={crop.h} viewBox={`0 0 ${crop.w} ${crop.h}`} style={{ position: 'absolute', left: 0, top: 0, display: 'block' }}>
+      {/* fundo da prancha (camada grafica separada, abaixo da imagem): durante o desenho do
+          traco, as linhas ainda nao reveladas ficam sobre folha branca, nao sobre o papel creme */}
+      {reveal?.startsWith('stroke') && !full && (
+        <rect x={0} y={0} width={crop.w} height={crop.h} fill={crop.sheet ?? '#ffffff'} opacity={Math.min(1, Math.max(0, threshold / 0.1))} />
+      )}
       {full || !map ? img : (
         <>
           <defs>

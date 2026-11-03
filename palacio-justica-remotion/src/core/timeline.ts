@@ -42,7 +42,7 @@ export function buildTimeline(m: Manifest) {
   {
     const start = 0, end = sec(12);
     const items: Item[] = [];
-    const it1 = itemH('a01_corte_longitudinal', 'inteiro', 0, 0, HN, { reveal: { type: 'up', from: 0, to: sec(4.2) } });
+    const it1 = itemH('a01_corte_longitudinal', 'inteiro', 0, 0, HN, { reveal: { type: 'stroke-up', from: 0, to: sec(4.2) } });
     items.push(it1);
     let x = W(it1) + 260;
     const seq: [string, string, boolean][] = [
@@ -54,9 +54,9 @@ export function buildTimeline(m: Manifest) {
     const starts = [4.5, 5.2, 5.9, 6.6, 7.3, 8.1, 9.4].map(sec);
     seq.forEach(([a, c, withBlocks], i) => {
       const from = starts[i];
-      const it = itemH(a, c, x, 0, HN, { reveal: { type: 'up', from, to: from + sec(1.25) } });
+      const it = itemH(a, c, x, 0, HN, { reveal: { type: 'stroke-up', from, to: from + (a === 'a04_corte_aa_esc_ext' ? sec(1.9) : sec(1.3)) } });
       const names = Object.keys(C(a, c).blocks);
-      if (withBlocks && names.length) it.blocks = names.map((n, j) => ({ name: n, from: from + sec(0.55) + j * 10, dir: 'up' as const }));
+      if (withBlocks && names.length) it.blocks = names.map((n, j) => ({ name: n, from: from + sec(1.35) + j * 10, dir: 'up' as const }));
       items.push(it);
       x += W(it) + 140;
     });
@@ -79,7 +79,7 @@ export function buildTimeline(m: Manifest) {
   {
     const start = sec(11.2), end = sec(15.8);
     const it = itemH('a05_perspectiva_bico_pena', 'inteiro', 0, 0, HN, {
-      reveal: { type: 'right', from: 6, to: sec(2.0) },
+      reveal: { type: 'stroke-right', from: 6, to: sec(2.0) },
       blocks: [{ name: 'brises', from: sec(1.7), dir: 'up' }],
     });
     shots.push({ id: 'c3_perspectiva', scene: 'Cena 3: perspectiva a bico de pena (creditos visiveis)', start, end, items: [it],
@@ -111,7 +111,7 @@ export function buildTimeline(m: Manifest) {
   // ---------- Cena 6: hall ----------
   {
     const start = sec(24.2), end = sec(27.8);
-    const it = itemH('a08_hall', 'inteiro', 0, 0, HN, { reveal: { type: 'right', from: 0, to: sec(1.9) } });
+    const it = itemH('a08_hall', 'inteiro', 0, 0, HN, { reveal: { type: 'stroke-right', from: 0, to: sec(1.9) } });
     shots.push({ id: 'c6_hall', scene: 'Cena 6: Vista do Hall (travelling)', start, end, items: [it],
       cam: [fitKey(0, it, 1.0), fitKey(end - start, it, 1.45, 0.02, 0.04)], inT: { type: 'dissolve', dur: 18, blur: 3 } });
   }
@@ -144,7 +144,7 @@ export function buildTimeline(m: Manifest) {
   {
     const start = sec(30.4), end = sec(35.6);
     const items = themisFrame(['estudo_1', 'estudo_2', 'estudo_3'], 70);
-    items.forEach((it, i) => (it.reveal = { type: 'up', from: sec(0.6) + i * sec(1.1), to: sec(1.9) + i * sec(1.1) }));
+    items.forEach((it, i) => (it.reveal = { type: 'stroke-up', from: sec(0.6) + i * sec(1.1), to: sec(1.9) + i * sec(1.1) }));
     const totalW = items[items.length - 1].x + W(items[items.length - 1]);
     const h = Hh(items[0]);
     shots.push({ id: 'c8_estudos', scene: 'Cena 8: desenhos de estudo da Themis', start, end, items,
@@ -166,7 +166,7 @@ export function buildTimeline(m: Manifest) {
   {
     const start = sec(39.0), end = sec(41.6);
     const c = C('a11_themis_2005', 'fachada');
-    const it: Item = { asset: 'a11_themis_2005', crop: 'fachada', x: -c.w / 2, y: -c.h / 2, s: 1, frame: true, reveal: { type: 'up', from: 0, to: sec(1.3) } };
+    const it: Item = { asset: 'a11_themis_2005', crop: 'fachada', x: -c.w / 2, y: -c.h / 2, s: 1, frame: true, reveal: { type: 'stroke-up', from: 0, to: sec(1.3) } };
     shots.push({ id: 'c10a_fachada_desenho', scene: 'Cena 10: desenho da Themis na fachada', start, end, items: [it],
       cam: [scaleKey(0, [0, c.h * 0.08], 1.28, it), scaleKey(end - start, [0, -c.h * 0.05], 1.44, it)],
       inT: { type: 'dissolve', dur: 18, blur: 2 } });

@@ -26,7 +26,7 @@ export const PalacioJustica: React.FC = () => {
         <Audio src={staticFile(manifest.optional.trilha)}
           volume={(fr) => MUSIC_VOLUME * interpolate(fr, [0, 20, durationInFrames - 45, durationInFrames], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} />
       )}
-      {lapis && tl.shots.flatMap((s) => s.items.filter((it) => it.reveal && (it.reveal.type === 'up' || it.reveal.type === 'right')).map((it, i) => (
+      {lapis && tl.shots.flatMap((s) => s.items.filter((it) => it.reveal && it.reveal.type.startsWith('stroke')).map((it, i) => (
         <Sequence key={`${s.id}-${i}`} from={s.start + it.reveal!.from} durationInFrames={Math.max(10, it.reveal!.to - it.reveal!.from)}>
           <Audio src={staticFile(lapis)} volume={SFX_VOLUME} />
         </Sequence>

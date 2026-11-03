@@ -124,8 +124,11 @@
       "down": "maps/a04_corte_aa_esc_ext__elevacao_escada__down.png",
       "right": "maps/a04_corte_aa_esc_ext__elevacao_escada__right.png",
       "luma": "maps/a04_corte_aa_esc_ext__elevacao_escada__luma.png",
-      "luma-up": "maps/a04_corte_aa_esc_ext__elevacao_escada__luma-up.png"
-     }
+      "luma-up": "maps/a04_corte_aa_esc_ext__elevacao_escada__luma-up.png",
+      "stroke-up": "maps/a04_corte_aa_esc_ext__elevacao_escada__stroke-up.png",
+      "stroke-right": "maps/a04_corte_aa_esc_ext__elevacao_escada__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "corte_aa": {
      "x": 1354,
@@ -162,8 +165,11 @@
       "down": "maps/a04_corte_aa_esc_ext__corte_aa__down.png",
       "right": "maps/a04_corte_aa_esc_ext__corte_aa__right.png",
       "luma": "maps/a04_corte_aa_esc_ext__corte_aa__luma.png",
-      "luma-up": "maps/a04_corte_aa_esc_ext__corte_aa__luma-up.png"
-     }
+      "luma-up": "maps/a04_corte_aa_esc_ext__corte_aa__luma-up.png",
+      "stroke-up": "maps/a04_corte_aa_esc_ext__corte_aa__stroke-up.png",
+      "stroke-right": "maps/a04_corte_aa_esc_ext__corte_aa__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
    "sourceFile": "03. p09 CORTE AA E Esc Ext eint.tif",
