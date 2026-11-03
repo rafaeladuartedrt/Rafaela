@@ -3,86 +3,193 @@
   "a01_corte_longitudinal": {
    "item": 1,
    "file": "62. EA corte longitudinal.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "inteiro": {
      "x": 0,
      "y": 0,
-     "w": 3000,
-     "h": 2068,
-     "reveal": "up",
-     "blocks": {},
-     "focus": {}
+     "w": 2421,
+     "h": 1251,
+     "reveal": "stroke-up",
+     "blocks": {
+      "escada": {
+       "rect": [
+        1170,
+        300,
+        140,
+        790
+       ]
+      }
+     },
+     "focus": {
+      "espiral": [
+       1240,
+       700
+      ]
+     },
+     "maps": {
+      "up": "maps/a01_corte_longitudinal__inteiro__up.png",
+      "down": "maps/a01_corte_longitudinal__inteiro__down.png",
+      "right": "maps/a01_corte_longitudinal__inteiro__right.png",
+      "luma": "maps/a01_corte_longitudinal__inteiro__luma.png",
+      "luma-up": "maps/a01_corte_longitudinal__inteiro__luma-up.png",
+      "stroke-up": "maps/a01_corte_longitudinal__inteiro__stroke-up.png",
+      "stroke-right": "maps/a01_corte_longitudinal__inteiro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 2068,
-   "estimated": true
+   "sourceFile": "62. EA corte longitudinal.tif",
+   "sha256": "e606a089709c57565a95f905414976d693ba57c23707499dd58be1f6f9eec0d9",
+   "w": 2421,
+   "h": 1251,
+   "src": "img/a01_corte_longitudinal_web8.png",
+   "master16": "img/a01_corte_longitudinal.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a02_cortes_aa_bb_cc": {
    "item": 2,
    "file": "3. PJ12-Cortes AA BB e CC junho.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "corte_aa": {
-     "x": 0,
-     "y": 0,
-     "w": 999,
-     "h": 1363,
-     "reveal": "up",
-     "blocks": {},
-     "focus": {}
+     "x": 280,
+     "y": 70,
+     "w": 800,
+     "h": 950,
+     "reveal": "stroke-up",
+     "blocks": {
+      "escada": {
+       "rect": [
+        474,
+        135,
+        115,
+        600
+       ]
+      }
+     },
+     "focus": {},
+     "maps": {
+      "up": "maps/a02_cortes_aa_bb_cc__corte_aa__up.png",
+      "down": "maps/a02_cortes_aa_bb_cc__corte_aa__down.png",
+      "right": "maps/a02_cortes_aa_bb_cc__corte_aa__right.png",
+      "luma": "maps/a02_cortes_aa_bb_cc__corte_aa__luma.png",
+      "luma-up": "maps/a02_cortes_aa_bb_cc__corte_aa__luma-up.png",
+      "stroke-up": "maps/a02_cortes_aa_bb_cc__corte_aa__stroke-up.png",
+      "stroke-right": "maps/a02_cortes_aa_bb_cc__corte_aa__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "corte_bb": {
-     "x": 999,
-     "y": 0,
-     "w": 1002,
-     "h": 1363,
-     "reveal": "up",
+     "x": 1160,
+     "y": 70,
+     "w": 775,
+     "h": 950,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a02_cortes_aa_bb_cc__corte_bb__up.png",
+      "down": "maps/a02_cortes_aa_bb_cc__corte_bb__down.png",
+      "right": "maps/a02_cortes_aa_bb_cc__corte_bb__right.png",
+      "luma": "maps/a02_cortes_aa_bb_cc__corte_bb__luma.png",
+      "luma-up": "maps/a02_cortes_aa_bb_cc__corte_bb__luma-up.png",
+      "stroke-up": "maps/a02_cortes_aa_bb_cc__corte_bb__stroke-up.png",
+      "stroke-right": "maps/a02_cortes_aa_bb_cc__corte_bb__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "corte_cc": {
-     "x": 2001,
-     "y": 0,
-     "w": 999,
-     "h": 1363,
-     "reveal": "up",
+     "x": 2050,
+     "y": 60,
+     "w": 572,
+     "h": 970,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a02_cortes_aa_bb_cc__corte_cc__up.png",
+      "down": "maps/a02_cortes_aa_bb_cc__corte_cc__down.png",
+      "right": "maps/a02_cortes_aa_bb_cc__corte_cc__right.png",
+      "luma": "maps/a02_cortes_aa_bb_cc__corte_cc__luma.png",
+      "luma-up": "maps/a02_cortes_aa_bb_cc__corte_cc__luma-up.png",
+      "stroke-up": "maps/a02_cortes_aa_bb_cc__corte_cc__stroke-up.png",
+      "stroke-right": "maps/a02_cortes_aa_bb_cc__corte_cc__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 1363,
-   "estimated": true
+   "sourceFile": "3. PJ12-Cortes AA BB e CC junho.tif",
+   "sha256": "8a77d74dbf0c9fd581971da6d149e230120f48e2542d3f7604ec37b7ed788a00",
+   "w": 2622,
+   "h": 1035,
+   "src": "img/a02_cortes_aa_bb_cc_web8.png",
+   "master16": "img/a02_cortes_aa_bb_cc.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a03_palacio_cortes": {
    "item": 3,
    "file": "2. Palácio da Justiça Cortes.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "elevacao_a": {
      "x": 0,
-     "y": 0,
-     "w": 1500,
-     "h": 1500,
-     "reveal": "up",
+     "y": 80,
+     "w": 1335,
+     "h": 870,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a03_palacio_cortes__elevacao_a__up.png",
+      "down": "maps/a03_palacio_cortes__elevacao_a__down.png",
+      "right": "maps/a03_palacio_cortes__elevacao_a__right.png",
+      "luma": "maps/a03_palacio_cortes__elevacao_a__luma.png",
+      "luma-up": "maps/a03_palacio_cortes__elevacao_a__luma-up.png",
+      "stroke-up": "maps/a03_palacio_cortes__elevacao_a__stroke-up.png",
+      "stroke-right": "maps/a03_palacio_cortes__elevacao_a__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "elevacao_b": {
-     "x": 1500,
-     "y": 0,
-     "w": 1500,
-     "h": 1500,
-     "reveal": "up",
-     "blocks": {},
-     "focus": {}
+     "x": 1360,
+     "y": 10,
+     "w": 1260,
+     "h": 920,
+     "reveal": "stroke-up",
+     "blocks": {
+      "escada": {
+       "rect": [
+        549,
+        303,
+        100,
+        590
+       ]
+      }
+     },
+     "focus": {},
+     "maps": {
+      "up": "maps/a03_palacio_cortes__elevacao_b__up.png",
+      "down": "maps/a03_palacio_cortes__elevacao_b__down.png",
+      "right": "maps/a03_palacio_cortes__elevacao_b__right.png",
+      "luma": "maps/a03_palacio_cortes__elevacao_b__luma.png",
+      "luma-up": "maps/a03_palacio_cortes__elevacao_b__luma-up.png",
+      "stroke-up": "maps/a03_palacio_cortes__elevacao_b__stroke-up.png",
+      "stroke-right": "maps/a03_palacio_cortes__elevacao_b__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 1500,
-   "estimated": true
+   "sourceFile": "2. Palácio da Justiça Cortes.tif",
+   "sha256": "85d5d21bd6a0f3f4650fb802d7a1b080dfcb166c1b0664f0d60d5117d74ee55f",
+   "w": 2634,
+   "h": 950,
+   "src": "img/a03_palacio_cortes_web8.png",
+   "master16": "img/a03_palacio_cortes.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a04_corte_aa_esc_ext": {
    "item": 4,
@@ -94,7 +201,7 @@
      "y": 10,
      "w": 1278,
      "h": 870,
-     "reveal": "up",
+     "reveal": "stroke-up",
      "blocks": {
       "escada": {
        "rect": [
@@ -135,7 +242,7 @@
      "y": 10,
      "w": 1237,
      "h": 870,
-     "reveal": "up",
+     "reveal": "stroke-up",
      "blocks": {
       "escada": {
        "rect": [
@@ -184,106 +291,180 @@
   "a05_perspectiva_bico_pena": {
    "item": 5,
    "file": "63. EA Perspectiva.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "inteiro": {
      "x": 0,
      "y": 0,
-     "w": 3000,
-     "h": 2142,
-     "reveal": "right",
+     "w": 2480,
+     "h": 1966,
+     "reveal": "stroke-right",
      "blocks": {
       "brises": {
        "rect": [
-        960.0,
-        471.24,
-        1260.0,
-        899.64
+        132,
+        822,
+        1488,
+        573
        ]
       }
      },
      "focus": {
       "creditos": [
-       1500.0,
-       1970.64
+       1950,
+       1885
+      ],
+      "themis": [
+       1922,
+       992
       ]
-     }
+     },
+     "maps": {
+      "up": "maps/a05_perspectiva_bico_pena__inteiro__up.png",
+      "down": "maps/a05_perspectiva_bico_pena__inteiro__down.png",
+      "right": "maps/a05_perspectiva_bico_pena__inteiro__right.png",
+      "luma": "maps/a05_perspectiva_bico_pena__inteiro__luma.png",
+      "luma-up": "maps/a05_perspectiva_bico_pena__inteiro__luma-up.png",
+      "stroke-up": "maps/a05_perspectiva_bico_pena__inteiro__stroke-up.png",
+      "stroke-right": "maps/a05_perspectiva_bico_pena__inteiro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 2142,
-   "estimated": true
+   "sourceFile": "63. EA Perspectiva.tif",
+   "sha256": "21d38f01670e5bb407727a623d26fcfdec275c3516b86031c192071f4650ee8b",
+   "w": 2480,
+   "h": 1966,
+   "src": "img/a05_perspectiva_bico_pena_web8.png",
+   "master16": "img/a05_perspectiva_bico_pena.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a06_perspectiva_themis": {
    "item": 6,
    "file": "14 - Perspectiva Pal Justiça.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "inteiro": {
      "x": 0,
      "y": 0,
-     "w": 3000,
-     "h": 2142,
-     "reveal": "right",
+     "w": 2657,
+     "h": 1570,
+     "reveal": "stroke-right",
      "blocks": {},
      "focus": {
       "themis": [
-       2340.0,
-       963.9
+       1876,
+       760
       ]
-     }
+     },
+     "maps": {
+      "up": "maps/a06_perspectiva_themis__inteiro__up.png",
+      "down": "maps/a06_perspectiva_themis__inteiro__down.png",
+      "right": "maps/a06_perspectiva_themis__inteiro__right.png",
+      "luma": "maps/a06_perspectiva_themis__inteiro__luma.png",
+      "luma-up": "maps/a06_perspectiva_themis__inteiro__luma-up.png",
+      "stroke-up": "maps/a06_perspectiva_themis__inteiro__stroke-up.png",
+      "stroke-right": "maps/a06_perspectiva_themis__inteiro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 2142,
-   "estimated": true
+   "sourceFile": "14 - Perspectiva Pal Justiça.tif",
+   "sha256": "3bb3348f39109c7f4f659dd8afd45f1612337745fb2886fd8e5acd68db7fa8e5",
+   "w": 2657,
+   "h": 1570,
+   "src": "img/a06_perspectiva_themis_web8.png",
+   "master16": "img/a06_perspectiva_themis.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a07_perspectivas": {
    "item": 7,
    "file": "1. Perspectivas.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "esquerda": {
      "x": 0,
-     "y": 0,
-     "w": 1500,
-     "h": 1250,
-     "reveal": "right",
+     "y": 60,
+     "w": 1360,
+     "h": 837,
+     "reveal": "stroke-right",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a07_perspectivas__esquerda__up.png",
+      "down": "maps/a07_perspectivas__esquerda__down.png",
+      "right": "maps/a07_perspectivas__esquerda__right.png",
+      "luma": "maps/a07_perspectivas__esquerda__luma.png",
+      "luma-up": "maps/a07_perspectivas__esquerda__luma-up.png",
+      "stroke-up": "maps/a07_perspectivas__esquerda__stroke-up.png",
+      "stroke-right": "maps/a07_perspectivas__esquerda__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "direita": {
-     "x": 1500,
-     "y": 0,
-     "w": 1500,
-     "h": 1250,
-     "reveal": "right",
+     "x": 1365,
+     "y": 30,
+     "w": 1166,
+     "h": 867,
+     "reveal": "stroke-right",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a07_perspectivas__direita__up.png",
+      "down": "maps/a07_perspectivas__direita__down.png",
+      "right": "maps/a07_perspectivas__direita__right.png",
+      "luma": "maps/a07_perspectivas__direita__luma.png",
+      "luma-up": "maps/a07_perspectivas__direita__luma-up.png",
+      "stroke-up": "maps/a07_perspectivas__direita__stroke-up.png",
+      "stroke-right": "maps/a07_perspectivas__direita__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 1250,
-   "estimated": true
+   "sourceFile": "1. Perspectivas.tif",
+   "sha256": "0aa84d889488987a7d58faeb2f2665af103f801b103903b0e32834552e5e5e74",
+   "w": 2531,
+   "h": 897,
+   "src": "img/a07_perspectivas_web8.png",
+   "master16": "img/a07_perspectivas.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a08_hall": {
    "item": 8,
    "file": "28 Hall 2.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "inteiro": {
      "x": 0,
      "y": 0,
-     "w": 3000,
-     "h": 2068,
-     "reveal": "right",
+     "w": 2574,
+     "h": 1011,
+     "reveal": "stroke-right",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a08_hall__inteiro__up.png",
+      "down": "maps/a08_hall__inteiro__down.png",
+      "right": "maps/a08_hall__inteiro__right.png",
+      "luma": "maps/a08_hall__inteiro__luma.png",
+      "luma-up": "maps/a08_hall__inteiro__luma-up.png",
+      "stroke-up": "maps/a08_hall__inteiro__stroke-up.png",
+      "stroke-right": "maps/a08_hall__inteiro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
-   "w": 3000,
-   "h": 2068,
-   "estimated": true
+   "sourceFile": "28 Hall 2.tif",
+   "sha256": "634c72e2b0b20693e611bfb0bb13f85893d884fc05e0da07086f2a033bffaa5d",
+   "w": 2574,
+   "h": 1011,
+   "src": "img/a08_hall_web8.png",
+   "master16": "img/a08_hall.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a09_escadas_fotos": {
    "item": 9,
@@ -376,99 +557,179 @@
   "a11_themis_2005": {
    "item": 11,
    "file": "36. Themis década 2005.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "fachada": {
      "x": 0,
      "y": 0,
      "w": 240,
      "h": 449,
-     "reveal": "up",
+     "reveal": "stroke-up",
      "blocks": {},
      "focus": {
       "themis": [
-       144.0,
-       202.05
+       100,
+       120
       ]
-     }
+     },
+     "maps": {
+      "up": "maps/a11_themis_2005__fachada__up.png",
+      "down": "maps/a11_themis_2005__fachada__down.png",
+      "right": "maps/a11_themis_2005__fachada__right.png",
+      "luma": "maps/a11_themis_2005__fachada__luma.png",
+      "luma-up": "maps/a11_themis_2005__fachada__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__fachada__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__fachada__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "modelo_claro": {
-     "x": 240,
-     "y": 157,
-     "w": 240,
-     "h": 269,
+     "x": 243,
+     "y": 170,
+     "w": 272,
+     "h": 250,
      "reveal": null,
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a11_themis_2005__modelo_claro__up.png",
+      "down": "maps/a11_themis_2005__modelo_claro__down.png",
+      "right": "maps/a11_themis_2005__modelo_claro__right.png",
+      "luma": "maps/a11_themis_2005__modelo_claro__luma.png",
+      "luma-up": "maps/a11_themis_2005__modelo_claro__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__modelo_claro__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__modelo_claro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "modelo_escuro": {
-     "x": 481,
-     "y": 0,
-     "w": 153,
-     "h": 449,
+     "x": 528,
+     "y": 130,
+     "w": 137,
+     "h": 300,
      "reveal": null,
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a11_themis_2005__modelo_escuro__up.png",
+      "down": "maps/a11_themis_2005__modelo_escuro__down.png",
+      "right": "maps/a11_themis_2005__modelo_escuro__right.png",
+      "luma": "maps/a11_themis_2005__modelo_escuro__luma.png",
+      "luma-up": "maps/a11_themis_2005__modelo_escuro__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__modelo_escuro__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__modelo_escuro__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "estudo_1": {
-     "x": 634,
-     "y": 0,
-     "w": 153,
-     "h": 449,
-     "reveal": "up",
+     "x": 672,
+     "y": 120,
+     "w": 175,
+     "h": 329,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a11_themis_2005__estudo_1__up.png",
+      "down": "maps/a11_themis_2005__estudo_1__down.png",
+      "right": "maps/a11_themis_2005__estudo_1__right.png",
+      "luma": "maps/a11_themis_2005__estudo_1__luma.png",
+      "luma-up": "maps/a11_themis_2005__estudo_1__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__estudo_1__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__estudo_1__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "estudo_2": {
-     "x": 787,
-     "y": 0,
-     "w": 153,
-     "h": 449,
-     "reveal": "up",
+     "x": 844,
+     "y": 110,
+     "w": 139,
+     "h": 339,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a11_themis_2005__estudo_2__up.png",
+      "down": "maps/a11_themis_2005__estudo_2__down.png",
+      "right": "maps/a11_themis_2005__estudo_2__right.png",
+      "luma": "maps/a11_themis_2005__estudo_2__luma.png",
+      "luma-up": "maps/a11_themis_2005__estudo_2__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__estudo_2__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__estudo_2__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     },
     "estudo_3": {
-     "x": 940,
-     "y": 0,
-     "w": 153,
-     "h": 449,
-     "reveal": "up",
+     "x": 985,
+     "y": 110,
+     "w": 108,
+     "h": 339,
+     "reveal": "stroke-up",
      "blocks": {},
-     "focus": {}
+     "focus": {},
+     "maps": {
+      "up": "maps/a11_themis_2005__estudo_3__up.png",
+      "down": "maps/a11_themis_2005__estudo_3__down.png",
+      "right": "maps/a11_themis_2005__estudo_3__right.png",
+      "luma": "maps/a11_themis_2005__estudo_3__luma.png",
+      "luma-up": "maps/a11_themis_2005__estudo_3__luma-up.png",
+      "stroke-up": "maps/a11_themis_2005__estudo_3__stroke-up.png",
+      "stroke-right": "maps/a11_themis_2005__estudo_3__stroke-right.png"
+     },
+     "sheet": "#ffffff"
     }
    },
+   "sourceFile": "36. Themis década 2005.tif",
+   "sha256": "f0a9522388492b91ce7097196268668416cbebb3ff5aea10fad81c6980e181e4",
    "w": 1093,
    "h": 449,
-   "estimated": true
+   "src": "img/a11_themis_2005_web8.png",
+   "master16": "img/a11_themis_2005.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   },
   "a12_themis_instalacao": {
    "item": 12,
    "file": "DSCN0039lelo.tif",
-   "present": false,
+   "present": true,
    "crops": {
     "inteiro": {
      "x": 0,
      "y": 0,
-     "w": 2250,
-     "h": 3000,
+     "w": 2628,
+     "h": 1642,
      "reveal": null,
      "blocks": {},
      "focus": {
       "base": [
-       1125.0,
-       2550.0
+       1300,
+       1400
       ],
       "rosto": [
-       1125.0,
-       600.0
+       1530,
+       230
       ]
-     }
+     },
+     "maps": {
+      "up": "maps/a12_themis_instalacao__inteiro__up.png",
+      "down": "maps/a12_themis_instalacao__inteiro__down.png",
+      "right": "maps/a12_themis_instalacao__inteiro__right.png",
+      "luma": "maps/a12_themis_instalacao__inteiro__luma.png",
+      "luma-up": "maps/a12_themis_instalacao__inteiro__luma-up.png",
+      "stroke-up": "maps/a12_themis_instalacao__inteiro__stroke-up.png",
+      "stroke-right": "maps/a12_themis_instalacao__inteiro__stroke-right.png"
+     },
+     "sheet": "#c3eba2"
     }
    },
-   "w": 2250,
-   "h": 3000,
-   "estimated": true
+   "sourceFile": "DSCN0039lelo.tif",
+   "sha256": "f8da9bb2ab6f5726c5309e994b99956471756f063dd11e343183a12cb3cb4a9c",
+   "w": 2628,
+   "h": 1642,
+   "src": "img/a12_themis_instalacao_web8.png",
+   "master16": "img/a12_themis_instalacao.png",
+   "colorspace": "CMYK",
+   "iccEmbedded": true
   }
  },
  "optional": {

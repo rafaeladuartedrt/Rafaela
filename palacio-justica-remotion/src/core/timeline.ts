@@ -42,11 +42,12 @@ export function buildTimeline(m: Manifest) {
   {
     const start = 0, end = sec(12);
     const items: Item[] = [];
-    const it1 = itemH('a01_corte_longitudinal', 'inteiro', 0, 0, HN, { reveal: { type: 'stroke-up', from: 0, to: sec(4.2) } });
+    const it1 = itemH('a01_corte_longitudinal', 'inteiro', 0, 0, HN, { reveal: { type: 'stroke-up', from: 0, to: sec(4.0) },
+      blocks: [{ name: 'escada', from: sec(3.3), dir: 'up' }] });
     items.push(it1);
     let x = W(it1) + 260;
     const seq: [string, string, boolean][] = [
-      ['a02_cortes_aa_bb_cc', 'corte_aa', false], ['a02_cortes_aa_bb_cc', 'corte_bb', false], ['a02_cortes_aa_bb_cc', 'corte_cc', false],
+      ['a02_cortes_aa_bb_cc', 'corte_aa', true], ['a02_cortes_aa_bb_cc', 'corte_bb', false], ['a02_cortes_aa_bb_cc', 'corte_cc', false],
       ['a03_palacio_cortes', 'elevacao_a', true], ['a03_palacio_cortes', 'elevacao_b', true],
       ['a04_corte_aa_esc_ext', 'elevacao_escada', true], ['a04_corte_aa_esc_ext', 'corte_aa', true],
     ];
@@ -83,7 +84,7 @@ export function buildTimeline(m: Manifest) {
       blocks: [{ name: 'brises', from: sec(1.7), dir: 'up' }],
     });
     shots.push({ id: 'c3_perspectiva', scene: 'Cena 3: perspectiva a bico de pena (creditos visiveis)', start, end, items: [it],
-      cam: [fitKey(0, it, 1.0, -0.06), fitKey(end - start, it, 1.08, 0.04)], inT: { type: 'dissolve', dur: 22, blur: 4 } });
+      cam: [fitKey(0, it, 0.98, -0.04), fitKey(end - start, it, 1.04, 0.0)], inT: { type: 'dissolve', dur: 22, blur: 4 } });
   }
 
   // ---------- Cena 4: perspectiva detalhada (6) e vista principal de (7) ----------

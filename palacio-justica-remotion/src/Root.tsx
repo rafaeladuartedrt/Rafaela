@@ -12,7 +12,7 @@ Promise.all(
 export const Root: React.FC = () => (
   <>
     <Composition id="PalacioJustica" component={PalacioJustica} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
-    <Composition id="PalacioJustica16x9" component={PalacioJustica} durationInFrames={DURATION} fps={FPS} width={1920} height={1080} />
-    <Composition id="IntegrityCheck" component={IntegrityCheck} durationInFrames={Math.max(1, integrityList.length)} fps={FPS} width={1920} height={1080} />
+    <Composition id="PalacioJustica16x9" component={PalacioJustica} durationInFrames={DURATION} fps={FPS} width={2700} height={2000} />
+    <Composition id="IntegrityCheck" component={IntegrityCheck} durationInFrames={Math.max(1, integrityList.length)} fps={FPS} width={2700} height={2000} />
   </>
 );
