@@ -39,3 +39,10 @@ Formato 1080 × 1920 (9:16), 30 fps, 60 s (1800 quadros). Master sem áudio.
 - **Último quadro:** papel em branco, fechando o ciclo.
 - **Folha de contato:** `entregaveis/contact_sheet.jpg`, 1 quadro a cada 2 s, 30 quadros.
 - **Compressão:** o master versionado usa CRF 23 (`-tune grain`, cerca de 89 MB) para caber no limite de 100 MB por arquivo do GitHub. Para a versão CRF 18 (cerca de 137 MB), rode o comando do README a partir dos quadros.
+
+## Entrega final
+
+- `entregaveis/final/palacio_justica_9x16_1080x1920.mp4`: vertical, 1080×1920, 30 fps, 59,3 s, H.264 High, BT.709, sem áudio. O master em CRF 18 tem 147 MB e foi entregue à parte, por passar do limite do GitHub.
+- `entregaveis/final/palacio_justica_16x9_1920x1080.mp4`: horizontal, 1920×1080, mesmas especificações. A tomada de drone vertical aprovada fica centralizada, com as laterais preenchidas pela própria cena desfocada.
+- O trecho de 0 a 49,6 s é animação gerada por código. De 49,6 a 59,3 s entra a tomada de drone gerada no Kling AI (modelo 4.0), que parte da Themis real e termina na vista aérea da praça.
+- Verificação: nenhum quadro preto, nenhum texto legível na tela, duração dentro da faixa de 55 a 65 s.
