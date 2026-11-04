@@ -115,6 +115,8 @@ const PATHS = [
   { a: [29, -22], b: [29, 22], w: 2.0, n: 10 },      // praça diante da empena sul
   { a: [36, -26], b: [36, 26], w: 3.5, n: 12 },
   { a: [23.5, -6], b: [23.5, 6], w: 0.8, n: 5 },     // entrada principal sob a empena
+  { a: [26, -30], b: [46, -10], w: 2.5, n: 14 },     // praça junto à câmera (primeiro plano)
+  { a: [30, -18], b: [30, 0], w: 1.5, n: 6 },
 ];
 
 export function buildPeople3D() {

@@ -8,7 +8,7 @@ import { setBlades } from './themis.js';
 import { setPhoto, setWalkers, makeCrowd } from './photoshots.js';
 import { updatePeople3D } from './people3d.js';
 
-export const FPS = 30, DURATION = 64;
+export const FPS = 30, DURATION = 49.6, CUT = [22, 6];
 
 // ---------- utilitários ----------
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -118,21 +118,12 @@ function drawCenter(t, c) {
   // centro e zoom do "olhar" sobre a prancha
   if (!c._p0) { look(c, DRAW_CAM.pos, DRAW_CAM.tgt, DRAW_CAM.fov); c._p0 = project(c, [27, 8, 11.05]); c._p1 = project(c, [14, 8, 11.05]); }
   const p0 = c._p0, p1 = c._p1;
-  let Z, cx, cy;
-  if (t < 3) {
-    const k = eSin(seg(t, 0, 3));
-    Z = lerp(11, 8, k); const head = seg(t, 0.8, 3.0) * 0.9;
-    cx = lerp(p0[0], p1[0], 0.15 + head * 0.55) + 0.004 * Math.sin(t * 1.3); cy = lerp(p0[1], p1[1], 0.15 + head * 0.55) + 0.02 + 0.003 * Math.cos(t);
-  } else {
-    const k = eIO(seg(t, 3, 7.6));
-    const z0 = 8;
-    Z = Math.exp(lerp(Math.log(z0), Math.log(1.0), k));
-    const s0x = lerp(p0[0], p1[0], 0.15 + 0.9 * 0.55), s0y = lerp(p0[1], p1[1], 0.15 + 0.9 * 0.55) + 0.02;
-    cx = lerp(s0x, 0.5, k); cy = lerp(s0y, 0.5, k);
-    // deriva suave mesmo no fim
-    cx += 0.006 * Math.sin(t * 0.9); cy += 0.004 * Math.sin(t * 0.7 + 1);
-    Z *= 1 + 0.02 * seg(t, 7.0, 8);
-  }
+  // um único movimento contínuo: segue a ponta do primeiro traço e recua até a prancha inteira
+  const head = 0.15 + 0.55 * eO(seg(t, 0.0, 3.2));
+  const hx = lerp(p0[0], p1[0], head), hy = lerp(p0[1], p1[1], head) + 0.02;
+  const k = eIO(seg(t, 1.6, 7.6));
+  let Z = Math.exp(lerp(Math.log(10), Math.log(1.0), k)) * (1 + 0.02 * seg(t, 7.0, 8));
+  let cx = lerp(hx, 0.5, k) + 0.004 * Math.sin(t * 0.9), cy = lerp(hy, 0.5, k) + 0.003 * Math.sin(t * 0.7 + 1);
   // whip pan para a direita no fim
   const w = eI(seg(t, 7.72, 8.0));
   cx += w * 1.4;
@@ -153,7 +144,7 @@ const shotDrawing = {
     const wz = Math.max(1.9, Z * 0.6);
     eachLine(c.bld.root, (l) => { l.width = wz; });
     // primeira linha
-    ex.first.visible = true; ex.first.progress = eO(seg(t, 0.7, 3.4));
+    ex.first.visible = true; ex.first.progress = 0.02 + 0.98 * eO(seg(t, 0.0, 3.2));
     ex.first.opacity = 1 - seg(t, 4.2, 4.8);
     // contornos peça a peça, depois grade, hachura, figuras, entorno
     const P = pieceList(c);
@@ -174,7 +165,7 @@ const shotDrawing = {
     eachLine(c.context, (l) => { l.progress = seg(t, 6.2, 7.9); l.opacity = 0.75; });
     c.themis.visible = false;
     const mb = [(cx - cxp) * c.W * Z, (cy - cyp) * c.H * Z];
-    return { paper, mb: Math.hypot(...mb) > 2 ? mb : [0, 0], global: { rake: lerp(0.45, 0.25, seg(t, 1.5, 5)), light: [0.85, 0.4], vig: 0.3 } };
+    return { paper, mb: t > 7.7 && Math.hypot(...mb) > 2 ? mb : [0, 0], global: { rake: lerp(0.45, 0.25, seg(t, 1.5, 5)), light: [0.85, 0.4], vig: 0.3 } };
   },
 };
 
@@ -250,7 +241,11 @@ function orbitPose(t) {
   const r = lerp(Math.hypot(58, 66), 62, eSin(k));
   const h = lerp(24, 1.6, eIO(seg(t, 18.5, 22.0)));
   const ty = lerp(9, 19, eIO(seg(t, 18.5, 22.0)));
-  return { pos: [Math.cos(a) * r, h, Math.sin(a) * r], tgt: [2, ty, 0], fov: lerp(40, 46, seg(t, 19, 22)) };
+  let pos = [Math.cos(a) * r, h, Math.sin(a) * r], tgt = [2, ty, 0];
+  // aproxima da praça diante do pórtico, à altura dos olhos, entre as pessoas
+  const kp = eIO(seg(t, 19.6, 22.0));
+  pos = L3(pos, [41, B.ground(41) + 1.65, -24], kp); tgt = L3(tgt, [14, 11, 2], kp);
+  return { pos, tgt, fov: lerp(40, 50, seg(t, 19, 22)) };
 }
 const shotBuild = {
   name: 'build',
@@ -304,6 +299,8 @@ const shotBuild = {
       const kk = seg(t, a, b);
       rv(k, kk, [0, -6, 0], 46, { mode: 1, dir: [0, 1, 0], amp: 0.35, freq: 0.15 });
     }
+    c.people3d.visible = t > 19.4;
+    if (c.people3d.visible) updatePeople3D(c.people3d, t - 14, V([0.4, 0.85, 0.5]), c.cam, eO(seg(t, 19.4, 20.4)));
     const focus = V(op.pos).distanceTo(V(op.tgt));
     return { paper: [0, 0, 1.6, 1.6], global: { rake: 0.25 }, focus, aperture: t < 14.6 ? 0 : 0 };
   },
@@ -655,7 +652,6 @@ const SHOTS = [
 ];
 const TRANS = [
   [10.82, 11.18, 1, 2, [0.5, 0.62]],
-  [27.78, 28.22, 4, 2, [0.52, 0.52]],
   [32.8, 33.2, 5, 2, [0.5, 0.3]],
   [37.0, 37.4, 8, 2, [0.5, 0.45]],
   [40.6, 41.0, 10, 2, [0.5, 0.5]],
@@ -667,6 +663,14 @@ const TRANS = [
   [61.8, 62.2, 16, 2, [0.5, 0.5]],
 ];
 export function evaluate(t) {
+  const force0 = typeof window !== 'undefined' && window.__forceShot;
+  if (!force0) {
+    if (t >= 21.75 && t < 22.25) return { a: { shot: shotBuild, tl: 0, tg: Math.min(t, 21.99) }, b: { shot: shotStudiesP, tl: 0, tg: t + 6 }, trans: { type: 2, t: (t - 21.75) / 0.5, c: [0.5, 0.5] } };
+    if (t >= 22) t += 6;
+  }
+  return evaluate0(t);
+}
+function evaluate0(t) {
   const force = typeof window !== 'undefined' && window.__forceShot;
   if (force) { const s = PREVIEW[force] || SHOTS.find((q) => q[2].name === force)[2]; return { a: { shot: s, tl: 0, tg: t } }; }
   for (const [a, b, i, type, cc] of TRANS) {
