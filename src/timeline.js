@@ -6,6 +6,7 @@ import { InkLines } from './lines.js';
 import { B } from './building.js';
 import { setBlades } from './themis.js';
 import { setPhoto, setWalkers, makeCrowd } from './photoshots.js';
+import { updatePeople3D } from './people3d.js';
 
 export const FPS = 30, DURATION = 60;
 
@@ -73,6 +74,7 @@ function reset(c) {
     if (p.userData.hull) { const u = p.userData.hull.material.uniforms; u.uRevealDir.value = 0; u.uOpacity.value = 1; }
   }
   ex.first.visible = false; ex.cables.visible = false; ex.first.width = 1;
+  c.themis2d.visible = false; c.people3d.visible = false;
   eachLine(c.context, (l) => { l.progress = 1; l.opacity = 0.9; l.width = 1.3; });
   c.people.progress = 1; c.people.opacity = 1;
   // Themis na fachada sul (posição conferida nas fotos 01 e 02)
@@ -564,10 +566,44 @@ const shotGuindP = photoShot('guindasteP', { photo: 'themis_guindaste', t0: 42.4
 const shotIcamP = photoShot('icamentoP', { photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, path: [[43.6, 0.5, 0.75, 2.0], [44.8, 0.5, 0.42, 1.3]], mode: 2, draw: [43.6, 44.1], reveal: [43.9, 44.7], c: [0.5, 0.72], seed: 5 });
 const shotFachP = photoShot('fachadaP', { photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, path: [[44.8, 0.47, 0.5, 2.4], [46.6, 0.5, 0.5, 1.0]], mode: 0, draw: [44.8, 45.4], reveal: [45.1, 46.3], c: [0.48, 0.5], seed: 6 });
 const shotFixP = photoShot('fixacaoP', { photo: 'themis_fixacao', t0: 46.6, t1: 48.0, path: [[46.6, 0.6, 0.7, 1.3], [48.0, 0.65, 0.3, 2.3]], mode: 2, draw: [46.6, 47.1], reveal: [46.85, 47.8], c: [0.6, 0.65], seed: 7 });
-const shotContraP = photoShot('contraplongeeP', { photo: 'predio_contraplongee', t0: 48.0, t1: 50.4, path: [[48.0, 0.45, 0.86, 2.4], [49.2, 0.7, 0.5, 2.0], [50.4, 0.55, 0.5, 1.0]], mode: 2, draw: [48.0, 48.8], reveal: [48.5, 50.0], c: [0.45, 0.85], seed: 8 });
-const shotAltaP = photoShot('vistaAltaP', { photo: 'predio_vista_alta', t0: 50.4, t1: 52.6, path: [[50.4, 0.7, 0.17, 2.6], [51.5, 0.7, 0.5, 1.9], [52.6, 0.45, 0.55, 1.05]], mode: 2, draw: [50.4, 51.1], reveal: [50.8, 52.2], c: [0.7, 0.2], seed: 9 });
-const shotBaixaP = photoShot('vistaBaixaP', { photo: 'predio_vista_baixa', t0: 52.6, t1: 54.8, path: [[52.6, 0.38, 0.85, 2.2], [53.6, 0.45, 0.6, 1.2], [54.8, 0.3, 0.43, 2.0]], mode: 2, draw: [52.6, 53.3], reveal: [53.0, 54.4], c: [0.38, 0.8], seed: 10 });
-const shotFinalP = photoShot('finalP', { photo: 'themis_frontal', t0: 54.6, t1: 59.7, path: [[54.6, 0.5, 0.5, 1.0], [56.4, 0.5, 0.86, 2.2], [58.0, 0.5, 0.36, 2.4], [59.9, 0.52, 0.17, 3.0]], mode: 2, draw: [54.6, 54.9], reveal: [54.6, 54.61], c: [0.5, 0.3], lineOut: [0, 0.01], back: [59.45, 59.78], white: [59.72, 59.99], seed: 2 });
+// giro em volta do prédio ilustrado, com a Themis desenhada na empena e pessoas caminhando
+const shotGiro = {
+  name: 'giro',
+  apply(c, tl, t) {
+    reset(c);
+    c.bld.root.visible = true; c.context.visible = true;
+    const sunDir = [0.62, 0.5, 0.42];
+    setSun(c, sunDir, 0xffffff, 2.2, 0.8);
+    // traço -> cor chapada entrando por mancha
+    const k0 = (a, b) => eIO(seg(t, a, b));
+    rv('granite', k0(48.4, 50.8), [27, 18, 0], 60); rv('travertine', k0(48.8, 50.4), [24, 0, 9], 40);
+    rv('glass', k0(49.0, 51.0), [10, 18, 11], 50); rv('mullion', k0(49.0, 51.0), [10, 18, 11], 50);
+    rv('blackgranite', k0(49.0, 50.6), [20, 2, 6], 35); rv('alu', k0(49.4, 51.2), [0, 20, -11], 50);
+    rv('relief', k0(49.4, 51.0), [5, 27, 8], 20); rv('concrete', k0(49.6, 51.2), [-30, 2, 8], 30);
+    rv('redgranite', k0(49.6, 51.2), [-30, 0, -12], 30); rv('pave', k0(48.6, 51.0), [30, -1, 5], 60, { freq: 0.08 });
+    rv('asphalt', k0(49.0, 51.6), [30, -2, 15], 160, { freq: 0.05 });
+    G.uHatch.value = 0.55 * (1 - seg(t, 49.5, 51.2));
+    setLinesOpacity(c, lerp(1, 0.75, seg(t, 50, 51.5)));
+    eachLine(c.context, (l) => { l.opacity = 0.8; });
+    // Themis ilustrada: traço surge, depois o tom chapado
+    c.themis2d.visible = true;
+    c.themis2d.userData.u.uDraw.value = eO(seg(t, 48.6, 50.4));
+    c.themis2d.userData.u.uFill.value = eIO(seg(t, 50.0, 51.6));
+    // câmera: giro lento à altura dos olhos, do pórtico leste até diante da empena sul, e aproxima da Themis
+    const k = seg(t, 48.0, 54.6), e = 0.3 * k + 0.7 * eSin(k);
+    const ang = lerp(1.15, 0.22, e), rad = lerp(84, 92, e) - 22 * Math.pow(seg(t, 52.5, 54.5), 2), hy = lerp(1.7, 6.5, e);
+    let pos = [Math.cos(ang) * rad, B.ground(Math.cos(ang) * rad) + hy, Math.sin(ang) * rad];
+    let tgt = [lerp(2, 16, e), lerp(18, 19, e), lerp(3, -0.4, e)];
+    let fov = 42;
+    const pk = eIO(seg(t, 54.0, 56.2));
+    pos = L3(pos, [41, 18.4, -0.2], pk); tgt = L3(tgt, [27, 18.6, -0.4], pk); fov = lerp(42, 34, pk);
+    look(c, pos, tgt, fov);
+    c.people3d.visible = true;
+    updatePeople3D(c.people3d, t - 44, V(sunDir), c.cam, eO(seg(t, 49.2, 50.4)));
+    return { paper: [0, 0, 1.6, 1.6], sky: [eIO(seg(t, 49, 51)), 0, -0.25 * e], global: { rake: 0.15, paperAmt: 0.85, vig: 0.2 } };
+  },
+};
+const shotFinalP = photoShot('finalP', { photo: 'themis_frontal', t0: 55.8, t1: 60, path: [[55.8, 0.5, 0.5, 1.0], [57.2, 0.5, 0.82, 2.2], [58.4, 0.5, 0.36, 2.4], [59.9, 0.52, 0.17, 3.0]], mode: 2, draw: [55.8, 56.0], reveal: [55.8, 56.6], c: [0.5, 0.5], lineOut: [0, 0.01], back: [59.45, 59.78], white: [59.72, 59.99], seed: 2, pre: 0.6 });
 
 // ---------- sequência ----------
 const SHOTS = [
@@ -583,18 +619,16 @@ const SHOTS = [
   [43.6, 44.8, shotIcamP],
   [44.8, 46.6, shotFachP],
   [46.6, 48.0, shotFixP],
-  [48.0, 50.4, shotContraP],
-  [50.4, 52.6, shotAltaP],
-  [52.6, 54.8, shotBaixaP],
-  [54.8, 60.0, shotFinalP],
+  [48.0, 56.0, shotGiro],
+  [56.0, 60.0, shotFinalP],
 ];
-// transições com sobreposição: [início, fim, índice do plano de saída, tipo(1 wipe, 2 dissolve), centro]
 const TRANS = [
   [10.82, 11.18, 1, 1, [0.5, 0.62]],
   [27.78, 28.22, 4, 1, [0.52, 0.52]],
   [32.8, 33.2, 5, 1, [0.5, 0.3]],
   [44.6, 45.0, 9, 1, [0.5, 0.45]],
-  [54.6, 55.0, 14, 2, [0.5, 0.5]],
+  [47.8, 48.2, 11, 1, [0.5, 0.5]],
+  [55.8, 56.2, 12, 2, [0.5, 0.5]],
 ];
 export function evaluate(t) {
   const force = typeof window !== 'undefined' && window.__forceShot;

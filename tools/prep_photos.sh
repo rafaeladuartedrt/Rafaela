@@ -29,3 +29,15 @@ prep predio_vista_baixa 70x90+1090+1070 220x25+20+970 40x60+1820+1170 40x50+1360
 convert "referencias/36_Themis_decada_2005.tif[0]" -colorspace sRGB -filter Lanczos -resize 400% -unsharp 0x2+1+0 -quality 92 "$OUT/estudos.jpg"
 convert "$OUT/estudos.jpg" -colorspace Gray -level 20%,90% -quality 92 "$OUT/estudos_lines.jpg"
 ls -la "$OUT"
+# Themis recortada (máscara: contorno traçado à mão + detalhe das lâminas do cabelo)
+T=$OUT/themis_frontal.jpg
+convert $T -crop 1080x2760+940+150 +repage $OUT/themis_cut.jpg
+convert $OUT/themis_frontal_lines.jpg -crop 1080x2760+940+150 +repage $OUT/themis_cut_lines.jpg
+convert $OUT/themis_cut.jpg -colorspace HSL -channel G -separate +channel -threshold 11% $OUT/_s.png
+convert $OUT/themis_cut.jpg -colorspace Gray -threshold 45% -negate $OUT/_d.png
+convert $OUT/_s.png $OUT/_d.png -compose Lighten -composite -morphology Open Disk:2 -morphology Close Disk:4 $OUT/_r.png
+convert -size 1080x2760 xc:black -fill white -draw "polygon $(cat tools/themis_poly.txt)" -blur 0x3 -threshold 50% $OUT/_p.png
+convert $OUT/_p.png -morphology Dilate Disk:25 $OUT/_pd.png
+convert $OUT/_r.png $OUT/_pd.png -compose Multiply -composite $OUT/_det.png
+convert $OUT/_p.png -morphology Erode Disk:10 $OUT/_det.png -compose Lighten -composite -morphology Close Disk:5 -blur 0x1.2 $OUT/themis_cut_mask.png
+rm -f $OUT/_s.png $OUT/_d.png $OUT/_r.png $OUT/_p.png $OUT/_pd.png $OUT/_det.png

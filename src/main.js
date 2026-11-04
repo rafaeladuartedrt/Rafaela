@@ -7,6 +7,8 @@ import { buildThemis, buildStudies } from './themis.js';
 import { buildSection, buildHall, buildSheet } from './scenes.js';
 import { evaluate, FPS, DURATION } from './timeline.js';
 import { buildPhotoStage } from './photoshots.js';
+import { buildThemis2D } from './themis2d.js';
+import { buildPeople3D } from './people3d.js';
 
 const q = new URLSearchParams(location.search);
 const W = +(q.get('w') || 540), H = +(q.get('h') || 960);
@@ -73,7 +75,9 @@ async function init() {
   const hall = buildHall(); scene.add(hall);
   const sheet = buildSheet(); scene.add(sheet);
   const photo = await buildPhotoStage();
-  Object.assign(ctx, { photo, bld, context, people, themis, studies, section, hall, sheet });
+  const themis2d = await buildThemis2D(); scene.add(themis2d);
+  const people3d = buildPeople3D(); scene.add(people3d);
+  Object.assign(ctx, { photo, themis2d, people3d, bld, context, people, themis, studies, section, hall, sheet });
   // compila todos os programas uma vez
   renderer.compile(scene, cam);
   window.__ready = true;
@@ -84,11 +88,11 @@ window.renderFrame = (f) => {
   G.uTime.value = t; post.u.uFrame.value = f;
   const ev = evaluate(t);
   const u = post.u;
-  const pa = ev.a.shot.apply(ctx, ev.a.tl, ev.a.tg); cull();
+  const pa = ev.a.shot.apply(ctx, ev.a.tl, ev.a.tg); ctx.themis.visible = false; ctx.studies.visible = false; cull();
   renderer.setRenderTarget(post.rtA); renderer.clear(); pa.photo ? renderer.render(ctx.photo.scene, ctx.photo.cam) : renderer.render(scene, cam);
   setPost(pa, 'A');
   if (ev.b) {
-    const pb = ev.b.shot.apply(ctx, ev.b.tl, ev.b.tg); cull();
+    const pb = ev.b.shot.apply(ctx, ev.b.tl, ev.b.tg); ctx.themis.visible = false; ctx.studies.visible = false; cull();
     renderer.setRenderTarget(post.rtB); renderer.clear(); pb.photo ? renderer.render(ctx.photo.scene, ctx.photo.cam) : renderer.render(scene, cam);
     setPost(pb, 'B');
     u.uTrans.value = ev.trans.type; u.uTransT.value = ev.trans.t; u.uTransC.value.set(...(ev.trans.c || [0.5, 0.5]));

@@ -1,7 +1,7 @@
 // Cenas a partir das fotos originais: o traço a nanquim (tirado da própria foto) se desenha,
 // entra a hachura e a foto original surge por manchas de aquarela. Câmera = enquadramento 2D animado.
 import * as THREE from 'three';
-import { NOISE } from './glsl.js';
+import { NOISE, ILLUS } from './glsl.js';
 import { G } from './globals.js';
 import { InkLines, rng } from './lines.js';
 
@@ -24,6 +24,7 @@ uniform float uSeed; uniform float uPaperWhite;
 uniform vec2 uJ[NF * 12]; uniform vec4 uFB[NF]; uniform vec3 uFC[NF]; uniform float uWalk;
 float capD(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0., 1.); return length(pa - ba * h); }
 ${NOISE}
+${ILLUS}
 vec3 toLin(vec3 c){ return pow(c, vec3(2.2)); }
 float hatchL(vec2 p, float ang, float sp, float th){
   vec2 d = vec2(cos(ang), sin(ang));
@@ -65,15 +66,9 @@ void main(){
   float v = uReveal * 1.75 - 0.15 - f - n;
   float m = smoothstep(0., 0.025, v);
   float ring = smoothstep(0., 0.01, v) * (1. - smoothstep(0.01, 0.07, v));
-  // a imagem é remontada como ilustração: cor em aguadas chapadas (tons quantizados), nunca a foto em si
-  vec3 cb = toLin(texture2D(tPhoto, tuv, 4.5).rgb);
-  float Lb = max(dot(cb, vec3(.299,.587,.114)), 0.003);
-  float Lq = (floor(pow(Lb, 0.45) * 4. + 0.5 + (fbm2(iuv * 30. + uSeed) - .5) * .5) / 4.);
-  Lq = pow(clamp(Lq, 0.06, 1.), 2.2);
-  vec3 tint = cb / Lb;
-  tint = mix(vec3(1.), tint, 1.25);
-  vec3 wc = clamp(tint * Lq, 0., 1.);
-  wc = mix(wc, uPaper, 0.12) * (0.9 + 0.12 * fbm2(iuv * 55. + 7.)) * mix(vec3(1.), uPaper, 0.35);
+  // a imagem é remontada como ilustração: tons chapados da paleta, nunca a foto em si
+  vec3 cs = texture2D(tPhoto, tuv, 2.5).rgb;
+  vec3 wc = illus(cs, fbm2(iuv * 22. + uSeed) - .5);
   wc = mix(wc, uPaper, uPaperWhite * smoothstep(0.82, 0.97, lum));
   vec3 wash = wc * (1. - 0.4 * ring);
   vec3 col = mix(drawing, wash, m);
@@ -90,21 +85,26 @@ void main(){
       if (abs(vUv.x - fb.x) > fb.z || abs(vUv.y - fb.y) > fb.w) continue;
       float H = fb.w * 0.95;
       vec2 hip = uJ[i*12]*vec2(sa,1.), sh = uJ[i*12+1]*vec2(sa,1.), hd = uJ[i*12+2]*vec2(sa,1.);
-      float body = capD(p, hip, sh) - H * 0.085;
-      float cloth = body;
-      body = min(body, length(p - hd) - H * 0.062);
+      float cloth = capD(p, hip, sh) - H * 0.105;
+      float body = min(cloth, length(p - hd) - H * 0.07);
+      vec2 base = vec2(hip.x, hip.y - H * 0.5);
       for (int j = 0; j < 2; j++) {
         vec2 kn = uJ[i*12+3+j*2]*vec2(sa,1.), ft = uJ[i*12+4+j*2]*vec2(sa,1.);
-        body = min(body, capD(p, hip, kn) - H * 0.05);
-        body = min(body, capD(p, kn, ft) - H * 0.04);
+        body = min(body, capD(p, hip, kn) - H * 0.06);
+        body = min(body, capD(p, kn, ft) - H * 0.045);
         vec2 el = uJ[i*12+7+j*2]*vec2(sa,1.), hn = uJ[i*12+8+j*2]*vec2(sa,1.);
-        body = min(body, capD(p, sh, el) - H * 0.035);
-        body = min(body, capD(p, el, hn) - H * 0.03);
+        body = min(body, capD(p, sh, el) - H * 0.04);
+        body = min(body, capD(p, el, hn) - H * 0.034);
+        base.y = min(base.y, ft.y);
       }
-      float aa = 1.2 / uRes.y;
+      float aa = 1.0 / uRes.y;
+      // sombra leve no chão, projetada em diagonal
+      vec2 q = p - base - vec2(H * 0.18, -H * 0.01);
+      float shd = 1. - smoothstep(0.6, 1.0, length(q / vec2(H * 0.32, H * 0.05)));
+      col = mix(col, col * 0.62, shd * 0.55 * uWalk);
       float sil = 1. - smoothstep(-aa, aa, body);
-      float cl = (1. - smoothstep(-aa, aa, cloth + H * 0.018)) * (0.75 + 0.25 * vnoise2(gl_FragCoord.xy * 0.3 + float(i)));
-      vec3 c = mix(uInk, uFC[i], cl * 0.85);
+      float cl = (1. - smoothstep(-aa, aa, cloth + H * 0.02));
+      vec3 c = mix(uInk * 0.9, uFC[i], cl * 0.7) * (0.85 + 0.3 * vnoise2(gl_FragCoord.xy * 0.4 + float(i)));
       col = mix(col, c, sil * uWalk);
     }
   }
@@ -163,7 +163,7 @@ export function buildWalkers(stage) {
   stage.scene.add(ln); stage.walkers = ln;
 }
 // figs: [{x, y, h, dir, speed, ph}] em uv da imagem (y do topo, pé no chão)
-const PALETTE = [[0.55, 0.16, 0.10], [0.13, 0.27, 0.48], [0.72, 0.55, 0.16], [0.18, 0.38, 0.33], [0.42, 0.40, 0.38], [0.60, 0.30, 0.12]];
+const PALETTE = [[0.16, 0.16, 0.17], [0.24, 0.23, 0.22], [0.12, 0.13, 0.15], [0.30, 0.29, 0.28], [0.20, 0.19, 0.19], [0.36, 0.34, 0.32]];
 export function setWalkers(stage, figs, view, t, opacity) {
   const u = stage.u;
   const lin = (c) => c.map((v) => Math.pow(v, 2.2));
@@ -175,8 +175,8 @@ export function setWalkers(stage, figs, view, t, opacity) {
   for (let i = 0; i < 18; i++) {
     const f = figs[i];
     if (!f) { u.uFB.value[i].set(0, 0, 0, 0); continue; }
-    const ph = t * f.speed * 7.5 + f.ph;
-    const x = f.x + f.dir * f.speed * 0.012 * t;
+    const ph = t * f.speed * 6.0 + f.ph;
+    const x = f.x + f.dir * f.speed * f.h * 0.55 * t;
     const [fx, fy] = toS(x, f.y);
     const H = f.h * z / span[1];          // altura em uv da tela
     const X = 1 / sa;
@@ -185,14 +185,14 @@ export function setWalkers(stage, figs, view, t, opacity) {
     const hip = P(0, 0.5 + bob), sh = P(0.02, 0.8 + bob), hd = P(0.035, 0.91 + bob);
     const J = [hip, sh, hd];
     for (const sgn of [1, -1]) {
-      const a = Math.sin(ph) * 0.42 * sgn;
+      const a = Math.sin(ph) * 0.32 * sgn;
       const knee = [hip[0] + f.dir * Math.sin(a) * 0.26 * H * X, hip[1] - Math.cos(a) * 0.26 * H];
       const b = a - Math.max(0, -Math.sin(ph + 0.6) * sgn) * 0.6;
       const foot = [knee[0] + f.dir * Math.sin(b) * 0.25 * H * X, knee[1] - Math.cos(b) * 0.25 * H];
       J.push(knee, foot);
     }
     for (const sgn of [1, -1]) {
-      const a = -Math.sin(ph) * 0.35 * sgn;
+      const a = -Math.sin(ph) * 0.22 * sgn;
       const elb = [sh[0] + f.dir * Math.sin(a) * 0.16 * H * X, sh[1] - Math.cos(a) * 0.16 * H];
       const hand = [elb[0] + f.dir * Math.sin(a + 0.3) * 0.15 * H * X, elb[1] - Math.cos(a + 0.3) * 0.15 * H];
       J.push(elb, hand);
@@ -206,9 +206,13 @@ export function setWalkers(stage, figs, view, t, opacity) {
 }
 export function makeCrowd(seed, n, x0, x1, y0, y1, h0, h1) {
   const r = rng(seed); const out = [];
-  for (let i = 0; i < n; i++) {
-    const y = y0 + (y1 - y0) * r();
-    out.push({ x: x0 + (x1 - x0) * r(), y, h: h0 + (h1 - h0) * (y - y0) / ((y1 - y0) || 1), dir: r() < 0.5 ? 1 : -1, speed: 0.7 + r() * 0.6, ph: r() * 6.28, c: Math.floor(r() * 6) });
+  while (out.length < n) {
+    const y = y0 + (y1 - y0) * r(), x = x0 + (x1 - x0) * r(), dir = r() < 0.5 ? 1 : -1, sp = 0.8 + r() * 0.3;
+    const g = 1 + Math.floor(r() * 3);   // grupos de 1 a 3 pessoas
+    for (let k = 0; k < g && out.length < n; k++) {
+      const h = (h0 + (h1 - h0) * (y - y0) / ((y1 - y0) || 1)) * (0.92 + 0.14 * r());
+      out.push({ x: x + k * h * 0.28 * (r() < 0.5 ? 1 : -1), y: y + (r() - 0.5) * h * 0.15, h, dir, speed: sp * (0.95 + 0.1 * r()), ph: r() * 6.28, c: Math.floor(r() * 6) });
+    }
   }
   return out.sort((a, b) => a.y - b.y);
 }

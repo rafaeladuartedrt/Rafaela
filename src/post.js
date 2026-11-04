@@ -21,12 +21,16 @@ uniform vec3 uPaper; uniform vec3 uInk;
 ${NOISE}
 float linz(float d, vec4 cam){ float z = d * 2. - 1.; return 2. * cam.x * cam.y / (cam.y + cam.x - z * (cam.y - cam.x)); }
 vec3 skyWash(vec2 uv, vec3 sk){
-  float n = fbm2(uv * vec2(2.2, 3.5) + 3.7), n2 = fbm2(uv * 7. + 1.3);
-  vec3 top = mix(vec3(.50,.62,.72), vec3(.42,.47,.62), sk.y);
-  vec3 hor = mix(vec3(.86,.84,.78), vec3(.98,.70,.42), sk.y);
-  vec3 c = mix(hor, top, smoothstep(.15, .95, uv.y + (n - .5) * .25));
-  float mask = smoothstep(.25, .55, n * .8 + uv.y * .45 + n2 * .15);
-  return mix(uPaper, c, mask * sk.x);
+  // céu de ilustração: campo azul-acinzentado chapado e disco de sol pêssego
+  vec3 blue = vec3(.36, .50, .55), peach = vec3(.80, .40, .22);
+  float n = fbm2(uv * 3. + 3.7);
+  float edge = smoothstep(.0, .02, uv.y - 0.08 + (n - .5) * 0.04);
+  vec3 c = blue;
+  vec2 q = (uv - vec2(.7 + sk.z, .8)) * vec2(uRes.x / uRes.y, 1.);
+  float disc = 1. - smoothstep(.105, .108, length(q));
+  c = mix(c, peach, disc * .85);
+  c *= 0.96 + 0.05 * fbm2(uv * vec2(4., 40.));
+  return mix(uPaper, c, sk.x * edge);
 }
 vec3 sampleScene(sampler2D t, sampler2D td, vec2 uv, vec4 cam, vec2 mb, vec3 sky){
   vec3 c = texture2D(t, uv).rgb;
