@@ -168,6 +168,8 @@ const shotDrawing = {
     });
     for (const col of c.bld.pieces.columns) { const u = col.userData.hull.material.uniforms; u.uRevealDir.value = 1; u.uRevealY.value = lerp(-3, 9, seg(t, 3.2, 4.4)); }
     G.uHatch.value = 0;
+    // aquarela logo atrás dos traços, de baixo para cima
+    for (const [k, a, b] of [['travertine', 3.6, 5.4], ['blackgranite', 3.9, 5.6], ['granite', 4.6, 7.6], ['glass', 5.0, 7.4], ['mullion', 5.0, 7.4], ['alu', 5.6, 7.8], ['relief', 6.0, 7.8], ['redgranite', 5.2, 7.0], ['concrete', 5.2, 7.0], ['pave', 4.4, 7.6]]) rv(k, seg(t, a, b), [0, -6, 0], 46, { mode: 1, dir: [0, 1, 0], amp: 0.35, freq: 0.15 });
     c.people.progress = seg(t, 6.6, 7.7);
     eachLine(c.context, (l) => { l.progress = seg(t, 6.2, 7.9); l.opacity = 0.75; });
     c.themis.visible = false;
@@ -196,6 +198,10 @@ const shotSection = {
     L.structure.progress = seg(t, 8.15, 9.6);
     L.slabs.progress = seg(t, 8.3, 10.6);
     L.stair.progress = seg(t, 8.45, 10.9);
+    // aquarela laranja subindo junto com a escada helicoidal; azul suave nas lajes
+    const W = c.section.userData.wash;
+    W.orange.uniforms.uY.value = lerp(B.yB - 1, B.roof[0] + 1, eO(seg(t, 8.45, 10.9))); W.orange.uniforms.uA.value = 1;
+    W.blue.uniforms.uY.value = lerp(B.yB - 1, B.roof[0] + 1, eO(seg(t, 8.6, 10.95))); W.blue.uniforms.uA.value = 0.8;
     L.interior.progress = seg(t, 8.6, 10.9);
     L.roof.progress = seg(t, 10.3, 10.95);
     const mb = [(cx - cxp) * c.W * Z, 0];

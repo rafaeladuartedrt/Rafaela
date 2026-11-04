@@ -32,9 +32,9 @@ vec3 illusV(vec3 c, float jit, float viv){
   // pátina verde-azulada
   if (c.g > c.r + .03 && sat > .14 && L > .14) o = q < .32 ? slate : patina;
   if (viv > .5) {
-    vec3 vor = sl(vec3(.94,.48,.18)), vmg = sl(vec3(.91,.27,.56));
+    vec3 vor = sl(vec3(.94,.48,.18)), vmg = sl(vec3(.50,.64,.64));
     if (q >= .2 && q < .4) o = vor;                 // vidros e sombras médias em laranja
-    else if (q >= .4 && q < .52) o = mix(grey, vmg, .55); // meios-tons em magenta suave
+    else if (q >= .4 && q < .52) o = mix(grey, vmg, .6); // meios-tons no azul da Themis
   }
   // céu
   else if (c.b > c.r + .06 && L > .5) o = blue;

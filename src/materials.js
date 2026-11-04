@@ -21,10 +21,10 @@ const PROC = {
   blackgranite: `diffuseColor.rgb = vec3(0.0446, 0.0430, 0.0546);`,
   glass: `diffuseColor.rgb = vec3(0.8751, 0.1975, 0.0231);`,
   concrete: `diffuseColor.rgb = vec3(0.6187, 0.5732, 0.5114);`,
-  relief: `diffuseColor.rgb = vec3(0.8122, 0.0564, 0.2801);`,
-  alu: `diffuseColor.rgb = vec3(0.8122, 0.0564, 0.2801);`,
+  relief: `diffuseColor.rgb = vec3(0.2158, 0.3686, 0.3787);`,
+  alu: `diffuseColor.rgb = vec3(0.2158, 0.3686, 0.3787);`,
   mullion: `diffuseColor.rgb = vec3(0.0303, 0.0316, 0.0385);`,
-  redgranite: `diffuseColor.rgb = vec3(0.8122, 0.0892, 0.0210);`,
+  redgranite: `diffuseColor.rgb = vec3(0.8122, 0.0564, 0.2801);`,
   pave: `diffuseColor.rgb = vec3(0.8832, 0.8122, 0.6800);`,
   asphalt: `diffuseColor.rgb = vec3(0.6524, 0.6121, 0.5480);`,
   bronze: `

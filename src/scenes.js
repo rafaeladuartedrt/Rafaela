@@ -78,6 +78,32 @@ export function buildSection() {
     L[k] = new InkLines(segs, { overshoot: k === 'stair' ? 0 : 0.25, wobble: 0.02, subdiv: 4, seed: 300 + k.length, span: k === 'stair' ? 0.01 : 0.08 });
     root.add(L[k]);
   }
+  // manchas de aquarela atrás do traço (laranja na escada, azul nas lajes)
+  const washMat = (col, alpha) => new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: { uY: { value: -100 }, uA: { value: 0 }, uC: { value: new THREE.Color(col) }, uMax: { value: alpha } },
+    vertexShader: 'varying vec3 vW; void main(){ vW = (modelMatrix * vec4(position,1.)).xyz; gl_Position = projectionMatrix * viewMatrix * vec4(vW,1.); }',
+    fragmentShader: `uniform float uY; uniform float uA; uniform vec3 uC; uniform float uMax; varying vec3 vW;
+      float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
+      float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1,0)),f.x), mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x), f.y); }
+      float fb(vec2 p){ return n(p)*.5 + n(p*2.1)*.25 + n(p*4.3)*.125 + n(p*9.)*.0625; }
+      void main(){
+        float e = fb(vW.xy * 0.35) * 2.2;
+        float m = smoothstep(0., 1.6, uY - vW.y + (e - 1.1) * 1.6);
+        float d = 0.6 + 0.4 * fb(vW.xy * 1.3 + 5.);
+        float edge = smoothstep(0.0, 0.08, fb(vW.xy * 0.22 + 2.) - 0.25);
+        float a = m * d * edge * uA * uMax;
+        if (a < 0.01) discard;
+        gl_FragColor = vec4(uC, a);
+      }`,
+  });
+  const orange = washMat(0xe9782f, 0.75), blue = washMat(0x7fa2a4, 0.45);
+  const og = new THREE.PlaneGeometry(9, B.roof[0] - B.yB + 2); og.translate(0, (B.yB + B.roof[0]) / 2, -0.4);
+  const bg = new THREE.PlaneGeometry(56, B.roof[0] - B.yB + 3); bg.translate(0, (B.yB + B.roof[0]) / 2, -0.6);
+  const om = new THREE.Mesh(og, orange), bm = new THREE.Mesh(bg, blue);
+  om.renderOrder = 2; bm.renderOrder = 1;
+  root.add(bm, om);
+  root.userData.wash = { orange, blue };
   root.userData.lines = L;
   return root;
 }

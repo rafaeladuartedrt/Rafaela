@@ -13,7 +13,7 @@ const VERT = /* glsl */`
 uniform vec2 uRes; uniform float uProgress; uniform float uSpan; uniform float uPx; uniform float uWidth;
 uniform float uRevealY; uniform float uRevealYOn;
 attribute vec3 iA; attribute vec3 iB; attribute float iW; attribute float iO; attribute float iR;
-varying float vSide; varying float vVis; varying float vR; varying float vAlong;
+varying float vSide; varying float vVis; varying float vR; varying float vAlong; varying float vFade;
 void main(){
   float r = clamp((uProgress * (1. + uSpan) - iO) / uSpan, 0., 1.);
   vec4 ca = projectionMatrix * modelViewMatrix * vec4(iA, 1.);
@@ -32,7 +32,8 @@ void main(){
   vec2 dir = L > 1e-4 ? d / L : vec2(1., 0.);
   vec2 nrm = vec2(-dir.y, dir.x);
   float taper = 1.0;
-  float w = max(iW * uPx * uWidth * taper, 0.6);
+  float w = max(iW * uPx * uWidth * taper, 1.3);
+  vFade = smoothstep(3., 14., L);   // segmentos minúsculos na tela somem em vez de cintilar
   vec2 off = nrm * position.y * w + dir * (position.x * 2. - 1.) * w * 0.5;
   c.xy += off / uRes * 2. * c.w * 0.5;
   gl_Position = c;
@@ -43,14 +44,14 @@ void main(){
 
 const FRAG = /* glsl */`
 uniform vec3 uColor; uniform float uOpacity;
-varying float vSide; varying float vVis; varying float vR; varying float vAlong;
+varying float vSide; varying float vVis; varying float vR; varying float vAlong; varying float vFade;
 float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   if (vVis < 0.5) discard;
   // pincelada contínua: borda levemente ondulada e estável (não muda de quadro para quadro)
   float wob = 0.06 * sin(vAlong * 9. + vR * 40.);
   float edge = 1. - smoothstep(0.62 + wob, 0.98, abs(vSide));
-  float a = uOpacity * edge;
+  float a = uOpacity * edge * vFade * (0.82 + 0.18 * vR);
   if (a < 0.01) discard;
   gl_FragColor = vec4(uColor, a);
 }`;
@@ -63,7 +64,16 @@ export class InkLines extends THREE.Mesh {
     const R = rng(opts.seed || 7);
     const over = opts.overshoot ?? 0.0, wob = opts.wobble ?? 0.0, maxLen = opts.subdiv ?? 1e9;
     const A = [], B = [], W = [], O = [], RR = [];
+    const sketch = opts.sketch ?? true;
+    const segs2 = [];
     for (const s of segs) {
+      segs2.push(s);
+      if (sketch) {
+        const j = () => (R() - 0.5) * (opts.jitter ?? 0.12);
+        segs2.push({ ...s, a: [s.a[0] + j(), s.a[1] + j(), s.a[2] + j()], b: [s.b[0] + j(), s.b[1] + j(), s.b[2] + j()], w: (s.w ?? 1) * 0.55 });
+      }
+    }
+    for (const s of segs2) {
       let a = s.a.slice(), b = s.b.slice();
       const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
       const len = Math.hypot(dx, dy, dz); if (len < 1e-6) continue;
