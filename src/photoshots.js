@@ -19,7 +19,7 @@ uniform float uHatch;         // 0..1 hachura tonal
 uniform float uReveal;        // 0..1 foto por aquarela
 uniform vec2 uRevealC;        // origem da mancha (uv da imagem)
 uniform float uLineOut;       // linhas somem sob a foto
-uniform float uSeed; uniform float uPaperWhite;
+uniform float uSeed; uniform float uPaperWhite; uniform float uReal;
 #define NF 18
 uniform vec2 uJ[NF * 12]; uniform vec4 uFB[NF]; uniform vec3 uFC[NF]; uniform float uWalk;
 float capD(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0., 1.); return length(pa - ba * h); }
@@ -62,19 +62,22 @@ void main(){
   vec3 drawing = mix(uPaper, uInk, clamp(ink + h * hk * 0.55, 0., 1.) * 0.92);
   // revelação da foto por mancha de aquarela
   float f = length((iuv - uRevealC) * vec2(uIA, 1.));
-  float n = fbm2(iuv * 4.5 + uSeed * 1.7) * .35 + fbm2(iuv * 19. + 3.) * .08;
+  float n = fbm2(iuv * 2.5 + uSeed * 1.7) * .15;
   float v = uReveal * 1.75 - 0.15 - f - n;
-  float m = smoothstep(0., 0.025, v);
+  float m = smoothstep(0., 0.3, v);
   float ring = smoothstep(0., 0.01, v) * (1. - smoothstep(0.01, 0.07, v));
   // a imagem é remontada como ilustração: tons chapados da paleta, nunca a foto em si
   vec3 cs = texture2D(tPhoto, tuv, 2.5).rgb;
   vec3 wc = illus(cs, fbm2(iuv * 22. + uSeed) - .5);
   wc = mix(wc, uPaper, uPaperWhite * smoothstep(0.82, 0.97, lum));
-  vec3 wash = wc * (1. - 0.4 * ring);
+  // no final o traço vira a imagem real
+  float rk = smoothstep(0., 0.35, uReal * 1.35 - 0.2 - (fbm2(iuv * 3. + 9.) * .25 + (1. - iuv.y) * .1));
+  wc = mix(wc, photo, rk);
+  vec3 wash = wc;
   vec3 col = mix(drawing, wash, m);
   // o traço permanece por cima e some aos poucos
-  col = mix(col, uInk, ink * m * 0.9 * (1. - 0.4 * uLineOut));
-  col = mix(col, uInk, h * hk * m * 0.25);
+  col = mix(col, uInk, ink * m * 0.9 * (1. - 0.4 * uLineOut) * (1. - uReal));
+  col = mix(col, uInk, h * hk * m * 0.25 * (1. - uReal));
   col = mix(uPaper, col, inside);
   // pessoas caminhando: silhuetas em nanquim com mancha de cor na roupa
   if (uWalk > 0.01) {
@@ -130,7 +133,7 @@ export async function buildPhotoStage() {
     tPhoto: { value: null }, tLines: { value: null }, uRes: G.uRes, uPx: G.uPx, uPaper: G.uPaper, uInk: G.uInk,
     uIA: { value: 1 }, uView: { value: new THREE.Vector3(0.5, 0.5, 1) }, uRot: { value: 0 },
     uDraw: { value: 1 }, uDrawMode: { value: 0 }, uHatch: { value: 0 }, uReveal: { value: 0 }, uRevealC: { value: new THREE.Vector2(0.5, 0.5) },
-    uLineOut: { value: 0 }, uSeed: { value: 0 }, uPaperWhite: { value: 0 },
+    uLineOut: { value: 0 }, uSeed: { value: 0 }, uPaperWhite: { value: 0 }, uReal: { value: 0 },
     uJ: { value: Array.from({ length: 18 * 12 }, () => new THREE.Vector2()) }, uFB: { value: Array.from({ length: 18 }, () => new THREE.Vector4()) },
     uFC: { value: Array.from({ length: 18 }, () => new THREE.Vector3()) }, uWalk: { value: 0 },
   };
@@ -150,7 +153,7 @@ export function setPhoto(stage, o) {
   u.uView.value.set(...o.view); u.uRot.value = o.rot || 0;
   u.uDraw.value = o.draw ?? 1; u.uDrawMode.value = o.mode ?? 0; u.uHatch.value = o.hatch ?? 0;
   u.uReveal.value = o.reveal ?? 0; u.uRevealC.value.set(...(o.revealC || [0.5, 0.5]));
-  u.uLineOut.value = o.lineOut ?? 0; u.uSeed.value = o.seed ?? 0; u.uPaperWhite.value = o.paperWhite ?? 0;
+  u.uLineOut.value = o.lineOut ?? 0; u.uSeed.value = o.seed ?? 0; u.uPaperWhite.value = o.paperWhite ?? 0; u.uReal.value = o.real ?? 0;
 }
 
 // ---------- pessoas em traço que caminham sobre as fotos (como nas referências) ----------

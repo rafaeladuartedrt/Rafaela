@@ -334,12 +334,11 @@ const shotMaterials = {
     const k = eSin(seg(t, d.t0, d.t1));
     look(c, L3(d.p0, d.p1, k), L3(d.g0, d.g1, k), d.fov);
     setSun(c, [0.55, 0.62, -0.55], 0xfff4e6, 2.1);
-    applyBuildingReveals(t);
-    G.uHatch.value = 1 - seg(t, 26.5, 27.6);
-    setLinesOpacity(c, lerp(1, 0.42, seg(t, 23.5, 27.5)));
+    G.uHatch.value = 0.6;
+    setLinesOpacity(c, 1);
     eachLine(c.context, (l) => { l.opacity = 0.65; });
     c.people.opacity = lerp(1, 0.6, seg(t, 24, 27));
-    return { paper: [0, 0, 1.6, 1.6], sky: [eIO(seg(t, 23.5, 27.5)), 0, 0], global: { rake: 0.15, paperAmt: lerp(1, 0.75, seg(t, 23, 27)) } };
+    return { paper: [0, 0, 1.6, 1.6], global: { rake: 0.2 } };
   },
 };
 
@@ -545,27 +544,27 @@ function photoShot(name, P) {
         view[0] = Math.min(Math.max(view[0], hx), 1 - hx); view[1] = Math.min(Math.max(view[1], hy), 1 - hy);
       }
       view[0] += 0.004 * Math.sin(t * 0.9 + P.seed); view[1] += 0.003 * Math.sin(t * 0.7 + P.seed * 2);
-      let reveal = eIO(seg(t, ...P.reveal));
+      let reveal = eIO(seg(t, ...P.reveal)) * (P.rmax ?? 1);
       let draw = eO(seg(t, P.draw[0] - (P.pre ?? 0.35), P.draw[1]));
       if (P.back) { const b = seg(t, ...P.back); reveal *= 1 - eIO(b); }
       setPhoto(c.photo, {
         name: P.photo, view, rot: P.rot || 0, mode: P.mode ?? 0, seed: P.seed,
         draw, hatch: eO(seg(t, ...(P.hatch || P.draw.map((x) => x + 0.4)))),
-        reveal, revealC: P.c, paperWhite: P.paperWhite || 0, lineOut: eIO(seg(t, ...(P.lineOut || [P.reveal[1] - 0.3, P.reveal[1] + 0.6]))),
+        reveal, revealC: P.c, paperWhite: P.paperWhite || 0, real: P.real ? eIO(seg(t, ...P.real)) : 0, lineOut: eIO(seg(t, ...(P.lineOut || [P.reveal[1] - 0.3, P.reveal[1] + 0.6]))),
       });
       setWalkers(c.photo, P.crowd || [], view, t - P.t0, P.crowd ? eO(seg(t, P.draw[0], P.draw[1])) * (1 - 0.1 * reveal) : 0);
       const white = P.white ? eIO(seg(t, ...P.white)) : 0;
-      return { photo: true, paper: [P.seed * 0.1 + t * 0.004, 0, 1.6, 1.6], global: { rake: lerp(0.35, 0.18, reveal), paperAmt: lerp(1, 0.6, reveal), vig: 0.22, white } };
+      return { photo: true, paper: [P.seed * 0.1 + t * 0.004, 0, 1.6, 1.6], global: { rake: lerp(0.35, 0.18, reveal) * (1 - (P.real ? seg(t, ...P.real) : 0)), paperAmt: lerp(lerp(1, 0.6, reveal), 0.12, P.real ? seg(t, ...P.real) : 0), vig: 0.22, white } };
     },
   };
 }
 const shotStudiesP = photoShot('studiesP', { photo: 'estudos', t0: 27.8, t1: 33.2, v0: [0.115, 0.5, 1.02], v1: [0.9, 0.5, 1.12], mode: 1, draw: [27.9, 31.8], hatch: [28.4, 32.2], reveal: [31.2, 32.9], c: [0.9, 0.45], lineOut: [32.4, 33.2], seed: 1, pre: 0, paperWhite: 1 });
 const shotThemisP = photoShot('themisP', { photo: 'themis_frontal', t0: 32.8, t1: 41.3, path: [[32.8, 0.5, 0.5, 1.0], [35.0, 0.52, 0.17, 2.6], [36.6, 0.49, 0.31, 2.3], [38.2, 0.51, 0.55, 2.0], [39.6, 0.5, 0.86, 2.4], [41.3, 0.5, 0.5, 1.05]], draw: [33.0, 35.6], hatch: [34.2, 36.8], reveal: [36.2, 40.0], c: [0.51, 0.18], lineOut: [39.5, 41], seed: 2 });
 const shotCabecaP = photoShot('cabecaP', { photo: 'themis_cabeca_icamento', t0: 41.0, t1: 42.4, path: [[41.0, 0.62, 0.45, 1.7], [42.4, 0.55, 0.5, 1.15]], mode: 2, draw: [41.0, 41.5], reveal: [41.3, 42.2], c: [0.62, 0.45], seed: 3 });
-const shotGuindP = photoShot('guindasteP', { photo: 'themis_guindaste', t0: 42.4, t1: 43.6, path: [[42.4, 0.25, 0.75, 2.2], [43.6, 0.72, 0.42, 1.6]], mode: 1, draw: [42.4, 42.9], reveal: [42.7, 43.5], c: [0.78, 0.4], seed: 4 });
-const shotIcamP = photoShot('icamentoP', { photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, path: [[43.6, 0.5, 0.75, 2.0], [44.8, 0.5, 0.42, 1.3]], mode: 2, draw: [43.6, 44.1], reveal: [43.9, 44.7], c: [0.5, 0.72], seed: 5 });
-const shotFachP = photoShot('fachadaP', { photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, path: [[44.8, 0.47, 0.5, 2.4], [46.6, 0.5, 0.5, 1.0]], mode: 0, draw: [44.8, 45.4], reveal: [45.1, 46.3], c: [0.48, 0.5], seed: 6 });
-const shotFixP = photoShot('fixacaoP', { photo: 'themis_fixacao', t0: 46.6, t1: 48.0, path: [[46.6, 0.6, 0.7, 1.3], [48.0, 0.65, 0.3, 2.3]], mode: 2, draw: [46.6, 47.1], reveal: [46.85, 47.8], c: [0.6, 0.65], seed: 7 });
+const shotGuindP = photoShot('guindasteP', { photo: 'themis_guindaste', t0: 42.4, t1: 43.6, rmax: 0.45, path: [[42.4, 0.25, 0.75, 2.2], [43.6, 0.72, 0.42, 1.6]], mode: 1, draw: [42.4, 42.9], reveal: [42.7, 43.5], c: [0.78, 0.4], seed: 4 });
+const shotIcamP = photoShot('icamentoP', { photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, rmax: 0.6, path: [[43.6, 0.5, 0.75, 2.0], [44.8, 0.5, 0.42, 1.3]], mode: 2, draw: [43.6, 44.1], reveal: [43.9, 44.7], c: [0.5, 0.72], seed: 5 });
+const shotFachP = photoShot('fachadaP', { photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, rmax: 0.22, path: [[44.8, 0.47, 0.5, 2.4], [46.6, 0.5, 0.5, 1.0]], mode: 0, draw: [44.8, 45.4], reveal: [45.1, 46.3], c: [0.48, 0.5], seed: 6 });
+const shotFixP = photoShot('fixacaoP', { photo: 'themis_fixacao', t0: 46.6, t1: 48.0, rmax: 0.55, path: [[46.6, 0.6, 0.7, 1.3], [48.0, 0.65, 0.3, 2.3]], mode: 2, draw: [46.6, 47.1], reveal: [46.85, 47.8], c: [0.6, 0.65], seed: 7 });
 // giro em volta do prédio ilustrado, com a Themis desenhada na empena e pessoas caminhando
 const shotGiro = {
   name: 'giro',
@@ -574,17 +573,9 @@ const shotGiro = {
     c.bld.root.visible = true; c.context.visible = true;
     const sunDir = [0.62, 0.5, 0.42];
     setSun(c, sunDir, 0xffffff, 2.2, 0.8);
-    // traço -> cor chapada entrando por mancha
-    const k0 = (a, b) => eIO(seg(t, a, b));
-    rv('granite', k0(48.4, 50.8), [27, 18, 0], 60); rv('travertine', k0(48.8, 50.4), [24, 0, 9], 40);
-    rv('glass', k0(49.0, 51.0), [10, 18, 11], 50); rv('mullion', k0(49.0, 51.0), [10, 18, 11], 50);
-    rv('blackgranite', k0(49.0, 50.6), [20, 2, 6], 35); rv('alu', k0(49.4, 51.2), [0, 20, -11], 50);
-    rv('relief', k0(49.4, 51.0), [5, 27, 8], 20); rv('concrete', k0(49.6, 51.2), [-30, 2, 8], 30);
-    rv('redgranite', k0(49.6, 51.2), [-30, 0, -12], 30); rv('pave', k0(48.6, 51.0), [30, -1, 5], 60, { freq: 0.08 });
-    rv('asphalt', k0(49.0, 51.6), [30, -2, 15], 160, { freq: 0.05 });
-    G.uHatch.value = 0.55 * (1 - seg(t, 49.5, 51.2));
-    setLinesOpacity(c, lerp(1, 0.75, seg(t, 50, 51.5)));
-    eachLine(c.context, (l) => { l.opacity = 0.8; });
+    G.uHatch.value = 0.5;
+    setLinesOpacity(c, 1);
+    eachLine(c.context, (l) => { l.opacity = 0.85; l.progress = seg(t, 48.2, 50.5); });
     // Themis ilustrada: traço surge, depois o tom chapado
     c.themis2d.visible = true;
     c.themis2d.userData.u.uDraw.value = eO(seg(t, 48.6, 50.4));
@@ -600,10 +591,10 @@ const shotGiro = {
     look(c, pos, tgt, fov);
     c.people3d.visible = true;
     updatePeople3D(c.people3d, t - 44, V(sunDir), c.cam, eO(seg(t, 49.2, 50.4)));
-    return { paper: [0, 0, 1.6, 1.6], sky: [eIO(seg(t, 49, 51)), 0, -0.25 * e], global: { rake: 0.15, paperAmt: 0.85, vig: 0.2 } };
+    return { paper: [0, 0, 1.6, 1.6], global: { rake: 0.15, vig: 0.2 } };
   },
 };
-const shotFinalP = photoShot('finalP', { photo: 'themis_frontal', t0: 55.8, t1: 60, path: [[55.8, 0.5, 0.5, 1.0], [57.2, 0.5, 0.82, 2.2], [58.4, 0.5, 0.36, 2.4], [59.9, 0.52, 0.17, 3.0]], mode: 2, draw: [55.8, 56.0], reveal: [55.8, 56.6], c: [0.5, 0.5], lineOut: [0, 0.01], back: [59.45, 59.78], white: [59.72, 59.99], seed: 2, pre: 0.6 });
+const shotFinalP = photoShot('finalP', { photo: 'themis_frontal', t0: 55.8, t1: 60, path: [[55.8, 0.5, 0.36, 2.2], [57.0, 0.51, 0.18, 3.0], [58.2, 0.5, 0.4, 2.2], [60.0, 0.5, 0.5, 1.02]], mode: 2, draw: [55.8, 56.0], reveal: [55.8, 56.6], c: [0.5, 0.5], lineOut: [0, 0.01], real: [57.9, 59.6], seed: 2, pre: 0.6 });
 
 // ---------- sequência ----------
 const SHOTS = [
@@ -623,11 +614,11 @@ const SHOTS = [
   [56.0, 60.0, shotFinalP],
 ];
 const TRANS = [
-  [10.82, 11.18, 1, 1, [0.5, 0.62]],
-  [27.78, 28.22, 4, 1, [0.52, 0.52]],
-  [32.8, 33.2, 5, 1, [0.5, 0.3]],
-  [44.6, 45.0, 9, 1, [0.5, 0.45]],
-  [47.8, 48.2, 11, 1, [0.5, 0.5]],
+  [10.82, 11.18, 1, 2, [0.5, 0.62]],
+  [27.78, 28.22, 4, 2, [0.52, 0.52]],
+  [32.8, 33.2, 5, 2, [0.5, 0.3]],
+  [44.6, 45.0, 9, 2, [0.5, 0.45]],
+  [47.8, 48.2, 11, 2, [0.5, 0.5]],
   [55.8, 56.2, 12, 2, [0.5, 0.5]],
 ];
 export function evaluate(t) {

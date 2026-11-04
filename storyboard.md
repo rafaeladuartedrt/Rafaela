@@ -21,7 +21,7 @@ Formato 1080 × 1920 (9:16), 30 fps, 60 s (1800 quadros). Master sem áudio.
 | 10 | 41,0 a 44,8 s (**TF 41,0 · 42,4 · 43,6**) | Içamento de 2005: rosto, estátua no guindaste, içamento frontal | Push in, travelling e crane | Cortes rápidos: cada foto nasce em traço e vira foto | Wipe de tinta (44,6 a 45,0 s) |
 | 11 | 44,8 a 48,0 s (**TF 46,6**) | Içamento na fachada sul e fixação | Push in | A estátua sobe junto à empena e é fixada | Corte seco |
 | 12 | 48,0 a 54,8 s (**TF 48,0 · 50,4 · 52,6**) | Prédio nas fotos originais: contra-plongée, vista alta, vista de baixo | Crane up, travelling lateral, push in até a Themis | Cada referência é redesenhada: o traço surge e a imagem é remontada em hachura e aguadas de cor, com a câmera passeando entre pilotis, loggia, brises e a Themis. | Dissolve (54,6 a 55,0 s) |
-| 13 | 54,8 a 60,0 s | Themis frontal | Push in contínuo até rosto, livro e espada | Nos últimos 15 quadros, a foto recua para o traço e se dissolve no branco do papel | Fim |
+| 13 | 54,8 a 60,0 s | Themis frontal | Push in contínuo até rosto, livro e espada | Nos últimos 2 s, o traço se transforma na imagem real da Themis | Fim |
 
 ## Regras conferidas
 

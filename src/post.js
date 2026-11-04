@@ -28,7 +28,7 @@ vec3 skyWash(vec2 uv, vec3 sk){
   vec3 c = blue;
   vec2 q = (uv - vec2(.7 + sk.z, .8)) * vec2(uRes.x / uRes.y, 1.);
   float disc = 1. - smoothstep(.105, .108, length(q));
-  c = mix(c, peach, disc * .85);
+  
   c *= 0.96 + 0.05 * fbm2(uv * vec2(4., 40.));
   return mix(uPaper, c, sk.x * edge);
 }

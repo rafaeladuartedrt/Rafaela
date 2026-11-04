@@ -25,7 +25,7 @@ void main(){
   float line = smoothstep(.2, .62, 1. - dot(texture2D(tL, tuv).rgb, vec3(.333))) * drawn;
   float edge = smoothstep(.25, .5, m) * (1. - smoothstep(.5, .75, m));
   vec3 col = illus(texture2D(tC, tuv, 2.).rgb, fbm2(uv * 30.) - .5);
-  float fk = smoothstep(0., .03, uFill * 1.4 - .2 - (length((uv - vec2(.5, .82)) * vec2(.4, 1.)) + (fbm2(uv * 5. + 2.) - .5) * .3));
+  float fk = smoothstep(0., .3, uFill * 1.4 - .2 - (length((uv - vec2(.5, .82)) * vec2(.4, 1.)) + (fbm2(uv * 2.5 + 2.) - .5) * .12));
   float a = smoothstep(.4, .6, m);
   vec3 c = mix(uPaper, col, fk);
   c = mix(c, uInk, clamp(line * .92 + edge * drawn * .9, 0., 1.));
