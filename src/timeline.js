@@ -5,6 +5,7 @@ import { REVEAL } from './materials.js';
 import { InkLines } from './lines.js';
 import { B } from './building.js';
 import { setBlades } from './themis.js';
+import { setPhoto, setWalkers, makeCrowd } from './photoshots.js';
 
 export const FPS = 30, DURATION = 60;
 
@@ -517,6 +518,44 @@ export const PREVIEW = {
   cmpThSide: { name: 'cmpThSide', apply(c) { reset(c); c.themis.visible = true; c.themis.position.set(0, 0, 0); c.themis.rotation.set(0, 0, 0); revealAll(1); themisLines(c, 0.2); look(c, [-14, 4.6, 7], [0, 4.6, 1], 34); setSun(c, [-0.5, 0.6, 0.8], 0xffffff, 2.2, 0.8, [0, 5, 0]); return { paper: [0, 0, 1.6, 1.6], global: { paperAmt: 0.4 } }; } },
 };
 
+// =====================================================================
+// ATOS 3 E 4 — A THEMIS E O PRÉDIO A PARTIR DAS FOTOS ORIGINAIS
+// =====================================================================
+// cada plano: foto, intervalo, enquadramento inicial/final [cx, cy, zoom] (uv da imagem, y a partir do topo),
+// tempos do traço, da hachura e da revelação, origem da mancha
+function photoShot(name, P) {
+  return {
+    name,
+    apply(c, tl, t) {
+      const k = (P.ease || eSin)(seg(t, P.t0, P.t1));
+      const view = L3(P.v0, P.v1, k);
+      view[0] += 0.004 * Math.sin(t * 0.9 + P.seed); view[1] += 0.003 * Math.sin(t * 0.7 + P.seed * 2);
+      let reveal = eIO(seg(t, ...P.reveal));
+      let draw = eO(seg(t, P.draw[0] - (P.pre ?? 0.35), P.draw[1]));
+      if (P.back) { const b = seg(t, ...P.back); reveal *= 1 - eIO(b); }
+      setPhoto(c.photo, {
+        name: P.photo, view, rot: P.rot || 0, mode: P.mode ?? 0, seed: P.seed,
+        draw, hatch: eO(seg(t, ...(P.hatch || P.draw.map((x) => x + 0.4)))),
+        reveal, revealC: P.c, paperWhite: P.paperWhite || 0, lineOut: eIO(seg(t, ...(P.lineOut || [P.reveal[1] - 0.3, P.reveal[1] + 0.6]))),
+      });
+      setWalkers(c.photo, P.crowd || [], view, t - P.t0, P.crowd ? eO(seg(t, P.draw[0], P.draw[1])) * (1 - 0.1 * reveal) : 0);
+      const white = P.white ? eIO(seg(t, ...P.white)) : 0;
+      return { photo: true, paper: [P.seed * 0.1 + t * 0.004, 0, 1.6, 1.6], global: { rake: lerp(0.35, 0.05, reveal), paperAmt: lerp(1, 0.18, reveal), vig: 0.22, white } };
+    },
+  };
+}
+const shotStudiesP = photoShot('studiesP', { photo: 'estudos', t0: 27.8, t1: 33.2, v0: [0.115, 0.5, 1.02], v1: [0.9, 0.5, 1.12], mode: 1, draw: [27.9, 31.8], hatch: [28.4, 32.2], reveal: [31.2, 32.9], c: [0.9, 0.45], lineOut: [32.4, 33.2], seed: 1, pre: 0, paperWhite: 1 });
+const shotThemisP = photoShot('themisP', { photo: 'themis_frontal', t0: 32.8, t1: 41.3, v0: [0.5, 0.52, 1.0], v1: [0.505, 0.47, 1.18], mode: 0, draw: [33.0, 36.4], hatch: [34.6, 37.2], reveal: [37.0, 40.2], c: [0.51, 0.18], lineOut: [39.3, 40.8], seed: 2 });
+const shotCabecaP = photoShot('cabecaP', { photo: 'themis_cabeca_icamento', t0: 41.0, t1: 42.4, v0: [0.6, 0.5, 1.05], v1: [0.63, 0.46, 1.28], mode: 2, draw: [41.0, 41.45], reveal: [41.3, 42.15], c: [0.62, 0.45], seed: 3 });
+const shotGuindP = photoShot('guindasteP', { photo: 'themis_guindaste', t0: 42.4, t1: 43.6, v0: [0.42, 0.6, 1.08], v1: [0.62, 0.55, 1.08], mode: 1, draw: [42.4, 42.85], reveal: [42.7, 43.45], c: [0.78, 0.4], seed: 4 });
+const shotIcamP = photoShot('icamentoP', { photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, v0: [0.48, 0.62, 1.15], v1: [0.48, 0.5, 1.02], mode: 0, draw: [43.6, 44.05], reveal: [43.9, 44.65], c: [0.5, 0.35], seed: 5 });
+const shotFachP = photoShot('fachadaP', { photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, v0: [0.5, 0.6, 1.0], v1: [0.48, 0.5, 1.3], mode: 0, draw: [44.8, 45.35], reveal: [45.15, 46.3], c: [0.48, 0.5], seed: 6 });
+const shotFixP = photoShot('fixacaoP', { photo: 'themis_fixacao', t0: 46.6, t1: 48.0, v0: [0.6, 0.62, 1.05], v1: [0.62, 0.42, 1.12], mode: 0, draw: [46.6, 47.0], reveal: [46.85, 47.7], c: [0.65, 0.3], seed: 7 });
+const shotContraP = photoShot('contraplongeeP', { photo: 'predio_contraplongee', t0: 48.0, t1: 50.4, v0: [0.55, 0.72, 1.12], v1: [0.6, 0.45, 1.0], mode: 0, draw: [48.0, 48.75], reveal: [48.5, 49.9], c: [0.72, 0.48], seed: 8, crowd: makeCrowd(81, 6, 0.1, 0.9, 0.935, 0.975, 0.085, 0.11) });
+const shotAltaP = photoShot('vistaAltaP', { photo: 'predio_vista_alta', t0: 50.4, t1: 52.6, v0: [0.36, 0.5, 1.02], v1: [0.62, 0.5, 1.02], mode: 1, draw: [50.4, 51.1], reveal: [50.9, 52.2], c: [0.34, 0.4], seed: 9, crowd: [...makeCrowd(91, 5, 0.32, 0.6, 0.82, 0.86, 0.055, 0.06), ...makeCrowd(92, 4, 0.4, 0.8, 0.9, 0.95, 0.07, 0.08)] });
+const shotBaixaP = photoShot('vistaBaixaP', { photo: 'predio_vista_baixa', t0: 52.6, t1: 54.8, v0: [0.52, 0.5, 1.0], v1: [0.32, 0.43, 1.35], mode: 2, draw: [52.6, 53.3], reveal: [53.0, 54.3], c: [0.3, 0.43], seed: 10, crowd: [...makeCrowd(101, 5, 0.12, 0.62, 0.95, 0.985, 0.11, 0.13), ...makeCrowd(102, 3, 0.62, 0.9, 0.93, 0.945, 0.06, 0.065)] });
+const shotFinalP = photoShot('finalP', { photo: 'themis_frontal', t0: 54.6, t1: 59.7, v0: [0.5, 0.5, 1.0], v1: [0.51, 0.25, 2.25], ease: eIO, mode: 2, draw: [54.6, 54.9], reveal: [54.6, 54.61], c: [0.5, 0.3], lineOut: [0, 0.01], back: [59.5, 59.78], white: [59.72, 59.99], seed: 2 });
+
 // ---------- sequência ----------
 const SHOTS = [
   [0.0, 8.0, shotDrawing],
@@ -524,16 +563,25 @@ const SHOTS = [
   [11.0, 14.0, shotHall],
   [14.0, 22.0, shotBuild],
   [22.0, 28.0, shotMaterials],
-  [28.0, 33.0, shotStudies],
-  [33.0, 38.0, shotThemisLine],
-  [38.0, 44.0, shotHoist],
-  [44.0, 54.0, shotOrbit],
-  [54.0, 60.0, shotFinale],
+  [28.0, 33.0, shotStudiesP],
+  [33.0, 41.0, shotThemisP],
+  [41.0, 42.4, shotCabecaP],
+  [42.4, 43.6, shotGuindP],
+  [43.6, 44.8, shotIcamP],
+  [44.8, 46.6, shotFachP],
+  [46.6, 48.0, shotFixP],
+  [48.0, 50.4, shotContraP],
+  [50.4, 52.6, shotAltaP],
+  [52.6, 54.8, shotBaixaP],
+  [54.8, 60.0, shotFinalP],
 ];
 // transições com sobreposição: [início, fim, índice do plano de saída, tipo(1 wipe, 2 dissolve), centro]
 const TRANS = [
   [10.82, 11.18, 1, 1, [0.5, 0.62]],
   [27.78, 28.22, 4, 1, [0.52, 0.52]],
+  [32.8, 33.2, 5, 1, [0.5, 0.3]],
+  [44.6, 45.0, 9, 1, [0.5, 0.45]],
+  [54.6, 55.0, 14, 2, [0.5, 0.5]],
 ];
 export function evaluate(t) {
   const force = typeof window !== 'undefined' && window.__forceShot;

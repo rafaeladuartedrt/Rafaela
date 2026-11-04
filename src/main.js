@@ -6,6 +6,7 @@ import { buildBuilding, buildContext, buildPeople } from './building.js';
 import { buildThemis, buildStudies } from './themis.js';
 import { buildSection, buildHall, buildSheet } from './scenes.js';
 import { evaluate, FPS, DURATION } from './timeline.js';
+import { buildPhotoStage } from './photoshots.js';
 
 const q = new URLSearchParams(location.search);
 const W = +(q.get('w') || 540), H = +(q.get('h') || 960);
@@ -60,7 +61,7 @@ const env = {
 scene.environment = env.day;
 
 const post = new Post(renderer, W, H);
-const ctx = { THREE, scene, cam, sun, hemi, renderer, post, env, W, H };
+const ctx = { THREE, scene, cam, sun, hemi, renderer, post, env, W, H }; window.__ctx = ctx;
 
 async function init() {
   const bld = buildBuilding(); scene.add(bld.root);
@@ -71,7 +72,8 @@ async function init() {
   const section = buildSection(); scene.add(section);
   const hall = buildHall(); scene.add(hall);
   const sheet = buildSheet(); scene.add(sheet);
-  Object.assign(ctx, { bld, context, people, themis, studies, section, hall, sheet });
+  const photo = await buildPhotoStage();
+  Object.assign(ctx, { photo, bld, context, people, themis, studies, section, hall, sheet });
   // compila todos os programas uma vez
   renderer.compile(scene, cam);
   window.__ready = true;
@@ -83,11 +85,11 @@ window.renderFrame = (f) => {
   const ev = evaluate(t);
   const u = post.u;
   const pa = ev.a.shot.apply(ctx, ev.a.tl, ev.a.tg); cull();
-  renderer.setRenderTarget(post.rtA); renderer.clear(); renderer.render(scene, cam);
+  renderer.setRenderTarget(post.rtA); renderer.clear(); pa.photo ? renderer.render(ctx.photo.scene, ctx.photo.cam) : renderer.render(scene, cam);
   setPost(pa, 'A');
   if (ev.b) {
     const pb = ev.b.shot.apply(ctx, ev.b.tl, ev.b.tg); cull();
-    renderer.setRenderTarget(post.rtB); renderer.clear(); renderer.render(scene, cam);
+    renderer.setRenderTarget(post.rtB); renderer.clear(); pb.photo ? renderer.render(ctx.photo.scene, ctx.photo.cam) : renderer.render(scene, cam);
     setPost(pb, 'B');
     u.uTrans.value = ev.trans.type; u.uTransT.value = ev.trans.t; u.uTransC.value.set(...(ev.trans.c || [0.5, 0.5]));
   } else u.uTrans.value = 0;

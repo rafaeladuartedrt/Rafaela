@@ -16,11 +16,12 @@ Formato 1080 × 1920 (9:16), 30 fps, 60 s (1800 quadros). Master sem áudio.
 | 7c | 24,5 a 25,7 s (**TF 24,5**) | Caixilhos da faixa de janelas refletindo o céu | Travelling lateral | Vidro e caixilharia entram por mancha | Corte seco |
 | 7d | 25,7 a 26,8 s (**TF 25,7**) | Loggia com o mural em relevo e as hastes de iluminação | Crane up | O relevo ganha concreto | Corte seco |
 | 7e | 26,8 a 28,0 s (**TF 26,8**) | Plano aberto da empena sul, ainda vazia | Dolly in lento | Céu em aguada, material completo, linhas atenuadas | Wipe de tinta centrado na fachada (27,8 a 28,2 s) |
-| 8 | 28,0 a 33,0 s | Estudos da Themis em folhas lado a lado | Travelling lateral com rack focus no último estudo (31,6 a 32,5 s) | Grafite: da Themis clássica com venda e balança, passando por variações intermediárias, até a versão final com elmo, livro e espada | Match cut pelo contorno |
-| 9 | 33,0 a 38,0 s (**TF 33,0**) | A Themis 3D em linha, sobre o papel | Aproximação suave com a escultura girando | As lâminas do cabelo se abrem uma a uma; o bronze escorre de cima para baixo e a pátina aparece | Corte seco |
-| 10 | 38,0 a 44,0 s (**TF 38,0**, **TF 41,2**) | 38 a 41,2 s: contra-plongée da praça. 41,2 a 44 s: plano lateral rente à empena | Dolly in de baixo para cima; depois travelling junto à parede | Içamento lento e pesado com leve balanço e cabos em traço; encaixe na posição às 42,6 s | Corte seco |
-| 11 | 44,0 a 54,0 s (**TF 44,0**) | Prédio finalizado em luz de fim de tarde | Órbita completa de 360°, descendo aos pilotis, subindo à cobertura, afastando ao plano geral com o entorno em traço e aproximando nas quinas | A volta termina diante da fachada sul, com a Themis em destaque | Contínuo |
-| 12 | 54,0 a 60,0 s | Push in até a Themis | Push in contínuo com profundidade de campo rasa | Close de rosto, livro e espada com luz rasante dourada. Nos últimos 15 quadros (59,5 a 60 s), o close volta a ser traço de nanquim e se dissolve no branco do papel | Fim |
+| 8 | 28,0 a 33,0 s | Estudos originais de Fayet (prancha 36) | Travelling lateral da esquerda para a direita | O nanquim percorre os estudos, da Themis clássica com venda e balança até a versão final com elmo, livro e espada; a hachura entra e o desenho original surge por aquarela | Wipe de tinta (32,8 a 33,2 s) |
+| 9 | 33,0 a 41,0 s (**TF 33,0**) | Themis frontal instalada, foto original | Push in lento | O traço, tirado da própria foto, se desenha de cima para baixo e recebe hachura; a partir de 37 s a foto original surge por manchas de aquarela, começando pelo rosto | Corte seco |
+| 10 | 41,0 a 44,8 s (**TF 41,0 · 42,4 · 43,6**) | Içamento de 2005: rosto, estátua no guindaste, içamento frontal | Push in, travelling e crane | Cortes rápidos: cada foto nasce em traço e vira foto | Wipe de tinta (44,6 a 45,0 s) |
+| 11 | 44,8 a 48,0 s (**TF 46,6**) | Içamento na fachada sul e fixação | Push in | A estátua sobe junto à empena e é fixada | Corte seco |
+| 12 | 48,0 a 54,8 s (**TF 48,0 · 50,4 · 52,6**) | Prédio nas fotos originais: contra-plongée, vista alta, vista de baixo | Crane up, travelling lateral, push in até a Themis | Cada foto começa em traço e se completa em foto. Pessoas desenhadas em silhueta de nanquim, com mancha de cor na roupa, caminham na calçada e no pórtico (como nas referências) | Dissolve (54,6 a 55,0 s) |
+| 13 | 54,8 a 60,0 s | Themis frontal | Push in contínuo até rosto, livro e espada | Nos últimos 15 quadros, a foto recua para o traço e se dissolve no branco do papel | Fim |
 
 ## Regras conferidas
 
