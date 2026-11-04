@@ -65,10 +65,21 @@ void main(){
   float v = uReveal * 1.75 - 0.15 - f - n;
   float m = smoothstep(0., 0.025, v);
   float ring = smoothstep(0., 0.01, v) * (1. - smoothstep(0.01, 0.07, v));
-  vec3 wash = mix(photo, uPaper, uPaperWhite * smoothstep(0.82, 0.97, lum)) * (1. - 0.35 * ring);
+  // a imagem é remontada como ilustração: cor em aguadas chapadas (tons quantizados), nunca a foto em si
+  vec3 cb = toLin(texture2D(tPhoto, tuv, 4.5).rgb);
+  float Lb = max(dot(cb, vec3(.299,.587,.114)), 0.003);
+  float Lq = (floor(pow(Lb, 0.45) * 4. + 0.5 + (fbm2(iuv * 30. + uSeed) - .5) * .5) / 4.);
+  Lq = pow(clamp(Lq, 0.06, 1.), 2.2);
+  vec3 tint = cb / Lb;
+  tint = mix(vec3(1.), tint, 1.25);
+  vec3 wc = clamp(tint * Lq, 0., 1.);
+  wc = mix(wc, uPaper, 0.12) * (0.9 + 0.12 * fbm2(iuv * 55. + 7.)) * mix(vec3(1.), uPaper, 0.35);
+  wc = mix(wc, uPaper, uPaperWhite * smoothstep(0.82, 0.97, lum));
+  vec3 wash = wc * (1. - 0.4 * ring);
   vec3 col = mix(drawing, wash, m);
   // o traço permanece por cima e some aos poucos
-  col = mix(col, uInk, ink * m * 0.75 * (1. - uLineOut));
+  col = mix(col, uInk, ink * m * 0.9 * (1. - 0.4 * uLineOut));
+  col = mix(col, uInk, h * hk * m * 0.25);
   col = mix(uPaper, col, inside);
   // pessoas caminhando: silhuetas em nanquim com mancha de cor na roupa
   if (uWalk > 0.01) {

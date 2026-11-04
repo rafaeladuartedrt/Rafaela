@@ -8,10 +8,10 @@ prep() { # nome  regiões-para-desfocar...
   local n=$1; shift
   local args=()
   for r in "$@"; do args+=(-region "$r" -blur 0x9 +region); done
-  convert "$SRC/$n.jpg" -auto-orient "${args[@]}" -resize '2048x2048>' -quality 92 "$OUT/$n.jpg"
+  convert "$SRC/$n.jpg" -auto-orient "${args[@]}" -filter Lanczos -resize '3200x3200' -resize '4000x3000>' -quality 92 "$OUT/$n.jpg"
   # traço: lápis/nanquim tirado da própria foto (dodge) x contornos (canny)
-  convert "$OUT/$n.jpg" -colorspace Gray \( +clone -negate -blur 0x5 \) -compose ColorDodge -composite -level 50%,97% -gamma 0.8 "$OUT/_sk.png"
-  convert "$OUT/$n.jpg" -colorspace Gray -blur 0x1.2 -canny 0x1.2+8%+22% -morphology Dilate Disk:1.2 -blur 0x0.6 -negate "$OUT/_c1.png"
+  convert "$OUT/$n.jpg" -colorspace Gray \( +clone -negate -blur 0x9 \) -compose ColorDodge -composite -level 50%,97% -gamma 0.8 "$OUT/_sk.png"
+  convert "$OUT/$n.jpg" -colorspace Gray -blur 0x2.4 -canny 0x2+8%+22% -morphology Dilate Disk:2 -blur 0x1 -negate "$OUT/_c1.png"
   convert "$OUT/_sk.png" "$OUT/_c1.png" -compose Multiply -composite -quality 92 "$OUT/${n}_lines.jpg"
   rm -f "$OUT/_c1.png" "$OUT/_sk.png"
 }
