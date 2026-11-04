@@ -16,17 +16,17 @@ function revealUniforms(kind) {
 }
 
 const PROC = {
-  granite: `diffuseColor.rgb = vec3(0.7012, 0.6661, 0.5989);`,
-  travertine: `diffuseColor.rgb = vec3(0.8671, 0.7742, 0.6055);`,
-  blackgranite: `diffuseColor.rgb = vec3(0.0658, 0.0677, 0.0738);`,
-  glass: `diffuseColor.rgb = vec3(0.3440, 0.4878, 0.5295);`,
-  concrete: `diffuseColor.rgb = vec3(0.6121, 0.5732, 0.5054);`,
-  relief: `diffuseColor.rgb = vec3(0.6524, 0.5924, 0.4936);`,
-  alu: `diffuseColor.rgb = vec3(0.8434, 0.8122, 0.7519);`,
-  mullion: `diffuseColor.rgb = vec3(0.0415, 0.0430, 0.0478);`,
-  redgranite: `diffuseColor.rgb = vec3(0.8122, 0.1905, 0.0415);`,
+  granite: `diffuseColor.rgb = vec3(0.6592, 0.6253, 0.5732);`,
+  travertine: `diffuseColor.rgb = vec3(0.8913, 0.6524, 0.4423);`,
+  blackgranite: `diffuseColor.rgb = vec3(0.0446, 0.0430, 0.0546);`,
+  glass: `diffuseColor.rgb = vec3(0.8751, 0.1975, 0.0231);`,
+  concrete: `diffuseColor.rgb = vec3(0.6187, 0.5732, 0.5114);`,
+  relief: `diffuseColor.rgb = vec3(0.8122, 0.0564, 0.2801);`,
+  alu: `diffuseColor.rgb = vec3(0.8122, 0.0564, 0.2801);`,
+  mullion: `diffuseColor.rgb = vec3(0.0303, 0.0316, 0.0385);`,
+  redgranite: `diffuseColor.rgb = vec3(0.8122, 0.0892, 0.0210);`,
   pave: `diffuseColor.rgb = vec3(0.8832, 0.8122, 0.6800);`,
-  asphalt: `diffuseColor.rgb = vec3(0.5924, 0.5605, 0.4995);`,
+  asphalt: `diffuseColor.rgb = vec3(0.6524, 0.6121, 0.5480);`,
   bronze: `
     float pn = fbm3(vWPos * vec3(2.4, 0.8, 2.4));
     float streak = vnoise3(vWPos * vec3(11., 0.9, 11.));
@@ -99,7 +99,7 @@ export function mat(kind, opts = {}) {
           h = max(h, hatchL(fp, 0.785, 8.0, 0.08) * smoothstep(0.42, 0.52, dark));
           h = max(h, hatchL(fp, 2.36, 8.0, 0.07) * smoothstep(0.66, 0.76, dark));
           h = max(h, hatchL(fp, 0.2, 5.0, 0.08) * smoothstep(0.88, 0.96, dark));
-          vec3 paperC = mix(uPaper, uInk, h * uHatch * uHatchOn * 0.85);
+          vec3 paperC = mix(uPaper, uInk, h * uHatch * uHatchOn * 0.5);
           float f = uMode < .5 ? length(vWPos - uOrigin) / uRadius : dot(vWPos - uOrigin, uDir) / uRadius;
           float n = fbm3(vWPos * uNFreq * vec3(1., uStretch, 1.));
           f += (n - 0.5) * uNAmp;
@@ -110,8 +110,8 @@ export function mat(kind, opts = {}) {
           float ring = 0.;
           float gran = fbm3(vWPos * 0.9 + 4.) * .6 + vnoise3(vWPos * 6.) * .4;
           float band = mix(0.86, 1.0, smoothstep(0.3, 0.6, shade));
-          vec3 tone = mix(uPaper, diffuseColor.rgb, 0.85) * band;
-          float dens = 0.55 + 0.35 * gran;
+          vec3 tone = diffuseColor.rgb * band;
+          float dens = 0.72 + 0.28 * gran;
           vec3 col = mix(uPaper, tone, dens);
           gl_FragColor.rgb = mix(mix(paperC, uPaper, 0.0), col, m);
         }`);

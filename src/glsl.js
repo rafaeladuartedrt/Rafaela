@@ -20,7 +20,7 @@ float fbm2(vec2 p){ float a=.5, s=0.; for(int i=0;i<5;i++){ s+=a*vnoise2(p); p=p
 // recebe cor sRGB da referência e devolve tom chapado linear da ilustração
 export const ILLUS = /* glsl */`
 vec3 sl(vec3 c){ return pow(c, vec3(2.2)); }
-vec3 illus(vec3 c, float jit){
+vec3 illusV(vec3 c, float jit, float viv){
   float L = dot(c, vec3(.299,.587,.114));
   float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
   float sat = (mx - mn) / max(mx, 1e-3);
@@ -31,7 +31,13 @@ vec3 illus(vec3 c, float jit){
   // dourado / quente saturado -> laranja de destaque
   // pátina verde-azulada
   if (c.g > c.r + .03 && sat > .14 && L > .14) o = q < .32 ? slate : patina;
+  if (viv > .5) {
+    vec3 vor = sl(vec3(.94,.48,.18)), vmg = sl(vec3(.91,.27,.56));
+    if (q >= .2 && q < .4) o = vor;                 // vidros e sombras médias em laranja
+    else if (q >= .4 && q < .52) o = mix(grey, vmg, .55); // meios-tons em magenta suave
+  }
   // céu
   else if (c.b > c.r + .06 && L > .5) o = blue;
   return o;
-}`;
+}
+vec3 illus(vec3 c, float jit){ return illusV(c, jit, 0.); }`;

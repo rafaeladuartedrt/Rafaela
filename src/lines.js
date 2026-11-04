@@ -31,7 +31,7 @@ void main(){
   vec2 d = (sb - sa) * uRes; float L = length(d);
   vec2 dir = L > 1e-4 ? d / L : vec2(1., 0.);
   vec2 nrm = vec2(-dir.y, dir.x);
-  float taper = 0.45 + 0.55 * sin(3.14159 * clamp(position.x, 0., 1.));
+  float taper = 1.0;
   float w = max(iW * uPx * uWidth * taper, 0.6);
   vec2 off = nrm * position.y * w + dir * (position.x * 2. - 1.) * w * 0.5;
   c.xy += off / uRes * 2. * c.w * 0.5;
@@ -47,13 +47,10 @@ varying float vSide; varying float vVis; varying float vR; varying float vAlong;
 float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   if (vVis < 0.5) discard;
-  // pincelada: borda irregular, cerdas secas ao longo do traço, pressão maior no meio
-  float n1 = h12(vec2(floor(vAlong * 60. + vR * 13.), floor((vSide * .5 + .5) * 7.) + vR * 31.));
-  float wob = 0.12 * sin(vAlong * 23. + vR * 40.) + 0.08 * sin(vAlong * 57. + vR * 7.);
-  float edge = 1. - smoothstep(0.5 + wob, 0.95 + wob, abs(vSide));
-  float bristle = mix(1., smoothstep(0.15, 0.5, n1), 0.35 * smoothstep(0.2, 0.9, abs(vSide)));
-  float dryEnd = mix(1., smoothstep(0.0, 0.6, h12(gl_FragCoord.xy * 0.5 + vR)), smoothstep(0.75, 1.0, vAlong) * 0.6);
-  float a = uOpacity * edge * bristle * dryEnd * (0.9 + 0.1 * vR);
+  // pincelada contínua: borda levemente ondulada e estável (não muda de quadro para quadro)
+  float wob = 0.06 * sin(vAlong * 9. + vR * 40.);
+  float edge = 1. - smoothstep(0.62 + wob, 0.98, abs(vSide));
+  float a = uOpacity * edge;
   if (a < 0.01) discard;
   gl_FragColor = vec4(uColor, a);
 }`;

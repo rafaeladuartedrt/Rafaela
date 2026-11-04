@@ -8,7 +8,7 @@ import { setBlades } from './themis.js';
 import { setPhoto, setWalkers, makeCrowd } from './photoshots.js';
 import { updatePeople3D } from './people3d.js';
 
-export const FPS = 30, DURATION = 60;
+export const FPS = 30, DURATION = 64;
 
 // ---------- utilitários ----------
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -167,7 +167,7 @@ const shotDrawing = {
       if (p.userData.hull) { const u = p.userData.hull.material.uniforms; u.uRevealDir.value = 1; u.uRevealY.value = lerp(-3, 40, seg(t, st, st + 1.1)); }
     });
     for (const col of c.bld.pieces.columns) { const u = col.userData.hull.material.uniforms; u.uRevealDir.value = 1; u.uRevealY.value = lerp(-3, 9, seg(t, 3.2, 4.4)); }
-    G.uHatch.value = eO(seg(t, 6.0, 7.4));
+    G.uHatch.value = 0;
     c.people.progress = seg(t, 6.6, 7.7);
     eachLine(c.context, (l) => { l.progress = seg(t, 6.2, 7.9); l.opacity = 0.75; });
     c.themis.visible = false;
@@ -292,7 +292,12 @@ const shotBuild = {
     const ak = eO(seg(t, 18.4, 19.2)); P.annex.scale.y = Math.max(ak, 0.001); P.annex.visible = ak > 0.001;
     P.annex.userData.lines.contour.progress = seg(t, 18.4, 19.3);
     eachLine(c.context, (l) => { l.progress = seg(t, 19.2, 21.9); l.opacity = 0.65; });
-    G.uHatch.value = 0.55 + 0.45 * seg(t, 19, 21);
+    G.uHatch.value = 0;
+    // cor em aquarela entrando junto com os traços, de baixo para cima
+    for (const [k, a, b] of [['travertine', 16.0, 18.2], ['pave', 15.6, 18.5], ['blackgranite', 16.8, 18.4], ['granite', 17.2, 21.8], ['glass', 17.6, 21.6], ['mullion', 17.6, 21.6], ['alu', 19.8, 21.9], ['relief', 20.6, 21.9], ['concrete', 18.4, 19.8], ['redgranite', 18.4, 19.8], ['asphalt', 16.5, 21.0]]) {
+      const kk = seg(t, a, b);
+      rv(k, kk, [0, -6, 0], 46, { mode: 1, dir: [0, 1, 0], amp: 0.35, freq: 0.15 });
+    }
     const focus = V(op.pos).distanceTo(V(op.tgt));
     return { paper: [0, 0, 1.6, 1.6], global: { rake: 0.25 }, focus, aperture: t < 14.6 ? 0 : 0 };
   },
@@ -335,8 +340,8 @@ const shotMaterials = {
     const k = eSin(seg(t, d.t0, d.t1));
     look(c, L3(d.p0, d.p1, k), L3(d.g0, d.g1, k), d.fov);
     setSun(c, [0.55, 0.62, -0.55], 0xfff4e6, 2.1);
-    applyBuildingReveals(t);
-    G.uHatch.value = 0.45 * (1 - seg(t, 23, 26));
+    revealAll(1);
+    G.uHatch.value = 0;
     setLinesOpacity(c, 1);
     eachLine(c.context, (l) => { l.opacity = 0.65; });
     c.people.opacity = lerp(1, 0.6, seg(t, 24, 27));
@@ -558,6 +563,7 @@ function photoShot(name, P, at) {
       let draw = eO(seg(t, P.draw[0] - (P.pre ?? 0.35), P.draw[1]));
       if (P.back) { const b = seg(t, ...P.back); reveal *= 1 - eIO(b); }
       setPhoto(c.photo, {
+        viv: P.viv || 0, dens: P.dens ?? 0.55, shadeH: P.shadeH || 0,
         name: P.photo, view, rot: P.rot || 0, mode: P.mode ?? 0, seed: P.seed,
         draw, hatch: eO(seg(t, ...(P.hatch || P.draw.map((x) => x + 0.4)))),
         reveal, revealC: P.c, paperWhite: P.paperWhite || 0, real: P.real ? eIO(seg(t, ...P.real)) : 0, lineOut: eIO(seg(t, ...(P.lineOut || [P.reveal[1] - 0.3, P.reveal[1] + 0.6]))),
@@ -569,12 +575,12 @@ function photoShot(name, P, at) {
   };
 }
 const shotStudiesP = photoShot('studiesP', { photo: 'estudos', t0: 27.8, t1: 33.2, v0: [0.115, 0.5, 1.02], v1: [0.9, 0.5, 1.12], mode: 1, draw: [27.9, 31.8], hatch: [28.4, 32.2], reveal: [31.2, 32.9], c: [0.9, 0.45], lineOut: [32.4, 33.2], seed: 1, pre: 0, paperWhite: 1 });
-const shotThemisP = photoShot('themisP', { photo: 'themis_frontal', t0: 32.8, t1: 41.3, path: [[32.8, 0.5, 0.5, 1.0], [35.0, 0.52, 0.17, 2.6], [36.6, 0.49, 0.31, 2.3], [38.2, 0.51, 0.55, 2.0], [39.6, 0.5, 0.86, 2.4], [41.3, 0.5, 0.5, 1.05]], draw: [33.0, 35.6], hatch: [34.2, 36.8], reveal: [36.2, 40.0], c: [0.51, 0.18], lineOut: [39.5, 41], seed: 2 });
-const shotCabecaP = photoShot('cabecaP', { photo: 'themis_cabeca_icamento', t0: 41.0, t1: 42.4, path: [[41.0, 0.62, 0.45, 1.7], [42.4, 0.55, 0.5, 1.15]], mode: 2, draw: [41.0, 41.5], reveal: [41.3, 42.2], c: [0.62, 0.45], seed: 3 });
-const shotGuindP = photoShot('guindasteP', { photo: 'themis_guindaste', t0: 42.4, t1: 43.6, path: [[42.4, 0.25, 0.75, 2.2], [43.6, 0.72, 0.42, 1.6]], mode: 1, draw: [42.4, 42.9], reveal: [42.7, 43.5], c: [0.78, 0.4], seed: 4 });
-const shotIcamP = photoShot('icamentoP', { photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, path: [[43.6, 0.5, 0.75, 2.0], [44.8, 0.5, 0.42, 1.3]], mode: 2, draw: [43.6, 44.1], reveal: [43.9, 44.7], c: [0.5, 0.72], seed: 5 });
-const shotFachP = photoShot('fachadaP', { photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, path: [[44.8, 0.47, 0.5, 2.4], [46.6, 0.5, 0.5, 1.0]], mode: 0, draw: [44.8, 45.4], reveal: [45.1, 46.3], c: [0.48, 0.5], seed: 6 });
-const shotFixP = photoShot('fixacaoP', { photo: 'themis_fixacao', t0: 46.6, t1: 48.0, path: [[46.6, 0.6, 0.7, 1.3], [48.0, 0.65, 0.3, 2.3]], mode: 2, draw: [46.6, 47.1], reveal: [46.85, 47.8], c: [0.6, 0.65], seed: 7 });
+const shotThemisP = photoShot('themisP', { dens: 0.92, shadeH: 0.4, photo: 'themis_frontal', t0: 32.8, t1: 41.3, path: [[32.8, 0.5, 0.5, 1.0], [35.0, 0.52, 0.17, 2.6], [36.6, 0.49, 0.31, 2.3], [38.2, 0.51, 0.55, 2.0], [39.6, 0.5, 0.86, 2.4], [41.3, 0.5, 0.5, 1.05]], draw: [33.0, 35.6], hatch: [34.2, 36.8], reveal: [36.2, 40.0], c: [0.51, 0.18], lineOut: [39.5, 41], seed: 2 });
+const shotCabecaP = photoShot('cabecaP', { dens: 0.92, shadeH: 0.4, photo: 'themis_cabeca_icamento', t0: 41.0, t1: 42.4, path: [[41.0, 0.62, 0.45, 1.7], [42.4, 0.55, 0.5, 1.15]], mode: 2, draw: [41.0, 41.5], reveal: [41.3, 42.2], c: [0.62, 0.45], seed: 3 });
+const shotGuindP = photoShot('guindasteP', { dens: 0.92, shadeH: 0.4, photo: 'themis_guindaste', t0: 42.4, t1: 43.6, path: [[42.4, 0.25, 0.75, 2.2], [43.6, 0.72, 0.42, 1.6]], mode: 1, draw: [42.4, 42.9], reveal: [42.7, 43.5], c: [0.78, 0.4], seed: 4 });
+const shotIcamP = photoShot('icamentoP', { dens: 0.92, shadeH: 0.4, photo: 'themis_icamento_frontal', t0: 43.6, t1: 44.8, path: [[43.6, 0.5, 0.75, 2.0], [44.8, 0.5, 0.42, 1.3]], mode: 2, draw: [43.6, 44.1], reveal: [43.9, 44.7], c: [0.5, 0.72], seed: 5 });
+const shotFachP = photoShot('fachadaP', { dens: 0.92, shadeH: 0.4, photo: 'themis_icamento_fachada', t0: 44.8, t1: 46.6, path: [[44.8, 0.47, 0.5, 2.4], [46.6, 0.5, 0.5, 1.0]], mode: 0, draw: [44.8, 45.4], reveal: [45.1, 46.3], c: [0.48, 0.5], seed: 6 });
+const shotFixP = photoShot('fixacaoP', { dens: 0.92, shadeH: 0.4, photo: 'themis_fixacao', t0: 46.6, t1: 48.0, path: [[46.6, 0.6, 0.7, 1.3], [48.0, 0.65, 0.3, 2.3]], mode: 2, draw: [46.6, 47.1], reveal: [46.85, 47.8], c: [0.6, 0.65], seed: 7 });
 // giro em volta do prédio ilustrado, com a Themis desenhada na empena e pessoas caminhando
 const shotGiro = {
   name: 'giro',
@@ -604,9 +610,9 @@ const shotGiro = {
     return { paper: [0, 0, 1.6, 1.6], global: { rake: 0.15, vig: 0.2 } };
   },
 };
-const shotBaixaP2 = photoShot('baixaP2', { photo: 'predio_vista_baixa', t0: 48.0, t1: 50.8, path: [[48.0, 0.42, 0.86, 2.0], [49.4, 0.4, 0.62, 1.5], [50.8, 0.3, 0.42, 2.0]], mode: 0, draw: [48.0, 48.9], hatch: [48.4, 49.4], reveal: [48.8, 50.4], c: [0.4, 0.8], seed: 10, pre: 0.5 });
-const shotContraP2 = photoShot('contraP2', { photo: 'predio_contraplongee', t0: 50.8, t1: 53.4, path: [[50.8, 0.25, 0.62, 2.1], [52.0, 0.3, 0.3, 1.9], [53.4, 0.7, 0.48, 1.7]], mode: 1, draw: [50.8, 51.6], hatch: [51.1, 52.0], reveal: [51.5, 53.0], c: [0.3, 0.5], seed: 8, pre: 0.5 });
-const shotThemisP2 = photoShot('themisP2', { photo: 'themis_frontal', t0: 53.4, t1: 57.8, path: [[53.4, 0.5, 0.86, 2.2], [54.8, 0.5, 0.36, 2.4], [56.0, 0.52, 0.17, 3.0], [57.8, 0.5, 0.45, 1.15]], mode: 2, draw: [53.4, 53.9], reveal: [53.6, 54.6], c: [0.5, 0.6], lineOut: [0, 0.01], real: [55.9, 57.4], seed: 2, pre: 0.6 });
+const shotBaixaP2 = photoShot('baixaP2', { viv: 1, dens: 0.85, photo: 'predio_vista_baixa', t0: 48.0, t1: 50.8, path: [[48.0, 0.42, 0.86, 2.0], [49.4, 0.4, 0.62, 1.5], [50.8, 0.3, 0.42, 2.0]], mode: 0, draw: [48.0, 48.9], hatch: [998, 999], reveal: [48.3, 49.6], c: [0.4, 0.8], seed: 10, pre: 0.5 });
+const shotContraP2 = photoShot('contraP2', { viv: 1, dens: 0.85, photo: 'predio_contraplongee', t0: 50.8, t1: 53.4, path: [[50.8, 0.25, 0.62, 2.1], [52.0, 0.3, 0.3, 1.9], [53.4, 0.7, 0.48, 1.7]], mode: 1, draw: [50.8, 51.6], hatch: [998, 999], reveal: [51.1, 52.4], c: [0.3, 0.5], seed: 8, pre: 0.5 });
+const shotThemisP2 = photoShot('themisP2', { dens: 0.92, shadeH: 0.4, photo: 'themis_frontal', t0: 53.4, t1: 57.8, path: [[53.4, 0.5, 0.86, 2.2], [54.8, 0.5, 0.36, 2.4], [56.0, 0.52, 0.17, 3.0], [57.8, 0.5, 0.45, 1.15]], mode: 2, draw: [53.4, 53.9], reveal: [53.6, 54.6], c: [0.5, 0.6], lineOut: [0, 0.01], real: [55.9, 57.4], seed: 2, pre: 0.6 });
 const shotPanorama = photoShot('panorama', { photo: 'predio_vista_alta', t0: 57.8, t1: 60, path: [[57.8, 0.34, 0.4, 3.0], [59.0, 0.36, 0.45, 1.3], [60.0, 0.56, 0.5, 1.0]], mode: 2, draw: [57.8, 57.81], reveal: [57.8, 57.81], c: [0.34, 0.4], lineOut: [0, 0.01], real: [57.0, 57.6], seed: 9, pre: 0 });
 const shotFinalP = shotPanorama;
 
@@ -616,7 +622,11 @@ const sGuind = photoShot('guind2', shotGuindP.P, 33.0), sCab = photoShot('cab2',
 const sFach = photoShot('fach2', shotFachP.P, 37.2), sFix = photoShot('fix2', shotFixP.P, 39.0);
 const sThemis = photoShot('themis2', { ...shotThemisP.P, t1: 46.4, path: [[32.8, 0.5, 0.5, 1.0], [34.6, 0.52, 0.17, 2.6], [36.0, 0.49, 0.31, 2.3], [37.4, 0.51, 0.62, 2.0], [38.4, 0.5, 0.5, 1.05]], draw: [33.0, 35.0], hatch: [33.8, 35.8], reveal: [35.2, 37.6], lineOut: [37.4, 38.4] }, 40.8);
 const sBaixa = photoShot('baixa3', shotBaixaP2.P, 46.4), sContra = photoShot('contra3', shotContraP2.P, 49.0);
-const sThemisR = photoShot('themisR', { ...shotThemisP2.P, path: [[53.4, 0.5, 0.36, 2.4], [55.0, 0.52, 0.17, 3.0], [57.8, 0.5, 0.45, 1.15]], draw: [53.4, 53.7], reveal: [53.4, 54.0], real: [55.4, 57.2] }, 51.6);
+const sThemisR = photoShot('themisR', { ...shotThemisP2.P, t1: 57.4, path: [[53.4, 0.5, 0.36, 2.4], [55.0, 0.52, 0.17, 3.0], [57.4, 0.5, 0.45, 1.1]], draw: [53.4, 53.7], reveal: [53.4, 54.0], real: [55.9, 57.1] }, 51.6);
+const realShot = (name, photo, t0, t1, path) => photoShot(name, { photo, t0, t1, path, mode: 2, draw: [t0 - 1, t0 - 0.9], reveal: [t0 - 1, t0 - 0.99], c: [0.5, 0.5], lineOut: [0, 0.01], real: [t0 - 1, t0 - 0.9], seed: 3, pre: 0 });
+const sAlta = realShot('altaR', 'predio_vista_alta', 55.6, 59.4, [[55.6, 0.34, 0.42, 2.6], [57.2, 0.38, 0.46, 1.1], [59.4, 0.62, 0.5, 1.0]]);
+const sBaixaR = realShot('baixaR', 'predio_vista_baixa', 59.2, 62.0, [[59.2, 0.28, 0.45, 1.25], [62.0, 0.56, 0.5, 1.0]]);
+const sContraR = realShot('contraR', 'predio_contraplongee', 61.8, 64.0, [[61.8, 0.78, 0.5, 1.2], [64.0, 0.6, 0.46, 1.0]]);
 const SHOTS = [
   [0.0, 8.0, shotDrawing],
   [8.0, 11.0, shotSection],
@@ -632,8 +642,10 @@ const SHOTS = [
   [40.8, 46.4, sThemis],
   [46.4, 49.0, sBaixa],
   [49.0, 51.6, sContra],
-  [51.6, 56.0, sThemisR],
-  [56.0, 60.0, photoShot('panorama2', { ...shotPanorama.P, path: [[57.8, 0.34, 0.4, 3.0], [59.2, 0.36, 0.45, 1.3], [61.8, 0.6, 0.5, 1.0]], real: [57.0, 57.6] }, 56.0)],
+  [51.6, 55.6, sThemisR],
+  [55.6, 59.4, sAlta],
+  [59.4, 62.0, sBaixaR],
+  [62.0, 64.0, sContraR],
 ];
 const TRANS = [
   [10.82, 11.18, 1, 2, [0.5, 0.62]],
@@ -644,7 +656,9 @@ const TRANS = [
   [46.2, 46.6, 11, 2, [0.5, 0.5]],
   [48.8, 49.2, 12, 2, [0.5, 0.5]],
   [51.4, 51.8, 13, 2, [0.5, 0.5]],
-  [55.7, 56.3, 14, 2, [0.5, 0.5]],
+  [55.3, 55.9, 14, 2, [0.5, 0.5]],
+  [59.2, 59.6, 15, 2, [0.5, 0.5]],
+  [61.8, 62.2, 16, 2, [0.5, 0.5]],
 ];
 export function evaluate(t) {
   const force = typeof window !== 'undefined' && window.__forceShot;
