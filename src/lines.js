@@ -47,9 +47,13 @@ varying float vSide; varying float vVis; varying float vR; varying float vAlong;
 float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   if (vVis < 0.5) discard;
-  float edge = 1. - smoothstep(0.55, 1.0, abs(vSide));
-  float dry = 0.82 + 0.18 * h12(floor(gl_FragCoord.xy * 0.7) + vR * 91.);
-  float a = uOpacity * edge * dry * (0.85 + 0.15 * vR);
+  // pincelada: borda irregular, cerdas secas ao longo do traço, pressão maior no meio
+  float n1 = h12(vec2(floor(vAlong * 60. + vR * 13.), floor((vSide * .5 + .5) * 7.) + vR * 31.));
+  float wob = 0.12 * sin(vAlong * 23. + vR * 40.) + 0.08 * sin(vAlong * 57. + vR * 7.);
+  float edge = 1. - smoothstep(0.5 + wob, 0.95 + wob, abs(vSide));
+  float bristle = mix(1., smoothstep(0.15, 0.5, n1), 0.35 * smoothstep(0.2, 0.9, abs(vSide)));
+  float dryEnd = mix(1., smoothstep(0.0, 0.6, h12(gl_FragCoord.xy * 0.5 + vR)), smoothstep(0.75, 1.0, vAlong) * 0.6);
+  float a = uOpacity * edge * bristle * dryEnd * (0.9 + 0.1 * vR);
   if (a < 0.01) discard;
   gl_FragColor = vec4(uColor, a);
 }`;

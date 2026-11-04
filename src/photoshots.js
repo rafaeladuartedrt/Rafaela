@@ -49,7 +49,8 @@ void main(){
   key += (fbm2(iuv * 7. + uSeed) - .5) * .28;
   float drawn = smoothstep(0., 0.04, uDraw * 1.3 - 0.15 - key);
   // traço com leve tremor de tinta
-  float ink = smoothstep(0.18, 0.62, line) * drawn;
+  float lineB = 1. - dot(texture2D(tLines, tuv, 1.2).rgb, vec3(.333));
+  float ink = smoothstep(0.1, 0.42, max(line, lineB * 1.15)) * drawn;
   ink *= 0.82 + 0.18 * vnoise2(gl_FragCoord.xy * 0.6 / uPx + uSeed);
   // hachura pela luminância da foto (estilo das pranchas LICVRGO)
   vec2 fp = gl_FragCoord.xy / uPx;
@@ -59,7 +60,7 @@ void main(){
   h = max(h, hatchL(fp, 2.36, 7.5, 0.07) * smoothstep(0.62, 0.74, dark));
   h = max(h, hatchL(fp, 0.2, 5.0, 0.08) * smoothstep(0.8, 0.9, dark));
   float hk = smoothstep(0., 0.05, uHatch * 1.3 - 0.15 - key);
-  vec3 drawing = mix(uPaper, uInk, clamp(ink + h * hk * 0.55, 0., 1.) * 0.92);
+  vec3 drawing = mix(uPaper, uInk, clamp(ink + h * hk * 0.45, 0., 1.) * 0.92);
   // revelação da foto por mancha de aquarela
   float f = length((iuv - uRevealC) * vec2(uIA, 1.));
   float n = fbm2(iuv * 2.5 + uSeed * 1.7) * .15;
@@ -73,11 +74,15 @@ void main(){
   // no final o traço vira a imagem real
   float rk = smoothstep(0., 0.35, uReal * 1.35 - 0.2 - (fbm2(iuv * 3. + 9.) * .25 + (1. - iuv.y) * .1));
   wc = mix(wc, photo, rk);
+  // aquarela suave sobre o papel (cores claras, sem marcações)
+  float gr = fbm2(iuv * 9. + uSeed) * .6 + vnoise2(iuv * 60.) * .4;
+  vec3 soft = mix(uPaper, wc, 0.55 + 0.3 * gr);
+  wc = mix(soft, wc, rk);
   vec3 wash = wc;
   vec3 col = mix(drawing, wash, m);
   // o traço permanece por cima e some aos poucos
   col = mix(col, uInk, ink * m * 0.9 * (1. - 0.4 * uLineOut) * (1. - uReal));
-  col = mix(col, uInk, h * hk * m * 0.25 * (1. - uReal));
+  
   col = mix(uPaper, col, inside);
   // pessoas caminhando: silhuetas em nanquim com mancha de cor na roupa
   if (uWalk > 0.01) {

@@ -97,7 +97,7 @@ export function buildBuilding() {
     const g = new THREE.Group(); g.position.set(x, gy, z); g.name = 'col' + i;
     const cg = new THREE.CylinderGeometry(colR, colR, h, 40, 1, true); cg.translate(0, h / 2, 0);
     const m = new THREE.Mesh(cg, mat('travertine')); m.castShadow = m.receiveShadow = true; g.add(m);
-    const hull = new THREE.Mesh(cg, hullMaterial({ width: 1.3 })); g.add(hull);
+    const hull = new THREE.Mesh(cg, hullMaterial({ width: 2.6 })); g.add(hull);
     const segs = [...ring(0, 0.02, 0, colR, 32, 1.4), ...ring(0, h - 0.02, 0, colR, 32, 1.4)];
     for (let y = 1.2; y < h - 0.3; y += 1.2) segs.push(...ring(0, y, 0, colR + 0.002, 32, 0.6));
     // caneluras verticais finas (como no desenho do hall)
@@ -171,7 +171,7 @@ export function buildBuilding() {
     pivot.add(meshOf(alu, mat('alu')));
     // linhas
     const contour = [];
-    contour.push(...boxEdges(L2 - F, y0, -D2, L2, y1, D2, 2.0), ...boxEdges(-L2, y0, -D2, -L2 + F, y1, D2, 2.0));
+    contour.push(...boxEdges(L2 - F, y0, -D2, L2, y1, D2, 3.0), ...boxEdges(-L2, y0, -D2, -L2 + F, y1, D2, 3.0));
     for (const s of [1, -1]) {
       const z = s * (D2 - 0.1);
       contour.push({ a: [-L2 + F, y0 + 0.45, z], b: [L2 - F, y0 + 0.45, z], w: 1.6 }, { a: [-L2 + F, y0, z], b: [L2 - F, y0, z], w: 1.4 });
@@ -216,7 +216,7 @@ export function buildBuilding() {
       lcs.push(...ring(x, y0 + 0.46, s * 9.9, 0.5, 24, 1.1), ...ring(x, y1 - 0.01, s * 9.9, 0.5, 24, 1.1));
     }
     const cm = meshOf(colG, mat('travertine')); pivot.add(cm);
-    const ch = new THREE.Mesh(cm.geometry, hullMaterial({ width: 1.2 })); pivot.add(ch);
+    const ch = new THREE.Mesh(cm.geometry, hullMaterial({ width: 2.4 })); pivot.add(ch);
     // murais em relevo "Terra" (leste) e "Povo" (oeste)
     const murals = [];
     const contourM = [];
@@ -234,7 +234,7 @@ export function buildBuilding() {
       contourM.push(...reliefContours(hf, (u, v) => [xc + s * (u - 0.5) * W, y0 + 0.5 + v * H, s * (back + 0.25)]));
       contourM.push(...polyline([[xc - W / 2, y0 + 0.5, s * (back + 0.2)], [xc + W / 2, y0 + 0.5, s * (back + 0.2)], [xc + W / 2, y0 + 0.5 + H, s * (back + 0.2)], [xc - W / 2, y0 + 0.5 + H, s * (back + 0.2)]], 1.2, true));
     }
-    const contour = [...boxEdges(L2 - F, y0, -D2, L2, y1, D2, 2.0), ...boxEdges(-L2, y0, -D2, -L2 + F, y1, D2, 2.0), ...lcs];
+    const contour = [...boxEdges(L2 - F, y0, -D2, L2, y1, D2, 3.0), ...boxEdges(-L2, y0, -D2, -L2 + F, y1, D2, 3.0), ...lcs];
     for (const s of [1, -1]) contour.push({ a: [-L2 + F, y0 + 0.45, s * (D2 - 0.1)], b: [L2 - F, y0 + 0.45, s * (D2 - 0.1)], w: 1.6 }, { a: [-L2 + F, y1, s * back], b: [L2 - F, y1, s * back], w: 1.0 }, { a: [-L2 + F, y0 + 0.45, s * back], b: [L2 - F, y0 + 0.45, s * back], w: 1.0 });
     const grid = [];
     for (const s of [1, -1]) for (let x = -L2 + F + 1.5; x < L2 - F; x += 1.5) grid.push({ a: [x, y0 + 0.45, s * (back + 0.07)], b: [x, y1, s * (back + 0.07)], w: 0.6 });

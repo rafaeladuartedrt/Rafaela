@@ -29,9 +29,8 @@ vec3 illus(vec3 c, float jit){
   float q = L + jit * 0.06;
   vec3 o = q < .2 ? ink : (q < .4 ? slate : (q < .63 ? grey : cream));
   // dourado / quente saturado -> laranja de destaque
-  if (c.r - c.b > .16 && sat > .32 && L > .3) o = orange;
   // pátina verde-azulada
-  else if (c.g > c.r + .03 && sat > .14 && L > .14) o = q < .32 ? slate : patina;
+  if (c.g > c.r + .03 && sat > .14 && L > .14) o = q < .32 ? slate : patina;
   // céu
   else if (c.b > c.r + .06 && L > .5) o = blue;
   return o;

@@ -105,16 +105,15 @@ export function mat(kind, opts = {}) {
           f += (n - 0.5) * uNAmp;
           float v = (uReveal * (1. + uNAmp + 0.1) - 0.5 * uNAmp - 0.05 - f) * uRadius;
           v += (fbm3(vWPos * 1.9 + 3.) - 0.5) * 0.9 + (vnoise3(vWPos * 7.) - 0.5) * 0.18;
-          float m = smoothstep(0., 0.06, v);
-          float ring = smoothstep(0., 0.05, v) * (1. - smoothstep(0.05, 0.45, v));
-          // ilustração chapada: duas ou três faixas de tom por orientação/sombra, sem textura
-          float band = mix(0.64, 0.82, smoothstep(0.3, 0.36, shade));
-          band = mix(band, 1.0, smoothstep(0.6, 0.66, shade));
-          vec3 col = diffuseColor.rgb * band;
-          float hs = hatchL(gl_FragCoord.xy / uPx, 0.785, 6.0, 0.06) * (1. - smoothstep(0.3, 0.36, shade));
-          col = mix(col, uInk, hs * 0.08);
-          col = mix(col, uInk, ring * 0.5);
-          gl_FragColor.rgb = mix(paperC, col, m);
+          // aquarela suave: mancha de borda macia, sem contorno escuro; papel aparece por baixo
+          float m = smoothstep(0., 1.6, v);
+          float ring = 0.;
+          float gran = fbm3(vWPos * 0.9 + 4.) * .6 + vnoise3(vWPos * 6.) * .4;
+          float band = mix(0.86, 1.0, smoothstep(0.3, 0.6, shade));
+          vec3 tone = mix(uPaper, diffuseColor.rgb, 0.85) * band;
+          float dens = 0.55 + 0.35 * gran;
+          vec3 col = mix(uPaper, tone, dens);
+          gl_FragColor.rgb = mix(mix(paperC, uPaper, 0.0), col, m);
         }`);
   };
   m.customProgramCacheKey = () => kind + (useAO ? 'ao' : '');
