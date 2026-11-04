@@ -113,8 +113,11 @@ function project(c, p) { const v = V(p).project(c.cam); return [(v.x + 1) / 2, (
 // =====================================================================
 // ATO 1 — O TRAÇO
 // =====================================================================
-const DRAW_CAM = { pos: [57, 1.2, 41], tgt: [-3, 17.5, -3], fov: 42 };
+const DRAW_CAM_V = { pos: [57, 1.2, 41], tgt: [-3, 17.5, -3], fov: 42 };
+const DRAW_CAM_H = { pos: [66, 3.0, 49], tgt: [0, 18.0, 0], fov: 41 };
+let DRAW_CAM = DRAW_CAM_V;
 function drawCenter(t, c) {
+  DRAW_CAM = c.W > c.H ? DRAW_CAM_H : DRAW_CAM_V;
   // centro e zoom do "olhar" sobre a prancha
   if (!c._p0) { look(c, DRAW_CAM.pos, DRAW_CAM.tgt, DRAW_CAM.fov); c._p0 = project(c, [27, 8, 11.05]); c._p1 = project(c, [14, 8, 11.05]); }
   const p0 = c._p0, p1 = c._p1;
@@ -134,7 +137,7 @@ const shotDrawing = {
   apply(c, tl, t) {
     reset(c);
     const ex = extras;
-    c.bld.root.visible = true; c.context.visible = true; c.people.visible = true;
+    c.bld.root.visible = true; c.context.visible = c.W <= c.H; c.people.visible = true;
     look(c, DRAW_CAM.pos, DRAW_CAM.tgt, DRAW_CAM.fov);
     setSun(c, [0.55, 0.75, 0.45]);
     const [Z, cx, cy] = drawCenter(t, c);
