@@ -74,64 +74,63 @@ const Scene: React.FC = () => {
 
   // ---- problema: "Ficou de fora dessa conversa?" pulsando com a batida ----
   const live = f < CUT ? beat(f) : 0;
-  // ---- bloco sólido de "conversa?" ----
+  // ---- palavras: cada uma entra na batida, grande e inclinada, e encaixa com impacto ----
+  const words: React.ReactNode[] = [];
+  const ENTRY = [6, 12, 18, 26]; // Ficou, de, fora, dessa
+  const OBJ_IN = 34; // bloco + "conversa?" como um único objeto
+  let wi = 0;
+  T2.F1.lines.forEach((ln, li) => {
+    const groups = new Map<number, typeof ln.letters>();
+    ln.letters.forEach((l) => groups.set(l.word, [...(groups.get(l.word) ?? []), l]));
+    groups.forEach((ls, w) => {
+      if (li === 1 && w === 1) return; // "conversa?" é desenhada junto com o bloco
+      const k = wi++;
+      const st = ENTRY[k];
+      if (f < st) return;
+      const cx = (ls[0].bb[0] + ls[ls.length - 1].bb[2]) / 2;
+      const cy = (ls[0].bb[1] + ls[0].bb[3]) / 2;
+      const p = pr(f, st, st + 9, expoOut);
+      const land = Math.sin(Math.PI * pr(f, st + 6, st + 14, expoIO));
+      const sc = lerp(2.3, 1, p);
+      const dir = k % 2 === 0 ? 1 : -1;
+      const rot = lerp(12 * dir, 0, p);
+      const pulse = 1 + 0.035 * live;
+      words.push(
+        <g key={`${li}-${w}`} transform={`translate(${cx} ${cy}) rotate(${rot}) scale(${sc * pulse * (1 + 0.07 * land)} ${sc * pulse * (1 - 0.1 * land)}) translate(${-cx} ${-cy})`}>
+          {ls.map((l, i) => <path key={i} d={l.d} fill={BLUE} />)}
+        </g>,
+      );
+    });
+  });
+  // objeto único: bloco azul + "conversa?" em amarelo (entram, pulsam e somem juntos)
   let pill: React.ReactNode = null;
-  let pillClip: React.ReactNode = null;
   {
     const ln = T2.F1.lines[1];
     const wl = ln.letters.filter((x) => x.word === 1);
-    const st = 14 + ln.letters.indexOf(wl[0]) * 0.7;
-    if (f >= st) {
+    if (f >= OBJ_IN) {
       const x1 = wl[0].bb[0] - 24;
       const x2 = wl[wl.length - 1].bb[2] + 24;
       const y1 = ln.y - wl[0].size * 0.78;
       const y2 = ln.y + wl[0].size * 0.3;
       const cx = (x1 + x2) / 2;
       const cy = (y1 + y2) / 2;
-      const inP = pr(f, st - 2, st + 10, expoOut);
-      const extra = 1 + 0.05 * live;
+      const p = pr(f, OBJ_IN, OBJ_IN + 12, expoOut);
+      const over = 0.14 * Math.sin(Math.PI * pr(f, OBJ_IN + 4, OBJ_IN + 16, expoIO));
+      const inS = lerp(0.2, 1, p) + over;
+      const inR = lerp(-18, 0, p);
+      const pulse = 1 + 0.06 * live;
       const flat = lerp(1, 11 / (y2 - y1), pr(f, CUT, CUT + 7, expoOut));
       const gone = 1 - pr(f, CUT + 9, CUT + 22, expoIn);
       if (gone > 0.001) {
-        const h = (y2 - y1) * flat * extra * inP;
-        const w = (x2 - x1) * extra * gone * lerp(0.4, 1, inP);
-        pill = <rect x={cx - w / 2} y={cy - h / 2} width={w} height={h} rx={Math.min(h, w) / 2} fill={BLUE} />;
-        pillClip = (
-          <clipPath id="pillc">
-            <rect x={cx - w / 2} y={cy - h / 2} width={w} height={h} rx={Math.min(h, w) / 2} />
-          </clipPath>
+        pill = (
+          <g transform={`translate(${cx} ${cy}) rotate(${inR}) scale(${inS * pulse * gone} ${inS * pulse * flat}) translate(${-cx} ${-cy})`}>
+            <rect x={x1} y={y1} width={x2 - x1} height={y2 - y1} rx={(y2 - y1) / 2} fill={BLUE} />
+            {wl.map((l, i) => <path key={i} d={l.d} fill={ACCENT} />)}
+          </g>
         );
       }
     }
   }
-
-  const words: React.ReactNode[] = [];
-  T2.F1.lines.forEach((ln, li) => {
-    const cy = (ln.bb[1] + ln.bb[3]) / 2;
-    const ls = 1 + 0.035 * live;
-    ln.letters.forEach((l, i) => {
-      const st = (li === 0 ? 8 : 14) + i * 0.7;
-      if (f < st) return;
-      const p = pr(f, st, st + 14);
-      const isConversa = li === 1 && l.word === 1;
-      let tr = `translate(0 ${(1 - p) * l.size * 1.3}) translate(540 ${cy}) scale(${ls}) translate(-540 ${-cy})`;
-      if (isConversa) {
-        const wl = ln.letters.filter((x) => x.word === 1);
-        const wx = (wl[0].bb[0] + wl[wl.length - 1].bb[2]) / 2;
-        const extra = 1 + 0.05 * live;
-        // achata até virar uma linha e depois se recolhe até sumir
-        const flat = lerp(1, 0.07, pr(f, CUT, CUT + 7, expoOut));
-        const gone = 1 - pr(f, CUT + 9, CUT + 22, expoIn);
-        if (gone <= 0.001) return;
-        tr += ` translate(${wx} ${ln.y - l.size * 0.25}) scale(${extra * gone} ${extra * flat}) translate(${-wx} ${-(ln.y - l.size * 0.25)})`;
-      }
-      words.push(
-        <g key={`${li}-${i}`} clipPath={isConversa ? (f < CUT ? 'url(#pillc)' : undefined) : `url(#F1c${li})`}>
-          <path d={l.d} fill={isConversa ? ACCENT : BLUE} transform={tr} />
-        </g>,
-      );
-    });
-  });
 
   // ---- alto-falante cortado ----
   const spkOut = 1 - pr(f, CUT + 6, CUT + 14, expoIn);
@@ -260,7 +259,6 @@ const Scene: React.FC = () => {
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
       <defs>
         {[0, 1].map((li) => lineClip('F1', li, `F1c${li}`))}
-        {pillClip}
         <clipPath id="rise"><rect x={-20} y={riseTop} width={1120} height={2000} /></clipPath>
       </defs>
       <rect width={1080} height={1920} fill={LIGHT} />
