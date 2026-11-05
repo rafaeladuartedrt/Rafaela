@@ -91,7 +91,7 @@ const Scene: React.FC = () => {
   const f = useCurrentFrame();
   const band = 1100 * pr(f, 28, 44, expoIO); // faixa que se abre a partir de "a sua"
   const wipe = 2400 * pr(f, IMPACT, IMPACT + 18, expoIO); // círculo a partir do ponto
-  const portal = pr(f, 100, 114, expoIn);
+  const portal = 0; // o ponto não vira mais portal: quem leva à próxima cena é a seta
   const post = f >= 114;
 
   // ---- SETA: acima do bloco, olhando a frase; acompanha a queda do ponto e se assusta ----
@@ -116,6 +116,16 @@ const Scene: React.FC = () => {
     ay = HY - 60 * t;
     stretch = 1 + 0.12 * t - 0.07 * Math.sin(Math.PI * pr(f, 76, 82, expoIO));
     rot = lerp(-125, -150, pr(f, IMPACT, 80, expoIO));
+  }
+  // aproximação: olha para quem assiste, recua tomando impulso e avança contra a câmera
+  if (f >= 90 && f < 114) {
+    const back = pr(f, 90, 98, expoOut) * (1 - pr(f, 98, 100, expoIn));
+    const go = pr(f, 98, 112, expoIn);
+    ax = lerp(HX, 560, go);
+    ay = lerp(HY, 1000, go) - 30 * back;
+    rot = lerp(-150, -130, pr(f, 90, 98)) + 125 * go;
+    sc = 1.6 * (1 - 0.15 * back) * lerp(1, 48, go);
+    stretch = 1 - 0.06 * back + 0.08 * Math.sin(Math.PI * go);
   }
   const inC = Math.hypot(ax - DOT_C[0], ay - DOT_C[1]) < wipe;
   const inB = !inC && Math.abs(ay - BAND_Y) < band;
@@ -179,7 +189,8 @@ const Scene: React.FC = () => {
         </>
       )}
       {gestures}
-      {f >= 20 && (portal < 0.6 || post) ? <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={post ? BLUE : inB ? BLUE : ACCENT} /> : null}
+      {f >= 112 && !post ? <rect width={1080} height={1920} fill={ACCENT} /> : null}
+      {f >= 20 && !(f >= 112 && !post) ? <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={post ? BLUE : inB ? BLUE : ACCENT} /> : null}
     </svg>
   );
 };
