@@ -58,7 +58,7 @@ const wordsOf = (id: string): W[] => {
 };
 const WA = wordsOf('A1');
 const WB = wordsOf('A2');
-const WORD_AD = WA[1];
+const WORD_AD = WA.find((w) => w.letters[0].color === 'O')!; // AUDIODESCRIÇÃO,
 const DOT_LAST = WA[WA.length - 1].letters[WA[WA.length - 1].letters.length - 1]; // ponto final de "vê."
 const AD_WORD_C: [number, number] = [(WORD_AD.letters[0].bb[0] + WORD_AD.letters[WORD_AD.letters.length - 1].bb[2]) / 2, (WORD_AD.letters[0].bb[1] + WORD_AD.letters[0].bb[3]) / 2];
 
@@ -322,7 +322,7 @@ const Scene: React.FC = () => {
           ) : (
             WA.map((w, k) => {
               const n = WB[k];
-              const t = pr(f, REORG + k * 2.5, REORG + k * 2.5 + 20, expoIO);
+              const t = pr(f, REORG + (WA.length - 1 - k) * 2.5, REORG + (WA.length - 1 - k) * 2.5 + 20, expoIO); // de baixo para cima
               const sc = lerp(1, n.size / w.size, t);
               const x = lerp(w.ox, n.ox, t);
               const y = lerp(w.oy, n.oy, t);
@@ -342,7 +342,7 @@ const Scene: React.FC = () => {
         const w = WA[WA.length - 1];
         const n = WB[WB.length - 1];
         const k = WA.length - 1;
-        const t = pr(f, REORG + k * 2.5, REORG + k * 2.5 + 20, expoIO);
+        const t = pr(f, REORG + (WA.length - 1 - k) * 2.5, REORG + (WA.length - 1 - k) * 2.5 + 20, expoIO); // de baixo para cima
         const sc2 = lerp(1, n.size / w.size, t);
         const x = lerp(w.ox, n.ox, t);
         const y = lerp(w.oy, n.oy, t);
