@@ -52,6 +52,19 @@ const CAP = BAR[0].size * 0.7;
 const TOPY = BASE - CAP; // o muro cresce a partir do topo das letras, para baixo
 const WALL_S = (WALL_BOTTOM - TOPY) / CAP;
 
+// queda de ACESSIBILIDADE: cai, amassa, quica uma vez e assenta (deslocamento vertical)
+const wordDy = (f: number) => {
+  const t = f - WRITE;
+  if (t < 0) return -1100;
+  if (t < 12) return -1100 * (1 - (t / 12) * (t / 12));
+  if (t < 15) return 0;
+  if (t < 25) {
+    const u = (t - 15) / 10;
+    return -90 * 4 * u * (1 - u);
+  }
+  return 0;
+};
+
 const lineClip = (id: string, li: number, k: string) => {
   const ln = T2[id].lines[li];
   const top = ln.bb[1] - 40;
@@ -102,28 +115,34 @@ const Scene: React.FC = () => {
     f >= WRITE ? (
       <g transform={`translate(540 960) scale(${pulse}) translate(-540 -960)`}>
         {(() => {
-          // no quique de ACESSIBILIDADE, "é direito." se solta de trás dela e cai no lugar
+          // "é direito." sai de dentro de ACESSIBILIDADE: escondida atrás dela, só aparece abaixo da borda da palavra
           const ln = T2.S5c.lines[1];
-          const st = WRITE + 15; // começo do quique
+          const st = WRITE + 15; // no quique
           if (f < st) return null;
           const t = f - st;
-          const lift = -1250; // cai de cima da tela, passando por trás de ACESSIBILIDADE
+          const edge = T2.S5c.lines[0].bb[3] + wordDy(f) - 4; // base atual da palavra
+          const start = edge - ln.bb[3] - 6; // começa inteira atrás da palavra
           let dy: number;
           let sy = 1;
           let sx = 1;
           if (t < 12) {
             const u = t / 12;
-            dy = lift * (1 - u * u);
-            sy = 1.08;
+            dy = start * (1 - u * u);
+            sy = 1.06;
           } else if (t < 15) {
             dy = 0;
-            sy = 0.84;
-            sx = 1.05;
+            sy = 0.86;
+            sx = 1.04;
           } else dy = 0;
           const cx = (ln.bb[0] + ln.bb[2]) / 2;
           return (
-            <g transform={`translate(0 ${dy}) translate(${cx} ${ln.y}) scale(${sx} ${sy}) translate(${-cx} ${-ln.y})`}>
-              {ln.letters.map((l, i) => <path key={i} d={l.d} fill={LIGHT} />)}
+            <g>
+              <clipPath id="outOfWord"><rect x={-100} y={edge} width={1300} height={1400} /></clipPath>
+              <g clipPath={t < 15 ? 'url(#outOfWord)' : undefined}>
+                <g transform={`translate(0 ${dy}) translate(${cx} ${ln.y}) scale(${sx} ${sy}) translate(${-cx} ${-ln.y})`}>
+                  {ln.letters.map((l, i) => <path key={i} d={l.d} fill={LIGHT} />)}
+                </g>
+              </g>
             </g>
           );
         })()}
