@@ -94,7 +94,7 @@ const Scene: React.FC = () => {
       const sc = lerp(2.3, 1, p);
       const dir = k % 2 === 0 ? 1 : -1;
       const rot = lerp(12 * dir, 0, p);
-      const pulse = 1 + 0.035 * live;
+      const pulse = 1; // só "conversa?" se move com o som
       words.push(
         <g key={`${li}-${w}`} transform={`translate(${cx} ${cy}) rotate(${rot}) scale(${sc * pulse * (1 + 0.07 * land)} ${sc * pulse * (1 - 0.1 * land)}) translate(${-cx} ${-cy})`}>
           {ls.map((l, i) => <path key={i} d={l.d} fill={BLUE} />)}
@@ -118,12 +118,16 @@ const Scene: React.FC = () => {
       const over = 0.14 * Math.sin(Math.PI * pr(f, OBJ_IN + 4, OBJ_IN + 16, expoIO));
       const inS = lerp(0.2, 1, p) + over;
       const inR = lerp(-18, 0, p);
-      const pulse = 1 + 0.06 * live;
+      // dança com a batida: pulsa, balança e salta a cada tempo
+      const pulse = 1 + 0.1 * live;
+      const beatN = Math.floor(f / BEAT);
+      const sway = f < CUT && f >= OBJ_IN + 12 ? (beatN % 2 === 0 ? 1 : -1) * 5 * live : 0;
+      const hop = f < CUT && f >= OBJ_IN + 12 ? -18 * live : 0;
       const flat = lerp(1, 11 / (y2 - y1), pr(f, CUT, CUT + 7, expoOut));
       const gone = 1 - pr(f, CUT + 9, CUT + 22, expoIn);
       if (gone > 0.001) {
         pill = (
-          <g transform={`translate(${cx} ${cy}) rotate(${inR}) scale(${inS * pulse * gone} ${inS * pulse * flat}) translate(${-cx} ${-cy})`}>
+          <g transform={`translate(${cx} ${cy + hop}) rotate(${inR + sway}) scale(${inS * pulse * gone} ${inS * pulse * flat}) translate(${-cx} ${-cy})`}>
             <rect x={x1} y={y1} width={x2 - x1} height={y2 - y1} rx={(y2 - y1) / 2} fill={BLUE} />
             {wl.map((l, i) => <path key={i} d={l.d} fill={ACCENT} />)}
           </g>
