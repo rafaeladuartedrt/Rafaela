@@ -132,6 +132,10 @@ for i in range(70):
 for sc, fr, sig, pan, gg in E: add(sfx, G(sc, fr), sig, pan, gg)
 
 mix = mus + sfx
+# abertura densa: 3 dB a menos no primeiro segundo (evita pico entre amostras após o AAC), retorno suave
+ge = np.ones(n); a1 = int(1.0 * SR); a2 = int(1.5 * SR)
+ge[:a1] = 10 ** (-3 / 20); ge[a1:a2] = np.linspace(10 ** (-3 / 20), 1, a2 - a1)
+mix *= ge[:, None]
 s0 = int(G('s3', L['cut']) * SR); s1 = int(G('s3', L['silEnd']) * SR)
 fade = int(.008 * SR); mix[s0 - fade:s0] *= np.linspace(1, 0, fade)[:, None]; mix[s0:s1] = 0.0
 
@@ -145,7 +149,7 @@ def lufs(p):
 out = sys.argv[1]; x = mix / (np.max(np.abs(mix)) + 1e-9) * .5
 for it in range(6):
     write(out, x); I, TP = lufs(out); print(f'iter {it}: {I:.2f} LUFS, pico {TP:.2f}')
-    if abs(I + 14) < .15 and TP <= -1: break
-    x *= 10 ** ((-14 - I) / 20); lim = 10 ** (-1.3 / 20)
+    if abs(I + 14) < .15 and TP <= -2.4: break
+    x *= 10 ** ((-14 - I) / 20); lim = 10 ** (-2.6 / 20)
     x = np.where(np.abs(x) > lim * .8, np.sign(x) * (lim * .8 + lim * .2 * np.tanh((np.abs(x) - lim * .8) / (lim * .2))), x)
 x[s0:s1] = 0; write(out, x); print('final', lufs(out), 'silêncio', s0 / SR, s1 / SR, 'total', TOTAL / FPS)
