@@ -1,0 +1,8 @@
+node_modules/
+.remotion/
+out/integrity/
+*.log
+assets/originais/*.tif
+assets/originais/*.TIF
+public/img/
+public/maps/

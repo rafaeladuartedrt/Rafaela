@@ -1,0 +1,142 @@
+[
+ {
+  "recorte": "a01_corte_longitudinal/inteiro",
+  "px": 3028671,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a02_cortes_aa_bb_cc/corte_aa",
+  "px": 760000,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a02_cortes_aa_bb_cc/corte_bb",
+  "px": 736250,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a02_cortes_aa_bb_cc/corte_cc",
+  "px": 554840,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a03_palacio_cortes/elevacao_a",
+  "px": 1161450,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a03_palacio_cortes/elevacao_b",
+  "px": 1159200,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a04_corte_aa_esc_ext/elevacao_escada",
+  "px": 1111860,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a04_corte_aa_esc_ext/corte_aa",
+  "px": 1076190,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a05_perspectiva_bico_pena/inteiro",
+  "px": 4875680,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a06_perspectiva_themis/inteiro",
+  "px": 4171490,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a07_perspectivas/esquerda",
+  "px": 1138320,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a07_perspectivas/direita",
+  "px": 1010922,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a08_hall/inteiro",
+  "px": 2602314,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/fachada",
+  "px": 107760,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/modelo_claro",
+  "px": 68000,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/modelo_escuro",
+  "px": 41100,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/estudo_1",
+  "px": 57575,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/estudo_2",
+  "px": 47121,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a11_themis_2005/estudo_3",
+  "px": 36612,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ },
+ {
+  "recorte": "a12_themis_instalacao/inteiro",
+  "px": 4315176,
+  "identicos_%": 100.0,
+  "dif_max": 0,
+  "dif_media": 0.0
+ }
+]
