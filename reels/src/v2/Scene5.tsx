@@ -101,21 +101,64 @@ const Scene: React.FC = () => {
   const finalText =
     f >= WRITE ? (
       <g transform={`translate(540 960) scale(${pulse}) translate(-540 -960)`}>
-        {T2.S5c.lines[0].letters.map((l, i) => {
-          const st = WRITE + i * 2;
+        {(() => {
+          // no quique de ACESSIBILIDADE, "é direito." se solta de trás dela e cai no lugar
+          const ln = T2.S5c.lines[1];
+          const st = WRITE + 15; // começo do quique
           if (f < st) return null;
-          const draw = pr(f, st, st + 12, expoIO);
-          const fill = pr(f, st + 8, st + 16, expoOut);
-          const cx = (l.bb[0] + l.bb[2]) / 2;
-          const cy = (l.bb[1] + l.bb[3]) / 2;
+          const t = f - st;
+          const lift = -1250; // cai de cima da tela, passando por trás de ACESSIBILIDADE
+          let dy: number;
+          let sy = 1;
+          let sx = 1;
+          if (t < 12) {
+            const u = t / 12;
+            dy = lift * (1 - u * u);
+            sy = 1.08;
+          } else if (t < 15) {
+            dy = 0;
+            sy = 0.84;
+            sx = 1.05;
+          } else dy = 0;
+          const cx = (ln.bb[0] + ln.bb[2]) / 2;
           return (
-            <g key={`c${i}`}>
-              <path d={l.d} fill="none" stroke={ACCENT} strokeWidth={5} strokeLinejoin="round" pathLength={1} strokeDasharray={`${draw} 2`} />
-              {fill > 0 ? <path d={l.d} fill={ACCENT} transform={`translate(${cx} ${cy}) scale(${fill}) translate(${-cx} ${-cy})`} /> : null}
+            <g transform={`translate(0 ${dy}) translate(${cx} ${ln.y}) scale(${sx} ${sy}) translate(${-cx} ${-ln.y})`}>
+              {ln.letters.map((l, i) => <path key={i} d={l.d} fill={LIGHT} />)}
             </g>
           );
+        })()}
+        {T2.S5c.lines[0].letters.map((l, i) => {
+          // cai de cima com gravidade, amassa no impacto, quica uma vez e assenta
+          const st = WRITE; // a palavra cai inteira, num impacto único
+          if (f < st) return null;
+          const t = f - st;
+          const FALL = 12;
+          const base = T2.S5c.lines[0].y;
+          let dy: number;
+          let sx = 1;
+          let sy = 1;
+          if (t < FALL) {
+            const u = t / FALL;
+            dy = -1100 * (1 - u * u);
+            sy = 1.12;
+            sx = 0.94;
+          } else if (t < FALL + 3) {
+            dy = 0;
+            sy = 0.78;
+            sx = 1.08;
+          } else if (t < FALL + 13) {
+            const u = (t - FALL - 3) / 10;
+            dy = -90 * 4 * u * (1 - u);
+            sy = 1.04;
+            sx = 0.98;
+          } else if (t < FALL + 16) {
+            dy = 0;
+            sy = 0.92;
+            sx = 1.03;
+          } else dy = 0;
+          const cx = (l.bb[0] + l.bb[2]) / 2;
+          return <path key={`c${i}`} d={l.d} fill={ACCENT} transform={`translate(0 ${dy}) translate(${cx} ${base}) scale(${sx} ${sy}) translate(${-cx} ${-base})`} />;
         })}
-        <Rise id="S5c" f={f} ins={[1e4, WRITE + 30]} color={LIGHT} />
       </g>
     ) : null;
 
