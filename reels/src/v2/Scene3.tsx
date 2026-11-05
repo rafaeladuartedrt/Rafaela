@@ -102,7 +102,7 @@ const Scene: React.FC = () => {
     const cx = (ln.bb[0] + ln.bb[2]) / 2;
     const cy = (ln.bb[1] + ln.bb[3]) / 2;
     const p = pr(f, st, st + 9, expoOut);
-    const land = Math.sin(Math.PI * pr(f, st + 6, st + 14, expoIO));
+    const land = 0; // sem vibração no encaixe
     const sc0 = lerp(2.1, 1, p);
     const rot0 = lerp(li % 2 === 0 ? 10 : -10, 0, p);
     words.push(
@@ -116,13 +116,13 @@ const Scene: React.FC = () => {
   let pill: React.ReactNode = null;
   if (f >= OBJ_IN && dropY(f) < 1300) {
     const p = pr(f, OBJ_IN, OBJ_IN + 12, expoOut);
-    const over = 0.14 * Math.sin(Math.PI * pr(f, OBJ_IN + 4, OBJ_IN + 16, expoIO));
+    const over = 0;
     const inS = lerp(0.2, 1, p) + over;
     const inR = lerp(-16, 0, p);
     const dancing = f >= OBJ_IN + 12 && f < CLICK3;
-    const pulse = 1 + (dancing ? 0.08 * live : 0);
-    const sway = dancing ? (Math.floor(f / BEAT) % 2 === 0 ? 1 : -1) * 4 * live : 0;
-    const hop = dancing ? -16 * live : 0;
+    const pulse = 1 + (dancing ? 0.06 * live : 0); // só uma pulsação suave no ritmo
+    const sway = 0; // sem balanço
+    const hop = 0; // sem saltos
     // clique: amassa
     const click = Math.sin(Math.PI * pr(f, CLICK3, CLICK3 + 5, expoIO));
     pill = (
