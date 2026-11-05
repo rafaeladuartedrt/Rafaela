@@ -13,20 +13,41 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const BEAT = 12; // batida da trilha (0,4 s)
 const beat = (f: number) => Math.exp(-(f % BEAT) / 3.5);
-const CUT = 64; // o som é cortado
-const SILENCE_END = CUT + 62; // 2 segundos de silêncio absoluto
-const BAND = SILENCE_END; // a linha engrossa e varre a tela de azul
+
+// diagramação: uma palavra por linha, alinhadas à esquerda; CONVERSA? num bloco azul
+const PL = T2.F2.lines[4];
+const PX1 = PL.bb[0] - 26;
+const PX2 = PL.bb[2] + 26;
+const PY1 = PL.y - PL.letters[0].size * 0.88;
+const PY2 = PL.y + PL.letters[0].size * 0.2;
+const PCX = (PX1 + PX2) / 2;
+const PCY = (PY1 + PY2) / 2;
+
+const WAVE_Y = 1390;
+const OBJ_IN = 32; // bloco entra
+const CLICK3 = 64; // a seta clica em CONVERSA?
+const DROP = 67; // o bloco cai
+const G = 6; // gravidade (px/frame²)
+const CONTACT = DROP + Math.sqrt((2 * (WAVE_Y - PY2)) / G); // bloco encosta na onda e o som é cortado
+const CUT = Math.round(CONTACT);
+const SILENCE_END = CUT + 60; // 2 segundos de silêncio absoluto
+const BAND = SILENCE_END; // a onda volta de baixo como faixa azul e toma a tela
 const BARS = BAND + 18;
-const WAVE_Y = 1060;
 // transição para a cena 4: legendas voltam a ser barras, empilham como degraus e o claro sobe de baixo
-const FOLD = 196;
-const STACK = 208;
-const RISE = 222;
+const FOLD = BAND + 70;
+const STACK = FOLD + 12;
+const RISE = FOLD + 26;
 const TREADS: [number, number, number][] = [
-  [STAIRS3[6][0], STAIRS3[7][0], STAIRS3[6][1]], // linha de cima > degrau mais alto
+  [STAIRS3[6][0], STAIRS3[7][0], STAIRS3[6][1]],
   [STAIRS3[4][0], STAIRS3[5][0], STAIRS3[4][1]],
   [STAIRS3[2][0], STAIRS3[3][0], STAIRS3[2][1]],
 ];
+export const SCENE3_LEN = RISE + 34;
+
+// queda do bloco depois do clique
+const dropY = (f: number) => (f < DROP ? 0 : 0.5 * G * (f - DROP) * (f - DROP));
+const dropX = (f: number) => (f < DROP ? 0 : 3 * (f - DROP));
+const dropR = (f: number) => (f < DROP ? 0 : 1.6 * Math.pow(f - DROP, 1.25));
 
 const Gesture: React.FC<{d: string; t: number; color: string; w?: number}> = ({d, t, color, w = 10}) => {
   if (t <= 0 || t >= 1) return null;
@@ -48,21 +69,20 @@ const lineClip = (id: string, li: number, k: string) => {
   );
 };
 
-// onda sonora: viva na batida, achata quando o som é cortado
+// onda sonora: viva na batida; quando o bloco cai sobre ela, é arrastada para fora da tela
 const wavePath = (f: number) => {
-  const N = 160;
-  let A: number;
-  if (f < CUT) A = (50 + 70 * beat(f)) * pr(f, 2, 14);
-  else {
-    const t = f - CUT;
-    A = 120 * Math.exp(-t / 2.2) + 10 * Math.exp(-t / 4) * Math.sin(t * 2.3);
-  }
+  const N = 180;
+  let A = (50 + 70 * beat(f)) * pr(f, 2, 14);
+  if (f >= CUT) A *= Math.exp(-(f - CUT) / 3);
+  const pull = Math.max(0, PY2 + dropY(f) - WAVE_Y);
+  const px = PCX + dropX(f);
+  const sigma = lerp(160, 2600, pr(f, CUT, CUT + 12, expoIn));
   const pts: string[] = [];
   for (let k = 0; k < N; k++) {
     const u = k / (N - 1);
     const x = 80 + 920 * u;
     const env = Math.pow(Math.sin(Math.PI * u), 1.3);
-    const y = WAVE_Y + A * env * Math.sin(u * Math.PI * 7 - f * 0.45);
+    const y = WAVE_Y + A * env * Math.sin(u * Math.PI * 7 - f * 0.45) + pull * Math.exp(-Math.pow((x - px) / sigma, 2));
     pts.push(`${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`);
   }
   return pts.join('');
@@ -70,80 +90,56 @@ const wavePath = (f: number) => {
 
 const Scene: React.FC = () => {
   const f = useCurrentFrame();
-  const band = 2300 * pr(f, BAND, BAND + 18, expoIO);
-
-  // ---- problema: "Ficou de fora dessa conversa?" pulsando com a batida ----
+  const bandTop = lerp(1960, -40, pr(f, BAND, BAND + 18, expoIO));
   const live = f < CUT ? beat(f) : 0;
-  // ---- palavras: cada uma entra na batida, grande e inclinada, e encaixa com impacto ----
+
+  // ---- palavras: uma por linha, entrando na batida com impacto; depois ficam paradas ----
+  const ENTRY = [6, 12, 18, 24];
   const words: React.ReactNode[] = [];
-  const ENTRY = [6, 12, 18, 26]; // Ficou, de, fora, dessa
-  const OBJ_IN = 34; // bloco + "conversa?" como um único objeto
-  let wi = 0;
-  T2.F1.lines.forEach((ln, li) => {
-    const groups = new Map<number, typeof ln.letters>();
-    ln.letters.forEach((l) => groups.set(l.word, [...(groups.get(l.word) ?? []), l]));
-    groups.forEach((ls, w) => {
-      if (li === 1 && w === 1) return; // "conversa?" é desenhada junto com o bloco
-      const k = wi++;
-      const st = ENTRY[k];
-      if (f < st) return;
-      const cx = (ls[0].bb[0] + ls[ls.length - 1].bb[2]) / 2;
-      const cy = (ls[0].bb[1] + ls[0].bb[3]) / 2;
-      const p = pr(f, st, st + 9, expoOut);
-      const land = Math.sin(Math.PI * pr(f, st + 6, st + 14, expoIO));
-      const sc = lerp(2.3, 1, p);
-      const dir = k % 2 === 0 ? 1 : -1;
-      const rot = lerp(12 * dir, 0, p);
-      const pulse = 1; // só "conversa?" se move com o som
-      words.push(
-        <g key={`${li}-${w}`} transform={`translate(${cx} ${cy}) rotate(${rot}) scale(${sc * pulse * (1 + 0.07 * land)} ${sc * pulse * (1 - 0.1 * land)}) translate(${-cx} ${-cy})`}>
-          {ls.map((l, i) => <path key={i} d={l.d} fill={BLUE} />)}
-        </g>,
-      );
-    });
+  T2.F2.lines.slice(0, 4).forEach((ln, li) => {
+    const st = ENTRY[li];
+    if (f < st) return;
+    const cx = (ln.bb[0] + ln.bb[2]) / 2;
+    const cy = (ln.bb[1] + ln.bb[3]) / 2;
+    const p = pr(f, st, st + 9, expoOut);
+    const land = Math.sin(Math.PI * pr(f, st + 6, st + 14, expoIO));
+    const sc0 = lerp(2.1, 1, p);
+    const rot0 = lerp(li % 2 === 0 ? 10 : -10, 0, p);
+    words.push(
+      <g key={li} transform={`translate(${cx} ${cy}) rotate(${rot0}) scale(${sc0 * (1 + 0.06 * land)} ${sc0 * (1 - 0.1 * land)}) translate(${-cx} ${-cy})`}>
+        {ln.letters.map((l, i) => <path key={i} d={l.d} fill={BLUE} />)}
+      </g>,
+    );
   });
-  // objeto único: bloco azul + "conversa?" em amarelo (entram, pulsam e somem juntos)
+
+  // ---- objeto único: bloco azul + CONVERSA? (entra, dança com o som, é clicado e cai) ----
   let pill: React.ReactNode = null;
-  {
-    const ln = T2.F1.lines[1];
-    const wl = ln.letters.filter((x) => x.word === 1);
-    if (f >= OBJ_IN) {
-      const x1 = wl[0].bb[0] - 24;
-      const x2 = wl[wl.length - 1].bb[2] + 24;
-      const y1 = ln.y - wl[0].size * 0.78;
-      const y2 = ln.y + wl[0].size * 0.3;
-      const cx = (x1 + x2) / 2;
-      const cy = (y1 + y2) / 2;
-      const p = pr(f, OBJ_IN, OBJ_IN + 12, expoOut);
-      const over = 0.14 * Math.sin(Math.PI * pr(f, OBJ_IN + 4, OBJ_IN + 16, expoIO));
-      const inS = lerp(0.2, 1, p) + over;
-      const inR = lerp(-18, 0, p);
-      // dança com a batida: pulsa, balança e salta a cada tempo
-      const pulse = 1 + 0.1 * live;
-      const beatN = Math.floor(f / BEAT);
-      const sway = f < CUT && f >= OBJ_IN + 12 ? (beatN % 2 === 0 ? 1 : -1) * 5 * live : 0;
-      const hop = f < CUT && f >= OBJ_IN + 12 ? -18 * live : 0;
-      const flat = lerp(1, 11 / (y2 - y1), pr(f, CUT, CUT + 7, expoOut));
-      const gone = 1 - pr(f, CUT + 9, CUT + 22, expoIn);
-      if (gone > 0.001) {
-        pill = (
-          <g transform={`translate(${cx} ${cy + hop}) rotate(${inR + sway}) scale(${inS * pulse * gone} ${inS * pulse * flat}) translate(${-cx} ${-cy})`}>
-            <rect x={x1} y={y1} width={x2 - x1} height={y2 - y1} rx={(y2 - y1) / 2} fill={BLUE} />
-            {wl.map((l, i) => <path key={i} d={l.d} fill={ACCENT} />)}
-          </g>
-        );
-      }
-    }
+  if (f >= OBJ_IN && dropY(f) < 1300) {
+    const p = pr(f, OBJ_IN, OBJ_IN + 12, expoOut);
+    const over = 0.14 * Math.sin(Math.PI * pr(f, OBJ_IN + 4, OBJ_IN + 16, expoIO));
+    const inS = lerp(0.2, 1, p) + over;
+    const inR = lerp(-16, 0, p);
+    const dancing = f >= OBJ_IN + 12 && f < CLICK3;
+    const pulse = 1 + (dancing ? 0.08 * live : 0);
+    const sway = dancing ? (Math.floor(f / BEAT) % 2 === 0 ? 1 : -1) * 4 * live : 0;
+    const hop = dancing ? -16 * live : 0;
+    // clique: amassa
+    const click = Math.sin(Math.PI * pr(f, CLICK3, CLICK3 + 5, expoIO));
+    pill = (
+      <g transform={`translate(${PCX + dropX(f)} ${PCY + hop + dropY(f)}) rotate(${inR + sway + dropR(f)}) scale(${inS * pulse * (1 + 0.06 * click)} ${inS * pulse * (1 - 0.14 * click)}) translate(${-PCX} ${-PCY})`}>
+        <rect x={PX1} y={PY1} width={PX2 - PX1} height={PY2 - PY1} rx={(PY2 - PY1) / 2} fill={BLUE} />
+        {PL.letters.map((l, i) => <path key={i} d={l.d} fill={ACCENT} />)}
+      </g>
+    );
   }
 
-  // ---- alto-falante cortado ----
-  const spkOut = 1 - pr(f, CUT + 6, CUT + 14, expoIn);
+  // ---- sinal de sem som: surge grande quando a onda é levada ----
   const speaker =
-    f >= 54 && spkOut > 0.001 ? (
-      <g transform={`translate(540 860) scale(${1.25 * spkOut})`}>
-        <Draw t={(f - 54) / 8} color={BLUE} w={11} d="M-64 -22 L-34 -22 L0 -52 L0 52 L-34 22 L-64 22 Z" />
-        <Draw t={(f - 59) / 5} color={BLUE} w={11} d="M28 -26 L78 24" />
-        <Draw t={(f - 62) / 4} color={BLUE} w={11} d="M78 -26 L28 24" />
+    f >= CUT + 9 ? (
+      <g transform={`translate(520 1300) scale(${2.3 * (1 + 0.12 * Math.sin(Math.PI * pr(f, CUT + 17, CUT + 25, expoIO)))})`}>
+        <Draw t={(f - CUT - 9) / 9} color={BLUE} w={11} d="M-64 -22 L-34 -22 L0 -52 L0 52 L-34 22 L-64 22 Z" />
+        <Draw t={(f - CUT - 14) / 5} color={BLUE} w={11} d="M28 -26 L78 24" />
+        <Draw t={(f - CUT - 17) / 5} color={BLUE} w={11} d="M78 -26 L28 24" />
       </g>
     ) : null;
 
@@ -210,32 +206,55 @@ const Scene: React.FC = () => {
   const riseTop = lerp(1960, -40, pr(f, RISE, RISE + 20, expoIO));
 
   // ---- SETA ----
-  let ax = lerp(930, 820, pr(f, 0, 14, expoIO));
-  let ay = lerp(1440, 1300, pr(f, 0, 14, expoIO));
+  const tipOff = (r: number, k: number): [number, number] => {
+    const an = (r * Math.PI) / 180;
+    const d0: [number, number] = [-0.336 * 64.8 * k, -0.942 * 64.8 * k];
+    return [d0[0] * Math.cos(an) - d0[1] * Math.sin(an), d0[0] * Math.sin(an) + d0[1] * Math.cos(an)];
+  };
+  const IDLE: [number, number] = [840, 640];
+  let ax = lerp(950, IDLE[0], pr(f, 0, 16, expoIO));
+  let ay = lerp(1470, IDLE[1], pr(f, 0, 16, expoIO)) - 120 * Math.sin(Math.PI * pr(f, 0, 16, expoIO));
   let rot = -24;
   let stretch = 1;
   let sc = 1.5;
-  if (f >= 14 && f < CUT) {
-    // dança na batida: amassa no tempo forte e sobe entre as batidas
-    const b = beat(f);
-    ay = 1300 - 26 * (1 - b);
-    stretch = 1 - 0.1 * b;
-    rot = -24 + 8 * Math.sin((f / BEAT) * Math.PI);
+  // olha cada palavra que chega
+  [6, 12, 18, 24].forEach((st) => {
+    if (f >= st && f < st + 10) rot += -10 * Math.sin(Math.PI * pr(f, st, st + 10, expoIO));
+  });
+  // vai até CONVERSA? e clica, com a ponta para baixo
+  const RCLK = -118;
+  const tip = tipOff(RCLK, 1.5);
+  const clickPos: [number, number] = [PX2 - 110 - tip[0], PY1 + 14 - tip[1]];
+  if (f >= 46) {
+    const t = pr(f, 46, 60, expoIO);
+    ax = lerp(IDLE[0], clickPos[0], t);
+    ay = lerp(IDLE[1], clickPos[1], t) - 90 * Math.sin(Math.PI * t);
+    rot = lerp(-24, RCLK, t);
+    const ant = pr(f, 58, 62, expoOut) * (1 - pr(f, 62, CLICK3, expoIn));
+    ay -= 24 * ant;
+    stretch = 1 + 0.06 * ant - 0.14 * Math.sin(Math.PI * pr(f, CLICK3, CLICK3 + 6, expoIO));
   }
-  if (f >= CUT && f < BAND + 10) {
-    // o som some: murcha e fica imóvel no silêncio
-    const d = pr(f, CUT, CUT + 10, expoOut);
-    ay = lerp(1300, 1330, d);
-    rot = lerp(-24, -6, d);
+  // vê o bloco cair levando a onda: recua e acompanha a queda com a ponta
+  if (f >= CLICK3 + 4) {
+    const t = pr(f, CLICK3 + 4, CLICK3 + 16, expoIO);
+    ax = lerp(clickPos[0], 860, t);
+    ay = lerp(clickPos[1], 940, t);
+    rot = lerp(RCLK, -160, t);
+  }
+  // silêncio: murcha e fica imóvel
+  if (f >= CUT + 6 && f < BAND + 10) {
+    const d = pr(f, CUT + 6, CUT + 16, expoOut);
+    ay = lerp(940, 980, d);
+    rot = lerp(-160, -190, d);
     stretch = lerp(1, 0.86, d);
     sc = lerp(1.5, 1.3, d);
   }
   if (f >= BAND + 10) {
     // a mensagem chega: levanta, pula e gira de alegria
     const t = pr(f, BAND + 10, BAND + 34, expoIO);
-    ax = lerp(820, 860, t);
-    ay = lerp(1330, 1300, t) - 160 * Math.sin(Math.PI * t);
-    rot = lerp(-6, -24, t) - 360 * pr(f, BAND + 12, BAND + 30, expoIO);
+    ax = lerp(860, 860, t);
+    ay = lerp(980, 1300, t) - 200 * Math.sin(Math.PI * t);
+    rot = lerp(-190, -24 - 360, t);
     stretch = lerp(0.86, 1, t) + 0.12 * Math.sin(Math.PI * t);
     sc = lerp(1.3, 1.5, t);
   }
@@ -245,12 +264,12 @@ const Scene: React.FC = () => {
     const fy = 1300;
     ax = lerp(fx, 140, t);
     ay = lerp(fy, 1316, t) - 220 * Math.sin(Math.PI * t);
-    rot = lerp(-24, -10, t) - 360 * pr(f, FOLD + 6, FOLD + 26, expoIO);
+    rot = lerp(-384, -370, t) - 360 * pr(f, FOLD + 6, FOLD + 26, expoIO);
     stretch = f >= FOLD + 28 && f < FOLD + 36 ? 1 - 0.12 * Math.sin(Math.PI * pr(f, FOLD + 28, FOLD + 36, expoIO)) : 1 + 0.1 * Math.sin(Math.PI * t);
     sc = 1.5;
   }
-  const inBand = Math.abs(ay - WAVE_Y) < band / 2;
-  const arrowColor = ay > riseTop ? BLUE : inBand ? ACCENT : BLUE;
+  const inBand = f >= BAND && ay > bandTop;
+  const arrowColor = f >= RISE && ay > riseTop ? BLUE : inBand ? ACCENT : BLUE;
 
   const gestures: React.ReactNode[] = [];
   if (f >= BAND + 30 && f < BAND + 48) {
@@ -262,18 +281,18 @@ const Scene: React.FC = () => {
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
       <defs>
-        {[0, 1].map((li) => lineClip('F1', li, `F1c${li}`))}
         <clipPath id="rise"><rect x={-20} y={riseTop} width={1120} height={2000} /></clipPath>
       </defs>
       <rect width={1080} height={1920} fill={LIGHT} />
-      {pill}
       {words}
       {speaker}
-      {/* a onda: viva, depois reta; no fim engrossa e varre a tela */}
-      {f >= 2 && band <= 11 ? (
-        <path d={wavePath(Math.min(f, BAND))} fill="none" stroke={BLUE} strokeWidth={11} strokeLinecap="round" pathLength={1} strokeDasharray={`${f < 16 ? expoOut(cl((f - 2) / 14)) : 1} 2`} />
+      {/* a onda: viva na batida; arrastada para fora da tela pelo bloco que cai */}
+      {f >= 2 && f < CUT + 14 ? (
+        <path d={wavePath(f)} fill="none" stroke={BLUE} strokeWidth={11} strokeLinecap="round" pathLength={1} strokeDasharray={`${f < 16 ? expoOut(cl((f - 2) / 14)) : 1} 2`} />
       ) : null}
-      {band > 11 ? <rect x={-20} y={WAVE_Y - band / 2} width={1120} height={band} fill={BLUE} /> : null}
+      {pill}
+      {/* a onda volta de baixo como faixa azul e toma a tela */}
+      {f >= BAND ? <rect x={-20} y={bandTop} width={1120} height={2100} fill={BLUE} /> : null}
       {barsFor(LIGHT)}
       {lettersFor(LIGHT, ACCENT)}
       {stairExtras(LIGHT)}
