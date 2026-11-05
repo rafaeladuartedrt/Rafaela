@@ -12,10 +12,15 @@ const pr = (f: number, a: number, b: number, e: (t: number) => number = expoOut)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 // câmera sobre o celular: escala e centro vertical
-const camK = (f: number) => lerp(1.05, 0.66, pr(f, 6, 26, expoIO));
-const camY = (f: number) => lerp(890, 1135, pr(f, 6, 26, expoIO));
-const mapP = (f: number, x: number, y: number): [number, number] => [540 + (x - 540) * camK(f), camY(f) + (y - 890) * camK(f)];
-const phoneT = (f: number) => `translate(540 ${camY(f)}) scale(${camK(f)}) translate(-540 -890)`;
+// câmera: recua (abre espaço ao texto), mergulha na tela do celular (foto borrada em primeiro plano) e recua de novo
+const ZIN = [72, 94];
+const ZOUT = [172, 194];
+const camPhase = (f: number) => pr(f, ZIN[0], ZIN[1], expoIO) * (1 - pr(f, ZOUT[0], ZOUT[1], expoIO));
+const camK = (f: number) => lerp(lerp(1.05, 0.66, pr(f, 6, 26, expoIO)), 1.62, camPhase(f));
+const camY = (f: number) => lerp(lerp(890, 1135, pr(f, 6, 26, expoIO)), 960, camPhase(f));
+const camF = (f: number) => lerp(890, PHONE.y + 150 + (PHONE.w - 88) / 2, camPhase(f));
+const mapP = (f: number, x: number, y: number): [number, number] => [540 + (x - 540) * camK(f), camY(f) + (y - camF(f)) * camK(f)];
+const phoneT = (f: number) => `translate(540 ${camY(f)}) scale(${camK(f)}) translate(-540 ${-camF(f)})`;
 
 // posição do selo AD dentro do post (coordenadas do celular)
 const PX = PHONE.x + 44;
@@ -23,17 +28,17 @@ const PY = PHONE.y + 150;
 const AD_P: [number, number] = [PX + 100, PY + 66];
 const HEART_P: [number, number] = [PX + 26, PY + (PHONE.w - 88) + 52];
 
-const AD_START = 90;
+const AD_START = 140;
 const AD_BIG: [number, number] = [540, 960]; // o selo nasce grande no centro
-const AD_LAND = 128; // e pousa no lugar dele na foto
-const LIGHT_ON = 104; // o AD "acende" e a cor se espalha a partir dele
-const CLICK = 150;
-const CLICK2 = 178; // clique em AUDIODESCRIÇÃO
-const PHONE_OUT = 182;
-const REORG = 188;
-const TAKEOVER = 228; // a seta toca o ponto final
-const HOP_END = 242; // o ponto salta na frente da seta e quica
-const INFLATE = 244; // e infla até tomar a tela
+const AD_LAND = 178; // e pousa no lugar dele na foto
+const LIGHT_ON = 154; // o AD "acende" e a cor se espalha a partir dele
+const CLICK = 222;
+const CLICK2 = 250; // clique em AUDIODESCRIÇÃO
+const PHONE_OUT = 254;
+const REORG = 260;
+const TAKEOVER = 300; // a seta toca o ponto final
+const HOP_END = 314; // o ponto salta na frente da seta e quica
+const INFLATE = 316; // e infla até tomar a tela
 
 // palavras de A1 e A2 na mesma ordem: cada palavra viaja e muda de tamanho como um bloco
 type W = {letters: (typeof T2)['A1']['lines'][0]['letters']; ox: number; oy: number; size: number};
@@ -116,7 +121,7 @@ const Scene: React.FC = () => {
   const blurA = 18 * pr(f, 24, 62, Easing.bezier(0.45, 0, 0.55, 1));
   const blurB = blurA * (1 - pr(f, LIGHT_ON, LIGHT_ON + 14));
   // a frase-problema também desfoca por no máximo 1 segundo
-  const textBlur = 9 * Math.sin(Math.PI * cl((f - 54) / 26)) * (f >= 54 && f < 80 ? 1 : 0);
+  const textBlur = 9 * Math.sin(Math.PI * cl((f - 48) / 20)) * (f >= 48 && f < 68 ? 1 : 0);
 
   // ---- SETA ----
   const rest = mapP(f, 330, 1290);
@@ -128,35 +133,54 @@ const Scene: React.FC = () => {
   // percebe a foto ficando turva: inclina a ponta na direção dela
   if (f >= 28 && f < 44) rot = -12 + 30 * pr(f, 28, 40, expoIO);
   // perdida: se afasta da câmera e procura, com pausas e hesitação
-  if (f >= 44 && f < 116) {
-    const t = (f - 44) / 72;
-    const z = 1 + 0.55 * pr(f, 44, 60, expoIO) - 0.55 * pr(f, 108, 116, expoIO);
-    const path = [
-      [rest[0], rest[1]],
-      [880, 1320],
-      [900, 1060],
-      [170, 1090],
-      [190, 1400],
-      [rest[0], rest[1]],
+  if (f >= 44 && f < 188) {
+    // posição inicial (no celular) até o mergulho; depois um caminho de busca em tela cheia
+    const start = mapP(Math.min(f, 70), 330, 1290);
+    const path: [number, number][] = [
+      [start[0], start[1]],
+      [760, 1400],
+      [850, 760],
+      [240, 700],
+      [230, 1260],
+      [540, 1380],
     ];
-    const seg = Math.min(4, Math.floor(t * 5));
-    const u = expoIO(cl(t * 5 - seg));
-    ax = lerp(path[seg][0], path[seg + 1][0], u);
-    ay = lerp(path[seg][1], path[seg + 1][1], u) - 50 * Math.sin(Math.PI * u);
-    rot = 18 + [-30, 25, -35, 20, -10][seg] * Math.sin(Math.PI * u) + (seg === 2 ? 360 * u : 0);
-    sc = (1.7 * camK(f)) / z;
-    stretch = 1 + 0.06 * Math.sin(Math.PI * u);
+    const T0 = 70;
+    const segLen = 14;
+    let px = start[0];
+    let py = start[1];
+    let rr = 18;
+    let ss = 1;
+    if (f >= T0) {
+      const k = Math.min(path.length - 2, Math.floor((f - T0) / segLen));
+      const u = expoIO(cl((f - T0) / segLen - k));
+      const done = f >= T0 + segLen * (path.length - 1);
+      const kk = done ? path.length - 2 : k;
+      const uu = done ? 1 : u;
+      px = lerp(path[kk][0], path[kk + 1][0], uu);
+      py = lerp(path[kk][1], path[kk + 1][1], uu) - 60 * Math.sin(Math.PI * uu);
+      rr = 18 + [-35, 30, -40, 25, -10][kk] * Math.sin(Math.PI * uu) + (kk === 2 ? 360 * uu : 0);
+      ss = 1 + 0.06 * Math.sin(Math.PI * uu);
+    }
+    // espera o AD: olha para o centro
+    if (f >= 140) rr = lerp(rr, -20, pr(f, 140, 150, expoIO));
+    const z = 1 + 0.4 * pr(f, 44, 60, expoIO) - 0.4 * pr(f, 178, 188, expoIO);
+    ax = px;
+    ay = py;
+    rot = rr;
+    sc = 1.7 * lerp(0.66, 1, camPhase(f) > 0 ? 1 : 0) / z;
+    if (f < 70) sc = (1.7 * camK(f)) / z;
+    stretch = ss;
   }
   // reencontra o caminho: volta perto, quica de alegria e clica no coração
   const heart = mapP(f, HEART_P[0], HEART_P[1]);
-  if (f >= 116) {
-    const t = pr(f, 116, 140, expoIO);
-    ax = lerp(rest[0], heart[0] + 38, t);
-    ay = lerp(rest[1], heart[1] + 62, t) - 140 * Math.sin(Math.PI * t);
-    rot = lerp(18, -14, t) - 360 * pr(f, 118, 136, expoIO);
+  if (f >= 188) {
+    const t = pr(f, 188, 212, expoIO);
+    ax = lerp(540, heart[0] + 38, t);
+    ay = lerp(1380, heart[1] + 62, t) - 140 * Math.sin(Math.PI * t);
+    rot = lerp(-20, -14, t) - 360 * pr(f, 190, 208, expoIO);
     sc = 1.7 * camK(f) * (1 + 0.15 * Math.sin(Math.PI * t));
     // antecipação e clique
-    const ant = pr(f, 140, 146, expoOut) * (1 - pr(f, 146, CLICK, expoIn));
+    const ant = pr(f, 212, 218, expoOut) * (1 - pr(f, 218, CLICK, expoIn));
     ax += 14 * ant;
     ay += 20 * ant;
     stretch = 1 + 0.08 * ant - 0.14 * Math.sin(Math.PI * pr(f, CLICK, CLICK + 6, expoIO));
@@ -170,43 +194,42 @@ const Scene: React.FC = () => {
     const d: [number, number] = [-0.336 * 64.8 * k, -0.942 * 64.8 * k];
     return [d[0] * Math.cos(a) - d[1] * Math.sin(a), d[0] * Math.sin(a) + d[1] * Math.cos(a)];
   };
-  if (f >= 158) {
+  if (f >= 230) {
     const k = 1.7 * 0.8;
     const r = -160; // ponta para baixo, corpo no vazio à direita de "Com"
     const o = tipOff(r, k);
     const target: [number, number] = [AD_WORD_C[0] + 220 - o[0], AD_WORD_C[1] - 46 - o[1]];
-    const t = pr(f, 158, 174, expoIO);
+    const t = pr(f, 230, 246, expoIO);
     const from: [number, number] = [heart[0] + 38, heart[1] + 62];
     ax = lerp(from[0], target[0], t);
     ay = lerp(from[1], target[1], t) - 160 * Math.sin(Math.PI * t);
     rot = lerp(-14, r + 360, t);
     sc = lerp(1.7 * camK(f), k, t);
-    const ant = pr(f, 172, 176, expoOut) * (1 - pr(f, 176, CLICK2, expoIn));
+    const ant = pr(f, 244, 248, expoOut) * (1 - pr(f, 248, CLICK2, expoIn));
     ay -= 22 * ant;
     stretch = 1 + 0.07 * ant - 0.12 * Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 6, expoIO));
-    if (f >= 190) {
-      const t2 = pr(f, 190, 212, expoIO);
+    if (f >= 262) {
+      const t2 = pr(f, 262, 284, expoIO);
       ax = lerp(target[0], dotFinal[0] + 96, t2);
       ay = lerp(target[1], dotFinal[1] + 110, t2) - 120 * Math.sin(Math.PI * t2);
       rot = lerp(r + 360, 336, t2);
       sc = lerp(k, 1.5, t2);
-      stretch = f >= 212 && f < 222 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 212, 222, expoIO)) : 1;
+      stretch = f >= 284 && f < 294 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 284, 294, expoIO)) : 1;
       // toque no ponto: antecipação e clique
-      const ant2 = pr(f, 220, 225, expoOut) * (1 - pr(f, 225, TAKEOVER, expoIn));
+      const ant2 = pr(f, 292, 297, expoOut) * (1 - pr(f, 297, TAKEOVER, expoIn));
       ax += 16 * ant2;
       ay += 20 * ant2;
       if (f >= TAKEOVER) stretch = 1 - 0.12 * Math.sin(Math.PI * pr(f, TAKEOVER, TAKEOVER + 6, expoIO));
       // susto: o ponto pula na frente dela
       if (f >= TAKEOVER + 4 && f < HOP_END + 6) {
         const j = Math.sin(Math.PI * pr(f, TAKEOVER + 4, HOP_END + 6, expoIO));
-        ax += 40 * j;
-        ay += 10 * j;
-        rot += 14 * j;
+        ay -= 30 * j;
+        rot += 8 * j;
       }
     }
   }
   const inBlue = Math.hypot(ax - adC[0], ay - adC[1]) < wipe;
-  const inLight = f >= INFLATE && Math.hypot(ax - (dotFinal[0] + 120), ay - (dotFinal[1] + 70)) < dotRad;
+  const inLight = f >= INFLATE && Math.hypot(ax - dotFinal[0], ay - dotFinal[1]) < dotRad;
   const arrowColor = inLight ? BLUE : inBlue ? ACCENT : BLUE;
   const heartFill = f >= CLICK ? pr(f, CLICK, CLICK + 10) : 0;
 
@@ -216,9 +239,9 @@ const Scene: React.FC = () => {
   const qy = (y: number) => Math.max(900, y);
   void qx;
   void qy;
-  gestures.push(<QMark key="q1" f={f} x={930} y={960} t={(f - 50) / 46} color={arrowColor} s={2.3} rot={-12} />);
-  gestures.push(<QMark key="q2" f={f} x={150} y={1010} t={(f - 64) / 40} color={arrowColor} s={1.9} rot={14} />);
-  gestures.push(<QMark key="q3" f={f} x={950} y={1330} t={(f - 74) / 30} color={arrowColor} s={1.4} rot={-6} />);
+  gestures.push(<QMark key="q1" f={f} x={860} y={560} t={(f - 96) / 56} color={arrowColor} s={2.4} rot={-12} />);
+  gestures.push(<QMark key="q2" f={f} x={200} y={820} t={(f - 108) / 48} color={arrowColor} s={2.0} rot={14} />);
+  gestures.push(<QMark key="q3" f={f} x={880} y={1320} t={(f - 120) / 38} color={arrowColor} s={1.5} rot={-6} />);
   if (f >= CLICK && f < CLICK + 18) {
     [-1, 0, 1].forEach((k) =>
       gestures.push(<Gesture key={`h${k}`} t={(f - CLICK - Math.abs(k)) / 16} color={ACCENT} d={`M${heart[0] - 10 + k * 30} ${heart[1] - 40} Q${heart[0] - 20 + k * 50} ${heart[1] - 90} ${heart[0] - 10 + k * 80} ${heart[1] - 140}`} />),
@@ -240,7 +263,7 @@ const Scene: React.FC = () => {
   let adOverlay: React.ReactNode = null;
   if (f >= AD_START && f < AD_LAND) {
     const dest = mapP(f, PX + 40 + 80, PY + 90 - 24);
-    const t = pr(f, 112, AD_LAND, expoIO);
+    const t = pr(f, 162, AD_LAND, expoIO);
     const cx = lerp(AD_BIG[0], dest[0], t);
     const cy = lerp(AD_BIG[1], dest[1], t);
     const S = lerp(3.4, camK(f), t);
@@ -267,8 +290,8 @@ const Scene: React.FC = () => {
   const dotS = lerp(1, 75, pr(f, INFLATE, INFLATE + 16, expoIn));
   // salto: arco para cima e para a frente, com amassada ao sair e ao cair
   const hopT = cl((f - TAKEOVER - 2) / (HOP_END - TAKEOVER - 2));
-  const hopY = (f >= TAKEOVER + 2 && f < HOP_END ? -240 * 4 * hopT * (1 - hopT) : 0) + (f >= TAKEOVER + 2 ? 70 * Math.min(1, hopT) : 0);
-  const hopX = f >= TAKEOVER + 2 ? 120 * Math.min(1, hopT) : 0; // salta para a frente da seta
+  const hopY = f >= TAKEOVER + 2 && f < HOP_END ? -200 * 4 * hopT * (1 - hopT) : 0; // quica no lugar
+  const hopX = 0;
   const squash = f >= HOP_END && f < HOP_END + 3 ? [1.3, 0.7] : f >= TAKEOVER + 2 && f < HOP_END ? [0.92, 1.1] : [1, 1];
   const dotR = ((DOTL.bb[2] - DOTL.bb[0]) / 2) * dotS;
   const cam = undefined;
@@ -284,7 +307,7 @@ const Scene: React.FC = () => {
       {/* problema: fundo amarelo, tudo azul */}
       <rect width={1080} height={1920} fill={ACCENT} />
       <g filter={textBlur > 0.3 ? 'url(#tb)' : undefined}>
-        <TextBlock id="Q1" f={f} start={[30, 36]} exit={96} colors={{B: BLUE, L: BLUE, O: BLUE}} />
+        <TextBlock id="Q1" f={f} start={[30, 36]} exit={66} colors={{B: BLUE, L: BLUE, O: BLUE}} />
       </g>
       {phone(BLUE, ACCENT, blurA, 'a')}
       {ring}
@@ -294,7 +317,7 @@ const Scene: React.FC = () => {
           <rect width={1080} height={1920} fill={BLUE} />
           {f < REORG ? (
             <g transform={f >= CLICK2 ? `translate(${AD_WORD_C[0]} ${AD_WORD_C[1]}) scale(1) translate(${-AD_WORD_C[0]} ${-AD_WORD_C[1]})` : undefined}>
-              <TextBlock id="A1" f={f} start={[110, 116, 124]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} pulseWord={f >= CLICK2 ? Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 10, expoIO)) : 0} />
+              <TextBlock id="A1" f={f} start={[184, 190, 198]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} pulseWord={f >= CLICK2 ? Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 10, expoIO)) : 0} />
             </g>
           ) : (
             WA.map((w, k) => {
@@ -315,7 +338,6 @@ const Scene: React.FC = () => {
       ) : null}
       {adOverlay}
       {gestures}
-      <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={arrowColor} />
       {f >= REORG ? (() => {
         const w = WA[WA.length - 1];
         const n = WB[WB.length - 1];
@@ -328,11 +350,12 @@ const Scene: React.FC = () => {
         const k2 = n.size / w.size;
         return (
           <g transform={`translate(${hopX} ${hopY}) translate(${x} ${y}) scale(${sc2}) translate(${-w.ox} ${-w.oy})`}>
-            <path d={DOT_LAST.d} fill={LIGHT} transform={`translate(${dc0[0]} ${DOT_LAST.bb[3]}) scale(${squash[0] * dotS} ${squash[1] * dotS}) translate(${-dc0[0]} ${-DOT_LAST.bb[3]})`} />
+            <path d={DOT_LAST.d} fill={LIGHT} transform={`translate(${dc0[0]} ${dc0[1]}) scale(${dotS}) translate(${-dc0[0]} ${-dc0[1]}) translate(${dc0[0]} ${DOT_LAST.bb[3]}) scale(${squash[0]} ${squash[1]}) translate(${-dc0[0]} ${-DOT_LAST.bb[3]})`} />
           </g>
         );
         void k2;
       })() : null}
+      <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={arrowColor} />
       </g>
     </svg>
   );
