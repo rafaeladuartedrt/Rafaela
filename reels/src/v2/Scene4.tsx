@@ -19,7 +19,7 @@ const CLICK = 160;
 const FLATTEN = 228; // a rampa se achata numa linha horizontal (transição)
 export const SCENE4_LEN = FLATTEN + 24;
 
-const BTN = {cx: 810, cy: 896, h: 96};
+const BTN = {cx: 810, cy: 870, h: 96}; // flutua acima do último degrau
 const SC = 1.12; // seta proporcional ao degrau
 const FLAT_Y = 1000;
 const FLAT: [number, number][] = STAIRS3.map((_, i) => [lerp(-40, 1120, i / (STAIRS3.length - 1)), FLAT_Y]);
