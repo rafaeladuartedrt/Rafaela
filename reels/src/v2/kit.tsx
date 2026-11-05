@@ -5,7 +5,7 @@ import data from './textData.json';
 export const BLUE = '#280A96';
 export const LIGHT = '#D7EDE3';
 export const ORANGE = '#FF8A1F';
-export const SW = 7;
+export const SW = 11; // traço mais grosso (v2)
 export const COLORS: Record<string, string> = {B: BLUE, L: LIGHT, O: ORANGE};
 
 export const st = (c: string, w = SW, fill = 'none') => ({
@@ -61,27 +61,27 @@ export const Burst: React.FC<{x: number; y: number; r?: number; n?: number; c: s
   <g>
     {Array.from({length: n}, (_, i) => {
       const a = ((a0 + (spread === 360 ? (i * 360) / n : -spread / 2 + (i * spread) / (n - 1))) * Math.PI) / 180;
-      return <path key={i} d={`M${x + Math.cos(a) * r} ${y + Math.sin(a) * r} L${x + Math.cos(a) * (r + len)} ${y + Math.sin(a) * (r + len)}`} {...st(c, 8)} />;
+      return <path key={i} d={`M${x + Math.cos(a) * r} ${y + Math.sin(a) * r} L${x + Math.cos(a) * (r + len)} ${y + Math.sin(a) * (r + len)}`} {...st(c, 12)} />;
     })}
   </g>
 );
 export const Question: React.FC<{x: number; y: number; s?: number; c: string; rot?: number}> = ({x, y, s = 1, c, rot = 0}) => (
   <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
-    <path d="M-18 -22 C-18 -44 18 -46 18 -22 C18 -6 0 -4 0 12" {...st(c, 8)} />
+    <path d="M-18 -22 C-18 -44 18 -46 18 -22 C18 -6 0 -4 0 12" {...st(c, 12)} />
     <circle cx={0} cy={32} r={6} fill={c} />
   </g>
 );
 export const Scribble: React.FC<{x: number; y: number; s?: number; c: string}> = ({x, y, s = 1, c}) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
     <path d="M-46 6 C-56 -20 -20 -34 -8 -14 C-4 -40 34 -38 30 -10 C56 -16 58 20 30 18 C34 40 -2 42 -6 20 C-24 40 -60 30 -46 6 Z" {...st(c, 7)} />
-    <path d="M-22 -4 L-6 8 M-6 -4 L-22 8 M8 -4 L24 8 M24 -4 L8 8" {...st(c, 6)} />
+    <path d="M-22 -4 L-6 8 M-6 -4 L-22 8 M8 -4 L24 8 M24 -4 L8 8" {...st(c, 9)} />
   </g>
 );
 export const Sparkle: React.FC<{x: number; y: number; s?: number; c: string}> = ({x, y, s = 1, c}) => (
   <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -26 C4 -6 6 -4 26 0 C6 4 4 6 0 26 C-4 6 -6 4 -26 0 C-6 -4 -4 -6 0 -26 Z" fill={c} />
 );
 export const Drop: React.FC<{x: number; y: number; s?: number; c: string}> = ({x, y, s = 1, c}) => (
-  <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -22 C10 -6 16 2 16 10 C16 20 8 26 0 26 C-8 26 -16 20 -16 10 C-16 2 -10 -6 0 -22 Z" {...st(c, 6)} />
+  <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -22 C10 -6 16 2 16 10 C16 20 8 26 0 26 C-8 26 -16 20 -16 10 C-16 2 -10 -6 0 -22 Z" {...st(c, 9)} />
 );
 export const Speed: React.FC<{x: number; y: number; c: string; n?: number; len?: number; ang?: number}> = ({x, y, c, n = 3, len = 90, ang = 180}) => {
   const a = (ang * Math.PI) / 180;
@@ -107,7 +107,7 @@ const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number}> = (
       <g>
         <circle cx={-14} cy={y - 4} r={11} fill={c} />
         <circle cx={14} cy={y - 4} r={11} fill={c} />
-        <path d={`M-3 ${y - 5} L3 ${y - 5}`} {...st(c, 5)} />
+        <path d={`M-3 ${y - 5} L3 ${y - 5}`} {...st(c, 8)} />
       </g>
     ) : (
       <g>
@@ -115,7 +115,7 @@ const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number}> = (
         <circle cx={12} cy={y - 4} r={4} fill={c} />
       </g>
     )}
-    <path d={`M-11 ${y + 12} Q0 ${y + 20} 11 ${y + 12}`} {...st(c, 5)} />
+    <path d={`M-11 ${y + 12} Q0 ${y + 20} 11 ${y + 12}`} {...st(c, 8)} />
   </g>
 );
 const Torso: React.FC<{c: string; bg: string; y0?: number; y1?: number}> = ({c, bg, y0 = -138, y1 = -64}) => (
@@ -128,11 +128,11 @@ export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: str
         <path d="M-40 -142 L-44 -60 L30 -60" {...st(c)} />
         <circle cx={-6} cy={-46} r={46} {...st(c, SW, bg)} />
         {[0, 45, 90, 135].map((a) => (
-          <path key={a} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, 4)} />
+          <path key={a} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, 9)} />
         ))}
         <circle cx={-6} cy={-46} r={6} fill={c} />
         <circle cx={46} cy={-8} r={8} {...st(c, 6, bg)} />
-        <path d="M30 -60 L46 -16" {...st(c, 6)} />
+        <path d="M30 -60 L46 -16" {...st(c, 9)} />
         <Head c={c} bg={bg} y={-196} />
         <Torso c={c} bg={bg} y0={-158} y1={-92} />
         <path d="M-20 -92 L34 -92 L40 -24 M10 -92 L18 -26 M40 -24 L54 -22 M18 -26 L30 -24" {...st(c)} />
@@ -148,7 +148,7 @@ export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: str
         <Head c={c} bg={bg} glasses />
         <path d="M-22 -128 L-38 -84" {...st(c)} />
         <path d="M22 -128 L42 -90" {...st(c)} />
-        <path d="M42 -92 L92 0" {...st(c, 6)} />
+        <path d="M42 -92 L92 0" {...st(c, 9)} />
       </g>
     );
   if (kind === 'dog')
@@ -160,19 +160,19 @@ export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: str
         <path d="M-22 -128 L-38 -84" {...st(c)} />
         <path d="M22 -128 L50 -96 L78 -96" {...st(c)} />
         {/* cão-guia com guia rígida */}
-        <path d="M78 -96 L96 -58" {...st(c, 6)} />
+        <path d="M78 -96 L96 -58" {...st(c, 9)} />
         <path d="M84 -56 Q120 -64 150 -56 L152 -30 Q120 -24 86 -30 Z" {...st(c, SW, bg)} />
         <path d="M150 -58 Q160 -86 178 -78 Q192 -72 186 -58 Q176 -50 156 -52" {...st(c, SW, bg)} />
-        <path d="M170 -80 Q166 -64 160 -66" {...st(c, 5)} />
+        <path d="M170 -80 Q166 -64 160 -66" {...st(c, 8)} />
         <circle cx={180} cy={-70} r={3.5} fill={c} />
-        <path d="M94 -30 L92 0 M112 -28 L112 0 M132 -28 L134 0 M148 -30 L150 0 M86 -50 Q72 -60 68 -76" {...st(c, 6)} />
+        <path d="M94 -30 L92 0 M112 -28 L112 0 M132 -28 L134 0 M148 -30 L150 0 M86 -50 Q72 -60 68 -76" {...st(c, 9)} />
         <path d="M96 -58 L120 -58" {...st(c, 9)} />
       </g>
     );
   return (
     <g>
       {legs}
-      <path d="M-44 -100 L-52 0 M44 -100 L52 0 M-44 -100 L-30 -104 M44 -100 L30 -104" {...st(c, 6)} />
+      <path d="M-44 -100 L-52 0 M44 -100 L52 0 M-44 -100 L-30 -104 M44 -100 L30 -104" {...st(c, 9)} />
       <Torso c={c} bg={bg} />
       <Head c={c} bg={bg} />
       <path d="M-22 -128 L-40 -96 M22 -128 L40 -96" {...st(c)} />
@@ -190,7 +190,7 @@ export const Phone: React.FC<{c: string; bg: string; people?: boolean; children?
       <rect x={x + 22} y={y + 22} width={w - 44} height={h - 44} rx={rx - 20} {...st(c, 4, bg)} />
       <rect x={x + w / 2 - 50} y={y + 40} width={100} height={22} rx={11} fill={c} />
       {/* interface do post */}
-      <path d={`M${x + 52} ${y + h - 70} L${x + w - 52} ${y + h - 70}`} {...st(c, 5)} />
+      <path d={`M${x + 52} ${y + h - 70} L${x + w - 52} ${y + h - 70}`} {...st(c, 8)} />
       <circle cx={x + 170} cy={y + h - 70} r={10} fill={c} />
       {[0, 1, 2].map((i) => {
         const ix = x + w - 74;
@@ -208,8 +208,8 @@ export const People: React.FC<{c: string; bg: string}> = ({c, bg}) => (
   <g>
     {/* sol e chão da foto */}
     <circle cx={PHONE.x + 300} cy={PHONE.y + 150} r={36} fill={c} />
-    <path d={`M${PHONE.x + 44} ${PHONE.y + 470} L${PHONE.x + PHONE.w - 120} ${PHONE.y + 470}`} {...st(c, 5)} />
-    <path d={`M${PHONE.x + 44} ${PHONE.y + 720} L${PHONE.x + PHONE.w - 44} ${PHONE.y + 720}`} {...st(c, 5)} />
+    <path d={`M${PHONE.x + 44} ${PHONE.y + 470} L${PHONE.x + PHONE.w - 120} ${PHONE.y + 470}`} {...st(c, 8)} />
+    <path d={`M${PHONE.x + 44} ${PHONE.y + 720} L${PHONE.x + PHONE.w - 44} ${PHONE.y + 720}`} {...st(c, 8)} />
     <g transform={`translate(${PHONE.x + 140} ${PHONE.y + 470}) scale(0.9)`}><Person kind="wheel" c={c} bg={bg} /></g>
     <g transform={`translate(${PHONE.x + 300} ${PHONE.y + 470}) scale(0.9)`}><Person kind="cane" c={c} bg={bg} /></g>
     <g transform={`translate(${PHONE.x + 100} ${PHONE.y + 720}) scale(0.9)`}><Person kind="dog" c={c} bg={bg} /></g>
@@ -222,3 +222,56 @@ export const STAIRS3: [number, number][] = [[60, 1400], [250, 1400], [250, 1250]
 // a mesma linha transformada em rampa (mesmo número de pontos)
 export const RAMP3: [number, number][] = [[60, 1400], ...[1, 2, 3, 4, 5].map((k) => [60 + (630 * k) / 6, 1400 - (450 * k) / 6] as [number, number]), [690, 950], [930, 950]];
 export const lineD = (P: [number, number][]) => P.map((p, i) => `${i ? 'L' : 'M'}${p[0]} ${p[1]}`).join('');
+
+// ---------- SETA COM RIG ELÁSTICO ----------
+// Continua sempre seta. O corpo pode esticar/amassar (com volume preservado), curvar, inchar e tremer como gelatina.
+// Eixo do corpo: da ponta para a cauda. Deformações calculadas sobre o contorno subdividido.
+const AX: [number, number] = [0.336, 0.942];
+const PX: [number, number] = [-0.942, 0.336];
+// proporções mais robustas (haste e cabeça mais largas)
+const ARROW_PTS: [number, number][] = [[0, 0], [0, 80], [18, 64], [29, 92], [53, 82], [42, 58], [66, 56]].map(([a, b]) => [a * S, b * S]);
+const DENSE: [number, number][] = (() => {
+  const out: [number, number][] = [];
+  for (let i = 0; i < ARROW_PTS.length; i++) {
+    const a = ARROW_PTS[i];
+    const b = ARROW_PTS[(i + 1) % ARROW_PTS.length];
+    const n = Math.max(4, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 6));
+    for (let k = 0; k < n; k++) out.push([a[0] + ((b[0] - a[0]) * k) / n, a[1] + ((b[1] - a[1]) * k) / n]);
+  }
+  return out;
+})();
+const AXLEN = 87 * S;
+export type Rig = {stretch?: number; bend?: number; bulge?: number; wobble?: number; phase?: number; lean?: number};
+export const rigPoints = ({stretch = 1, bend = 0, bulge = 0, wobble = 0, phase = 0, lean = 0}: Rig) => {
+  const vol = 1 / Math.sqrt(Math.min(1.25, Math.max(0.7, stretch)));
+  // centro de massa como origem
+  const cA = 45 * S * 0.9;
+  return DENSE.map(([x, y]) => {
+    const t = (x * AX[0] + y * AX[1]) / AXLEN; // 0 ponta, 1 cauda
+    let n = x * PX[0] + y * PX[1];
+    let ta = (t * AXLEN - cA) * Math.min(1.25, Math.max(0.7, stretch));
+    n *= vol * (1 + bulge * Math.sin(Math.PI * Math.min(1, Math.max(0, t))));
+    n += wobble * 16 * Math.sin(t * Math.PI * 2.4 - phase) * (0.3 + t);
+    n += lean * ta * 0.4;
+    // curvatura concentrada na haste; a cabeça (triângulo) só se inclina
+    const tc = Math.min(1, Math.max(0, (t - 0.55) / 0.45));
+    const ang = bend * (0.18 + 0.82 * Math.pow(tc, 1.4));
+    const ux = AX[0] * Math.cos(ang) - AX[1] * Math.sin(ang);
+    const uy = AX[0] * Math.sin(ang) + AX[1] * Math.cos(ang);
+    const vx = -uy;
+    const vy = ux;
+    const r = ta;
+    return [ux * r + vx * -n * -1, uy * r + vy * -n * -1] as [number, number];
+  });
+};
+export const RubberArrow: React.FC<{x: number; y: number; rot?: number; scale?: number; rig?: Rig}> = ({x, y, rot = 0, scale = 1, rig = {}}) => {
+  const P = rigPoints(rig);
+  const d = P.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join('') + 'Z';
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${scale})`}>
+      {/* contorno azul externo (só aparece sobre fundo claro) e corpo laranja com cantos arredondados */}
+      <path d={d} fill={BLUE} stroke={BLUE} strokeWidth={SW + 20} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <path d={d} fill={ORANGE} stroke={ORANGE} strokeWidth={18} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </g>
+  );
+};
