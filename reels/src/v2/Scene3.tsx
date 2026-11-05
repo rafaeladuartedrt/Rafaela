@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
-import {BLUE, LIGHT, ACCENT, T2, RubberArrow} from './kit';
+import {BLUE, LIGHT, ACCENT, T2, RubberArrow, STAIRS3} from './kit';
 
 // ============ CENA 3: AUDIÇÃO ============
 const expoOut = Easing.bezier(0.16, 1, 0.3, 1);
@@ -18,6 +18,15 @@ const SILENCE_END = CUT + 62; // 2 segundos de silêncio absoluto
 const BAND = SILENCE_END; // a linha engrossa e varre a tela de azul
 const BARS = BAND + 18;
 const WAVE_Y = 1060;
+// transição para a cena 4: legendas voltam a ser barras, empilham como degraus e o claro sobe de baixo
+const FOLD = 196;
+const STACK = 208;
+const RISE = 222;
+const TREADS: [number, number, number][] = [
+  [STAIRS3[6][0], STAIRS3[7][0], STAIRS3[6][1]], // linha de cima > degrau mais alto
+  [STAIRS3[4][0], STAIRS3[5][0], STAIRS3[4][1]],
+  [STAIRS3[2][0], STAIRS3[3][0], STAIRS3[2][1]],
+];
 
 const Gesture: React.FC<{d: string; t: number; color: string; w?: number}> = ({d, t, color, w = 10}) => {
   if (t <= 0 || t >= 1) return null;
@@ -104,27 +113,67 @@ const Scene: React.FC = () => {
       </g>
     ) : null;
 
-  // ---- solução: barras de legenda que se desdobram em texto ----
-  const bars: React.ReactNode[] = [];
-  const sol: React.ReactNode[] = [];
-  if (f >= BARS) {
+  // ---- solução: barras de legenda que se desdobram em texto (e depois se dobram e viram degraus) ----
+  const stackT = pr(f, STACK, STACK + 18, expoIO);
+  const barsFor = (col: string): React.ReactNode[] => {
+    const out: React.ReactNode[] = [];
+    if (f < BARS) return out;
     T2.S3.lines.forEach((ln, li) => {
       const y = (ln.bb[1] + ln.bb[3]) / 2;
       const x1 = ln.bb[0];
       const x2 = ln.bb[2];
       const grow = pr(f, BARS + li * 3, BARS + li * 3 + 10, expoOut);
-      const wx = lerp(x1 - 30, x2 + 30, pr(f, BARS + 10 + li * 3, BARS + 26 + li * 3, expoIO));
+      // cabeça que transforma barra em letra (ida) e letra em barra (volta)
+      const wIn = lerp(x1 - 30, x2 + 30, pr(f, BARS + 10 + li * 3, BARS + 26 + li * 3, expoIO));
+      const wOut = lerp(x2 + 30, x1 - 30, pr(f, FOLD + li * 2, FOLD + 12 + li * 2, expoIO));
+      const folding = f >= FOLD;
       const cx = (x1 + x2) / 2;
-      const bx1 = Math.max(lerp(cx, x1, grow), wx);
-      const bx2 = lerp(cx, x2, grow);
-      if (bx2 > bx1) bars.push(<path key={`b${li}`} d={`M${bx1} ${y} L${bx2} ${y}`} stroke={LIGHT} strokeWidth={34} strokeLinecap="round" />);
+      let bx1 = folding ? Math.max(x1, wOut) : Math.max(lerp(cx, x1, grow), wIn);
+      let bx2 = folding ? x2 : lerp(cx, x2, grow);
+      let by = y;
+      let bw = 34;
+      if (f >= STACK) {
+        const [tx1, tx2, ty] = TREADS[li];
+        bx1 = lerp(x1, tx1, stackT);
+        bx2 = lerp(x2, tx2, stackT);
+        by = lerp(y, ty, stackT) - 60 * Math.sin(Math.PI * stackT) * (1 + li * 0.3);
+        bw = lerp(34, 11, stackT);
+      }
+      if (bx2 > bx1) out.push(<path key={`b${li}`} d={`M${bx1} ${by} L${bx2} ${by}`} stroke={col} strokeWidth={bw} strokeLinecap="round" />);
+    });
+    return out;
+  };
+  const lettersFor = (colL: string, colO: string): React.ReactNode[] => {
+    const out: React.ReactNode[] = [];
+    if (f < BARS || f >= STACK) return out;
+    T2.S3.lines.forEach((ln, li) => {
+      const y = (ln.bb[1] + ln.bb[3]) / 2;
+      const wIn = lerp(ln.bb[0] - 30, ln.bb[2] + 30, pr(f, BARS + 10 + li * 3, BARS + 26 + li * 3, expoIO));
+      const wOut = lerp(ln.bb[2] + 30, ln.bb[0] - 30, pr(f, FOLD + li * 2, FOLD + 12 + li * 2, expoIO));
       ln.letters.forEach((l, i) => {
-        if (wx < l.bb[0]) return;
-        const s = 0.18 + 0.82 * expoOut(cl((wx - l.bb[0]) / 90));
-        sol.push(<path key={`s${li}-${i}`} d={l.d} fill={l.color === 'O' ? ACCENT : LIGHT} transform={`translate(0 ${y}) scale(1 ${s}) translate(0 ${-y})`} />);
+        let s2: number;
+        if (f < FOLD) {
+          if (wIn < l.bb[0]) return;
+          s2 = 0.18 + 0.82 * expoOut(cl((wIn - l.bb[0]) / 90));
+        } else {
+          if (wOut < l.bb[0]) return;
+          s2 = 0.18 + 0.82 * cl((wOut - l.bb[0]) / 90);
+        }
+        out.push(<path key={`s${li}-${i}`} d={l.d} fill={l.color === 'O' ? colO : colL} transform={`translate(0 ${y}) scale(1 ${s2}) translate(0 ${-y})`} />);
       });
     });
-  }
+    return out;
+  };
+  // espelhos e chão da escada se desenham quando as barras assentam
+  const stairExtras = (col: string) =>
+    f >= STACK + 12 ? (
+      <g>
+        <Draw t={(f - STACK - 12) / 10} color={col} w={11} d={`M${STAIRS3[0][0]} ${STAIRS3[0][1]} L${STAIRS3[1][0]} ${STAIRS3[1][1]} L${STAIRS3[2][0]} ${STAIRS3[2][1]}`} />
+        <Draw t={(f - STACK - 14) / 8} color={col} w={11} d={`M${STAIRS3[3][0]} ${STAIRS3[3][1]} L${STAIRS3[4][0]} ${STAIRS3[4][1]}`} />
+        <Draw t={(f - STACK - 16) / 8} color={col} w={11} d={`M${STAIRS3[5][0]} ${STAIRS3[5][1]} L${STAIRS3[6][0]} ${STAIRS3[6][1]}`} />
+      </g>
+    ) : null;
+  const riseTop = lerp(1960, -40, pr(f, RISE, RISE + 20, expoIO));
 
   // ---- SETA ----
   let ax = lerp(930, 820, pr(f, 0, 14, expoIO));
@@ -156,8 +205,18 @@ const Scene: React.FC = () => {
     stretch = lerp(0.86, 1, t) + 0.12 * Math.sin(Math.PI * t);
     sc = lerp(1.3, 1.5, t);
   }
+  if (f >= FOLD + 4) {
+    const t = pr(f, FOLD + 4, FOLD + 28, expoIO);
+    const fx = 860;
+    const fy = 1300;
+    ax = lerp(fx, 140, t);
+    ay = lerp(fy, 1316, t) - 220 * Math.sin(Math.PI * t);
+    rot = lerp(-24, -10, t) - 360 * pr(f, FOLD + 6, FOLD + 26, expoIO);
+    stretch = f >= FOLD + 28 && f < FOLD + 36 ? 1 - 0.12 * Math.sin(Math.PI * pr(f, FOLD + 28, FOLD + 36, expoIO)) : 1 + 0.1 * Math.sin(Math.PI * t);
+    sc = 1.5;
+  }
   const inBand = Math.abs(ay - WAVE_Y) < band / 2;
-  const arrowColor = inBand ? ACCENT : BLUE;
+  const arrowColor = ay > riseTop ? BLUE : inBand ? ACCENT : BLUE;
 
   const gestures: React.ReactNode[] = [];
   if (f >= BAND + 30 && f < BAND + 48) {
@@ -168,7 +227,10 @@ const Scene: React.FC = () => {
 
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
-      <defs>{[0, 1].map((li) => lineClip('F1', li, `F1c${li}`))}</defs>
+      <defs>
+        {[0, 1].map((li) => lineClip('F1', li, `F1c${li}`))}
+        <clipPath id="rise"><rect x={-20} y={riseTop} width={1120} height={2000} /></clipPath>
+      </defs>
       <rect width={1080} height={1920} fill={LIGHT} />
       {words}
       {speaker}
@@ -177,8 +239,16 @@ const Scene: React.FC = () => {
         <path d={wavePath(Math.min(f, BAND))} fill="none" stroke={BLUE} strokeWidth={11} strokeLinecap="round" pathLength={1} strokeDasharray={`${f < 16 ? expoOut(cl((f - 2) / 14)) : 1} 2`} />
       ) : null}
       {band > 11 ? <rect x={-20} y={WAVE_Y - band / 2} width={1120} height={band} fill={BLUE} /> : null}
-      {bars}
-      {sol}
+      {barsFor(LIGHT)}
+      {lettersFor(LIGHT, ACCENT)}
+      {stairExtras(LIGHT)}
+      {f >= RISE ? (
+        <g clipPath="url(#rise)">
+          <rect width={1080} height={1920} fill={LIGHT} />
+          {barsFor(BLUE)}
+          {stairExtras(BLUE)}
+        </g>
+      ) : null}
       {gestures}
       <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={arrowColor} />
     </svg>

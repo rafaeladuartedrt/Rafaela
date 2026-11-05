@@ -25,7 +25,7 @@ export const Root: React.FC = () => (
     <Composition id="Layouts" component={Layouts} durationInFrames={5} fps={30} width={1080} height={1920} />
     <Composition id="Cena2" component={Scene2} durationInFrames={338} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
     <Composition id="Cena2SemBlur" component={Scene2} durationInFrames={338} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
-    <Composition id="Cena3" component={Scene3} durationInFrames={220} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
-    <Composition id="Cena3SemBlur" component={Scene3} durationInFrames={220} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
+    <Composition id="Cena3" component={Scene3} durationInFrames={256} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
+    <Composition id="Cena3SemBlur" component={Scene3} durationInFrames={256} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
   </>
 );
