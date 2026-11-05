@@ -1,0 +1,13 @@
+1
+00:00:00,500 --> 00:00:02,300
+Fica até o fim.
+
+2
+00:00:03,500 --> 00:00:05,800
+Sem descrição,
+a imagem some.
+
+3
+00:00:26,533 --> 00:00:29,633
+Acessibilidade é direito.
+E começa nos detalhes.

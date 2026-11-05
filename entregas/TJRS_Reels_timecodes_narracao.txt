@@ -1,0 +1,37 @@
+REELS TJRS | DIA INTERNACIONAL DAS PESSOAS COM DEFICIÊNCIA (3/12)
+Roteiro de locução com timecodes exatos
+Vídeo: 30 s | 30 fps | 900 frames | timecode no formato HH:MM:SS:FF (FF = frame, 0 a 29)
+
+Os timecodes abaixo são os mesmos usados na legenda queimada da versão acessível.
+A fala deve começar no IN e terminar até o OUT.
+
+FALA 1 | Cena 1, Gancho
+IN  00:00:00:15  (0,50 s)
+OUT 00:00:02:09  (2,30 s)
+Janela: 1,80 s
+Texto: "Fica até o fim."
+Direção: voz próxima, tom de convite, sem pressa. Termina antes da tela começar a mudar (3 s).
+
+FALA 2 | Cena 2, Visão
+IN  00:00:03:15  (3,50 s)
+OUT 00:00:05:24  (5,80 s)
+Janela: 2,30 s
+Texto: "Sem descrição, a imagem some."
+Direção: mais baixa e contida, acompanhando o post que se apaga. Pequena pausa na vírgula.
+
+SEM NARRAÇÃO de 00:00:05:24 a 00:00:26:16
+Atenção: de 00:00:11:15 a 00:00:13:15 (11,5 s a 13,5 s) o vídeo tem SILÊNCIO TOTAL obrigatório.
+Não incluir locução, respiração ou ruído de sala nesse trecho.
+
+FALA 3 | Cena 5, Virada
+IN  00:00:26:16  (26,53 s)
+OUT 00:00:29:19  (29,63 s)
+Janela: 3,10 s
+Texto: "Acessibilidade é direito. E começa nos detalhes."
+Direção: firme e calorosa. "Acessibilidade é direito." entra junto com a frase escrita na tela.
+Respiro curto entre as duas frases. Terminar antes de 29,7 s para preservar o loop.
+
+ENTREGA DA LOCUÇÃO
+WAV 48 kHz / 24 bits, mono, sem trilha. Na mixagem final, mixar a voz por cima de
+"TJRS_Reels_trilha_e_efeitos_-14LUFS.wav" e renormalizar o conjunto para -14 LUFS integrados
+(true peak até -1 dBTP), mantendo o silêncio digital de 11,5 s a 13,5 s.
