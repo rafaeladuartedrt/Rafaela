@@ -8,6 +8,7 @@ import {DepthPreview} from './v2/DepthPreview';
 import {OpeningPreview} from './v2/OpeningPreview';
 import {OpeningPro} from './v2/OpeningPro';
 import {Layouts} from './v2/Layouts';
+import {Scene2} from './v2/Scene2';
 
 export const Root: React.FC = () => (
   <>
@@ -21,5 +22,7 @@ export const Root: React.FC = () => (
     <Composition id="AberturaPro" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
     <Composition id="AberturaProSemBlur" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
     <Composition id="Layouts" component={Layouts} durationInFrames={5} fps={30} width={1080} height={1920} />
+    <Composition id="Cena2" component={Scene2} durationInFrames={210} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
+    <Composition id="Cena2SemBlur" component={Scene2} durationInFrames={210} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
   </>
 );

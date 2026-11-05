@@ -277,6 +277,23 @@ export const RubberArrow: React.FC<{x: number; y: number; rot?: number; scale?: 
 };
 
 // ---------- POST DE REDE SOCIAL COM FOTO EM TRAÇO ----------
+export const HEART_D = 'M0 26 C-14 14 -36 0 -36 -14 C-36 -28 -24 -36 -13 -36 C-6 -36 -2 -32 0 -26 C2 -32 6 -36 13 -36 C24 -36 36 -28 36 -14 C36 0 14 14 0 26 Z';
+// Selo de audiodescrição: letras AD + ondas de som. p = progresso do desenho (0..1)
+export const ADMark: React.FC<{x: number; y: number; c: string; p: number; s?: number}> = ({x, y, c, p, s = 1}) => {
+  const ad = T2.ad.lines[0];
+  const pop = 1 + 0.25 * Math.sin(Math.PI * Math.min(1, p * 1.6)) * (p < 0.62 ? 1 : 0);
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s * Math.min(1, p * 2.2) * pop})`}>
+      {ad.letters.map((l, i) => <path key={i} d={l.d} fill={c} />)}
+      {[22, 40, 58].map((r, i) => {
+        const q = Math.min(1, Math.max(0, (p - 0.3 - i * 0.12) / 0.3));
+        if (q <= 0) return null;
+        const a = 0.85 * q;
+        return <path key={i} d={`M${104 + r * Math.cos(-a)} ${-24 + r * Math.sin(-a)} A${r} ${r} 0 0 1 ${104 + r * Math.cos(a)} ${-24 + r * Math.sin(a)}`} {...st(c, 8)} />;
+      })}
+    </g>
+  );
+};
 // Pessoas em proporção natural, numa praça: mulher cadeirante, homem cego com bengala e cão-guia.
 const ManCane: React.FC<{c: string; bg: string}> = ({c, bg}) => (
   <g>
@@ -335,7 +352,7 @@ export const PostPhoto: React.FC<{c: string; bg: string; x: number; y: number; s
     <g transform={`translate(${214 + roll} ${404 + bob}) scale(1.45)`}><Person kind="wheel" c={c} bg={bg} W={6.5} spin={-roll * 1.1} /></g>
   </g>
 );
-export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode; roll?: number; bob?: number}> = ({c, bg, photo, roll = 0, bob = 0}) => {
+export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode; roll?: number; bob?: number; blur?: number; ad?: number; heart?: number; heartColor?: string; hide?: boolean; uid?: string}> = ({c, bg, photo, roll = 0, bob = 0, blur = 0, ad = 0, heart = 0, heartColor, hide = false, uid = ''}) => {
   const {x, y, w, h, rx} = PHONE;
   const px = x + 44;
   const py = y + 150;
@@ -355,12 +372,22 @@ export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNod
       <path d={`M${x + w - 92} ${y + 104} L${x + w - 92} ${y + 104} M${x + w - 72} ${y + 104} L${x + w - 72} ${y + 104} M${x + w - 52} ${y + 104} L${x + w - 52} ${y + 104}`} {...st(c, 9)} />
       {/* foto */}
       <defs>
-        <clipPath id="photoClip"><rect x={px} y={py} width={ps} height={ps} rx={20} /></clipPath>
+        <clipPath id={`photoClip${uid}`}><rect x={px} y={py} width={ps} height={ps} rx={20} /></clipPath>
       </defs>
-      <g clipPath="url(#photoClip)">{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} roll={roll} bob={bob} />}</g>
+      <defs>
+        <filter id={`visao${uid}`} x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation={blur} /></filter>
+      </defs>
+      <g clipPath={`url(#photoClip${uid})`}>
+        <g filter={blur > 0.2 ? `url(#visao${uid})` : undefined}>{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} roll={roll} bob={bob} />}</g>
+        {ad > 0 ? <ADMark x={px + 40} y={py + 90} c={c} p={ad} /> : null}
+      </g>
       <rect x={px} y={py} width={ps} height={ps} rx={20} {...st(c, T)} />
       {/* ações */}
-      {icon('M0 26 C-14 14 -36 0 -36 -14 C-36 -28 -24 -36 -13 -36 C-6 -36 -2 -32 0 -26 C2 -32 6 -36 13 -36 C24 -36 36 -28 36 -14 C36 0 14 14 0 26 Z', px + 26, py + ps + 52, 'h')}
+      {heart > 0 ? (
+        <path transform={`translate(${px + 26} ${py + ps + 52}) scale(${0.62 * (1 + 0.35 * Math.sin(Math.PI * Math.min(1, heart)))})`} d={HEART_D} fill={heartColor ?? c} stroke={heartColor ?? c} strokeWidth={5} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      ) : (
+        icon(HEART_D, px + 26, py + ps + 52, 'h')
+      )}
       {icon('M-18 25 C-31 18 -38 9 -38 -3 C-38 -20 -21 -32 0 -32 C21 -32 38 -20 38 -3 C38 15 21 27 0 27 C-5 27 -10 26 -14 25 L-32 36 Z', px + 92, py + ps + 52, 'c')}
       {icon('M-36 -2 L36 -32 L12 34 L1 8 Z M1 8 L36 -32', px + 158, py + ps + 52, 's')}
       {icon('M-22 -34 L22 -34 L22 36 L0 18 L-22 36 Z', px + ps - 20, py + ps + 52, 'b')}
