@@ -72,8 +72,39 @@ const Scene: React.FC = () => {
   const f = useCurrentFrame();
   const band = 2300 * pr(f, BAND, BAND + 18, expoIO);
 
-  // ---- problema: "Ficou fora dessa conversa?" pulsando com a batida ----
+  // ---- problema: "Ficou de fora dessa conversa?" pulsando com a batida ----
   const live = f < CUT ? beat(f) : 0;
+  // ---- bloco sólido de "conversa?" ----
+  let pill: React.ReactNode = null;
+  let pillClip: React.ReactNode = null;
+  {
+    const ln = T2.F1.lines[1];
+    const wl = ln.letters.filter((x) => x.word === 1);
+    const st = 14 + ln.letters.indexOf(wl[0]) * 0.7;
+    if (f >= st) {
+      const x1 = wl[0].bb[0] - 24;
+      const x2 = wl[wl.length - 1].bb[2] + 24;
+      const y1 = ln.y - wl[0].size * 0.78;
+      const y2 = ln.y + wl[0].size * 0.3;
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+      const inP = pr(f, st - 2, st + 10, expoOut);
+      const extra = 1 + 0.05 * live;
+      const flat = lerp(1, 11 / (y2 - y1), pr(f, CUT, CUT + 7, expoOut));
+      const gone = 1 - pr(f, CUT + 9, CUT + 22, expoIn);
+      if (gone > 0.001) {
+        const h = (y2 - y1) * flat * extra * inP;
+        const w = (x2 - x1) * extra * gone * lerp(0.4, 1, inP);
+        pill = <rect x={cx - w / 2} y={cy - h / 2} width={w} height={h} rx={Math.min(h, w) / 2} fill={BLUE} />;
+        pillClip = (
+          <clipPath id="pillc">
+            <rect x={cx - w / 2} y={cy - h / 2} width={w} height={h} rx={Math.min(h, w) / 2} />
+          </clipPath>
+        );
+      }
+    }
+  }
+
   const words: React.ReactNode[] = [];
   T2.F1.lines.forEach((ln, li) => {
     const cy = (ln.bb[1] + ln.bb[3]) / 2;
@@ -95,8 +126,8 @@ const Scene: React.FC = () => {
         tr += ` translate(${wx} ${ln.y - l.size * 0.25}) scale(${extra * gone} ${extra * flat}) translate(${-wx} ${-(ln.y - l.size * 0.25)})`;
       }
       words.push(
-        <g key={`${li}-${i}`} clipPath={`url(#F1c${li})`}>
-          <path d={l.d} fill={BLUE} transform={tr} />
+        <g key={`${li}-${i}`} clipPath={isConversa ? (f < CUT ? 'url(#pillc)' : undefined) : `url(#F1c${li})`}>
+          <path d={l.d} fill={isConversa ? ACCENT : BLUE} transform={tr} />
         </g>,
       );
     });
@@ -229,9 +260,11 @@ const Scene: React.FC = () => {
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
       <defs>
         {[0, 1].map((li) => lineClip('F1', li, `F1c${li}`))}
+        {pillClip}
         <clipPath id="rise"><rect x={-20} y={riseTop} width={1120} height={2000} /></clipPath>
       </defs>
       <rect width={1080} height={1920} fill={LIGHT} />
+      {pill}
       {words}
       {speaker}
       {/* a onda: viva, depois reta; no fim engrossa e varre a tela */}
