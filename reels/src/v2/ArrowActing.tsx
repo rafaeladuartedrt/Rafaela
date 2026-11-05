@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, spring, Easing} from 'remotion';
-import {BLUE, LIGHT, ORANGE, st, RubberArrow, Burst, Question, Scribble, Speed} from './kit';
+import {BLUE, LIGHT, ACCENT, st, RubberArrow, Burst, Question, Scribble, Speed} from './kit';
 
 const io = Easing.bezier(0.65, 0, 0.35, 1);
 const outQ = Easing.bezier(0.22, 1, 0.36, 1);
@@ -31,7 +31,7 @@ export const ArrowActing: React.FC = () => {
     rot = -10 * up;
     y = 960 - 40 * up;
     bulge = -0.15 * up;
-    if (up > 0.6) fx.push(<Burst key="b" x={x - 40} y={y - 190} r={40} n={3} c={ORANGE} a0={-100} spread={70} len={36} />);
+    if (up > 0.6) fx.push(<Burst key="b" x={x - 40} y={y - 190} r={40} n={3} c={ACCENT} a0={-100} spread={70} len={36} />);
   } else if (f < 88) {
     // PERDIDA: encolhe, murcha, gira devagar procurando, corpo bamboleia
     label = 'perdida';
@@ -42,8 +42,8 @@ export const ArrowActing: React.FC = () => {
     bend = 0.4 * Math.sin(g * 0.22);
     wobble = 0.25;
     x = 540 + 60 * Math.sin(g * 0.11);
-    fx.push(<Question key="q1" x={430} y={760 + 6 * Math.sin(g * 0.3)} c={ORANGE} s={1.3} rot={-12} />);
-    if (g > 14) fx.push(<Question key="q2" x={660} y={740 + 6 * Math.cos(g * 0.3)} c={ORANGE} s={0.9} rot={14} />);
+    fx.push(<Question key="q1" x={430} y={760 + 6 * Math.sin(g * 0.3)} c={ACCENT} s={1.3} rot={-12} />);
+    if (g > 14) fx.push(<Question key="q2" x={660} y={740 + 6 * Math.cos(g * 0.3)} c={ACCENT} s={0.9} rot={14} />);
   } else if (f < 134) {
     // FRUSTRADA: antecipa, avança, bate na parede, amassa, treme de raiva e murcha
     label = 'frustrada';
@@ -61,10 +61,10 @@ export const ArrowActing: React.FC = () => {
       x = 730 - 40 * pr(f, 112, 124, outQ) + 4 * Math.sin(f * 2.1) * (f < 120 ? 1 : 0);
       scale = SC * (1 - 0.12 * pr(f, 122, 132));
       bend = -0.2 * pr(f, 122, 132);
-      fx.push(<Burst key="i" x={815} y={960} r={30} n={7} c={ORANGE} a0={180} spread={150} len={44} />);
-      if (f > 110) fx.push(<Scribble key="s" x={680} y={790 + 4 * Math.sin(f * 1.7)} c={ORANGE} s={1.3} />);
+      fx.push(<Burst key="i" x={815} y={960} r={30} n={7} c={ACCENT} a0={180} spread={150} len={44} />);
+      if (f > 110) fx.push(<Scribble key="s" x={680} y={790 + 4 * Math.sin(f * 1.7)} c={ACCENT} s={1.3} />);
     }
-    if (!hit && go > 0) fx.push(<Speed key="sp" x={x - 120} y={y} c={ORANGE} len={110} ang={180} />);
+    if (!hit && go > 0) fx.push(<Speed key="sp" x={x - 120} y={y} c={ACCENT} len={110} ang={180} />);
   } else if (f < 180) {
     // ALEGRE: quica com amassada no chão, estica no ar, dá uma pirueta, treme feliz
     label = 'alegre';
@@ -78,7 +78,7 @@ export const ArrowActing: React.FC = () => {
     rot = g >= 15 && g < 30 ? 360 * io(ph) : 0;
     wobble = 0.15 * Math.sin(g * 0.9);
     fx.push(<path key="g" d="M380 1180 L700 1180" {...st(LIGHT)} />);
-    if (ph < 0.15) fx.push(<Burst key="j" x={540} y={1160} r={70} n={5} c={ORANGE} a0={-90} spread={160} len={30} />);
+    if (ph < 0.15) fx.push(<Burst key="j" x={540} y={1160} r={70} n={5} c={ACCENT} a0={-90} spread={160} len={30} />);
   } else {
     // CONTENTE: balança tranquila, respira, curva de um lado para o outro
     label = 'contente';

@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
-import {BLUE, LIGHT, ORANGE, SW, st, Words, T2, Arrow2, Burst, Question, Scribble, Sparkle, Drop, Speed, Phone, PHONE, STAIRS3, RAMP3, lineD} from './kit';
+import {BLUE, LIGHT, ACCENT, SW, st, Words, T2, Arrow2, Burst, Question, Scribble, Sparkle, Drop, Speed, Phone, PHONE, STAIRS3, RAMP3, lineD} from './kit';
 
 const hs = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -37,7 +37,7 @@ const frames: React.FC[] = [
       <Words id="s1b" fn={(l, gi) => ({rot: gi === 0 ? -4 : 0})} />
       <Words id="s1c" />
       <Arrow2 x={640} y={1050} rot={-16} sx={0.88} sy={1.16} />
-      <Burst x={600} y={980} r={62} n={3} c={ORANGE} a0={-90} spread={80} len={30} />
+      <Burst x={600} y={980} r={62} n={3} c={ACCENT} a0={-90} spread={80} len={30} />
     </>
   ),
   // 2. VISÃO (problema): fundo invertido, foto desfocada, letras saindo do eixo e da tela, seta perdida
@@ -63,12 +63,12 @@ const frames: React.FC[] = [
       <Bg c={BLUE} />
       <Phone c={LIGHT} bg={BLUE} />
       <ADBadge x={PHONE.x + 64} y={PHONE.y + 140} c={LIGHT} s={0.9} />
-      <circle cx={PHONE.x + 124} cy={PHONE.y + 120} r={96} {...st(ORANGE, 5)} />
+      <circle cx={PHONE.x + 124} cy={PHONE.y + 120} r={96} {...st(ACCENT, 5)} />
       <Words id="s2b" />
       <Arrow2 x={880} y={1120} rot={-24} sx={0.86} sy={1.2} />
-      <Sparkle x={820} y={1000} c={ORANGE} s={0.9} />
-      <Sparkle x={930} y={1020} c={ORANGE} s={0.6} />
-      <Burst x={870} y={1040} r={70} n={4} c={ORANGE} a0={-90} spread={120} len={26} />
+      <Sparkle x={820} y={1000} c={ACCENT} s={0.9} />
+      <Sparkle x={930} y={1020} c={ACCENT} s={0.6} />
+      <Burst x={870} y={1040} r={70} n={4} c={ACCENT} a0={-90} spread={120} len={26} />
     </>
   ),
   // 4. AUDIÇÃO: só "conversa" vira linha e some, junto com a onda achatando
@@ -106,9 +106,9 @@ const frames: React.FC[] = [
       <path d={lineD(RAMP3)} {...st(LIGHT, 9)} />
       <Button x={810} y={880} filled label="segd" c={LIGHT} bg={BLUE} />
       <Arrow2 x={600} y={960} rot={-30} sx={0.9} sy={1.12} scale={1.2} />
-      <Sparkle x={520} y={860} c={ORANGE} />
-      <Sparkle x={660} y={830} c={ORANGE} s={0.6} />
-      <Speed x={520} y={1060} c={ORANGE} len={80} ang={145} />
+      <Sparkle x={520} y={860} c={ACCENT} />
+      <Sparkle x={660} y={830} c={ACCENT} s={0.6} />
+      <Speed x={520} y={1060} c={ACCENT} len={80} ang={145} />
     </>
   ),
   // 7. VIRADA: "barreira" se parte na divisão silábica correta (bar-rei-ra) e a seta passa pela abertura
@@ -124,9 +124,9 @@ const frames: React.FC[] = [
         const ox = (heavy[2].bb[2] + heavy[3].bb[0]) / 2;
         return left ? {dx: -38, rot: -7, ox, oy: l.y} : {dx: 40, rot: 7, ox, oy: l.y};
       }} />
-      {(() => { const h = T2.s5x.lines[1].letters.filter((x) => x.weight === 800); const m = (h[2].bb[2] + h[3].bb[0]) / 2; return <path d={`M${m} 440 L${m - 16} 480 L${m + 12} 515 L${m - 12} 555 L${m + 8} 600`} {...st(ORANGE, 6)} />; })()}
+      {(() => { const h = T2.s5x.lines[1].letters.filter((x) => x.weight === 800); const m = (h[2].bb[2] + h[3].bb[0]) / 2; return <path d={`M${m} 440 L${m - 16} 480 L${m + 12} 515 L${m - 12} 555 L${m + 8} 600`} {...st(ACCENT, 6)} />; })()}
       <Arrow2 x={600} y={760} rot={-90} sx={1.2} sy={0.85} />
-      <Speed x={540} y={760} c={ORANGE} len={110} ang={90} />
+      <Speed x={540} y={760} c={ACCENT} len={110} ang={90} />
     </>
   ),
   // 8. FINAL: só o texto em destaque no meio e a seta viva
@@ -135,9 +135,9 @@ const frames: React.FC[] = [
       <Bg c={BLUE} />
       <Words id="s5b" />
       <Arrow2 x={540} y={1210} rot={-10} sx={0.9} sy={1.14} scale={1.1} />
-      <Sparkle x={460} y={1120} c={ORANGE} s={0.8} />
-      <Sparkle x={630} y={1100} c={ORANGE} s={0.55} />
-      <path d="M470 1310 Q540 1330 610 1310" {...st(ORANGE, 6)} />
+      <Sparkle x={460} y={1120} c={ACCENT} s={0.8} />
+      <Sparkle x={630} y={1100} c={ACCENT} s={0.55} />
+      <path d="M470 1310 Q540 1330 610 1310" {...st(ACCENT, 6)} />
     </>
   ),
 ];

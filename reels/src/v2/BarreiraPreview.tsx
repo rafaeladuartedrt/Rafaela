@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, spring, Easing} from 'remotion';
-import {BLUE, LIGHT, ORANGE, st, Words, T2} from './kit';
+import {BLUE, LIGHT, ACCENT, st, Words, T2} from './kit';
 
 const io = Easing.bezier(0.65, 0, 0.35, 1);
 const cl = (v: number) => Math.min(1, Math.max(0, v));
@@ -64,7 +64,7 @@ export const BarreiraPreview: React.FC = () => {
           <Words id="s5x" fn={(l, gi, li) => (li === 1 && l.weight === 800 ? {sx: big, sy: big, ox: cx, oy: line.y, dy: (1 - enter) * 160} : {hide: true})} />
         )}
         {/* linha do corte: se desenha e se abre junto com a palavra */}
-        {crack > 0 && opening < 0.25 ? <path d={`M${x1 - 20} ${cutY} L${x1 - 20 + (x2 - x1 + 40) * crack} ${cutY}`} {...st(ORANGE, 6 * (1 - opening * 4))} /> : null}
+        {crack > 0 && opening < 0.25 ? <path d={`M${x1 - 20} ${cutY} L${x1 - 20 + (x2 - x1 + 40) * crack} ${cutY}`} {...st(ACCENT, 6 * (1 - opening * 4))} /> : null}
       </svg>
     </AbsoluteFill>
   );
