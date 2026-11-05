@@ -225,7 +225,6 @@ const Scene: React.FC = () => {
         ),
       );
   });
-  gestures.push(<Anger key="ang" x={ax + 10} y={ay - 210} t={(f - HIT2 - 6) / 30} color={BLUE} />);
   if (f >= CLICK && f < CLICK + 18)
     [-1, 0, 1].forEach((k) =>
       gestures.push(<Gesture key={`c${k}`} t={(f - CLICK - Math.abs(k)) / 16} color={ACCENT} d={`M${BTN.cx + 40 + k * 60} ${BTN.cy - 70} Q${BTN.cx + 50 + k * 80} ${BTN.cy - 130} ${BTN.cx + 40 + k * 110} ${BTN.cy - 190}`} />),
