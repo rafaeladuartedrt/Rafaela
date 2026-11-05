@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 
 const browserExecutable = '/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell';
-const [mode, compId = 'Reels', arg] = process.argv.slice(2);
+const [mode, compId = 'Reels', arg, scaleArg] = process.argv.slice(2);
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts')});
 const composition = await selectComposition({serveUrl, id: compId, browserExecutable});
@@ -15,7 +15,7 @@ fs.mkdirSync(outDir, {recursive: true});
 if (mode === 'video') {
   await renderMedia({
     serveUrl, composition, codec: 'h264', outputLocation: arg, browserExecutable, concurrency: 4,
-    muted: true, crf: 16, pixelFormat: 'yuv420p', x264Preset: 'slow', colorSpace: 'bt709', imageFormat: 'png',
+    muted: true, scale: scaleArg ? Number(scaleArg) : 1, crf: 16, pixelFormat: 'yuv420p', x264Preset: 'slow', colorSpace: 'bt709', imageFormat: 'png',
     onProgress: ({progress}) => { if (Math.round(progress * 100) % 10 === 0) process.stdout.write(`\r${Math.round(progress * 100)}%`); },
   });
   console.log('\nok', arg);

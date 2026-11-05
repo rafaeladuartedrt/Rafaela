@@ -34,9 +34,10 @@ const frames: React.FC[] = [
       <Bg c={BLUE} />
       <Phone c={LIGHT} bg={BLUE} />
       <Words id="s1a" />
-      <Words id="s1b" fn={(l, gi) => ({dy: gi === 5 ? -14 : 0, rot: gi === 0 ? -4 : 0})} />
-      <Arrow2 x={640} y={1010} rot={-16} sx={0.88} sy={1.16} />
-      <Burst x={600} y={940} r={62} n={3} c={ORANGE} a0={-90} spread={80} len={30} />
+      <Words id="s1b" fn={(l, gi) => ({rot: gi === 0 ? -4 : 0})} />
+      <Words id="s1c" />
+      <Arrow2 x={640} y={1050} rot={-16} sx={0.88} sy={1.16} />
+      <Burst x={600} y={980} r={62} n={3} c={ORANGE} a0={-90} spread={80} len={30} />
     </>
   ),
   // 2. VISÃO (problema): fundo invertido, foto desfocada, letras saindo do eixo e da tela, seta perdida

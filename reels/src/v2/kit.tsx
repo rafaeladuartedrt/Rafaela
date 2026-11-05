@@ -181,7 +181,7 @@ export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: str
 };
 
 // ---------- CELULAR COM POST ----------
-export const PHONE = {x: 270, y: 600, w: 540, h: 860, rx: 72};
+export const PHONE = {x: 270, y: 640, w: 540, h: 840, rx: 72};
 export const Phone: React.FC<{c: string; bg: string; people?: boolean; children?: React.ReactNode}> = ({c, bg, people = true, children}) => {
   const {x, y, w, h, rx} = PHONE;
   return (
