@@ -14,15 +14,15 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const LINE_Y = 1000; // linha herdada da rampa achatada
 const EXPAND1 = 0; // a linha se expande e muda a tela para claro
 const A_IN = 18; // "Sentiu desconforto?"
-const A_OUT = 84;
-const B_IN = 96; // "A dificuldade estava na BARREIRA."
-const WALL = 120; // BARREIRA se estica na vertical e vira um muro
+const A_OUT = 62;
+const B_IN = 72; // "A dificuldade estava na BARREIRA."
+const WALL = 90; // BARREIRA se estica na vertical e vira um muro
 const WALL_BOTTOM = 1530; // o muro cresce para baixo até ocupar a metade de baixo da tela
-const COLLAPSE = 182; // o muro desaba numa linha
-const EXPAND2 = 196; // a linha se expande e muda a tela para azul
-const WRITE = 214; // ACESSIBILIDADE escrita traço a traço
-const PULSE = 262;
-const CLICK_A = 286; // a seta clica em ACESSIBILIDADE
+const COLLAPSE = 130; // o muro desaba numa linha
+const EXPAND2 = 142; // a linha se expande e muda a tela para azul
+const WRITE = 158; // ACESSIBILIDADE escrita traço a traço
+const PULSE = 206;
+const CLICK_A = 228; // a seta clica em ACESSIBILIDADE
 const LIKES = CLICK_A + 2; // curtidas sobem de baixo e cobrem a tela
 export const SCENE5_LEN = LIKES + 62;
 
