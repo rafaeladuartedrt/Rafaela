@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
-import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE} from './kit';
+import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE, ADMark, st} from './kit';
 
 // ============ CENA 2: VISÃO ============
 const expoOut = Easing.bezier(0.16, 1, 0.3, 1);
@@ -24,8 +24,34 @@ const AD_P: [number, number] = [PX + 100, PY + 66];
 const HEART_P: [number, number] = [PX + 26, PY + (PHONE.w - 88) + 52];
 
 const AD_START = 90;
+const AD_BIG: [number, number] = [540, 960]; // o selo nasce grande no centro
+const AD_LAND = 128; // e pousa no lugar dele na foto
 const LIGHT_ON = 104; // o AD "acende" e a cor se espalha a partir dele
 const CLICK = 150;
+const CLICK2 = 178; // clique em AUDIODESCRIÇÃO
+const PHONE_OUT = 182;
+const REORG = 188;
+
+// palavras de A1 e A2 na mesma ordem: cada palavra viaja e muda de tamanho como um bloco
+type W = {letters: (typeof T2)['A1']['lines'][0]['letters']; ox: number; oy: number; size: number};
+const wordsOf = (id: string): W[] => {
+  const out: W[] = [];
+  T2[id].lines.forEach((ln) => {
+    let cur = -1;
+    ln.letters.forEach((l) => {
+      if (l.word !== cur) {
+        cur = l.word;
+        out.push({letters: [], ox: l.x, oy: ln.y, size: l.size});
+      }
+      out[out.length - 1].letters.push(l);
+    });
+  });
+  return out;
+};
+const WA = wordsOf('A1');
+const WB = wordsOf('A2');
+const WORD_AD = WA[1];
+const AD_WORD_C: [number, number] = [(WORD_AD.letters[0].bb[0] + WORD_AD.letters[WORD_AD.letters.length - 1].bb[2]) / 2, (WORD_AD.letters[0].bb[1] + WORD_AD.letters[0].bb[3]) / 2];
 
 // Traço de gesto: nasce, viaja e se recolhe
 const Gesture: React.FC<{d: string; t: number; color: string; w?: number}> = ({d, t, color, w = 10}) => {
@@ -55,7 +81,7 @@ const lineClip = (id: string, li: number, k: string) => {
     </clipPath>
   );
 };
-const TextBlock: React.FC<{id: string; f: number; start: number[]; exit?: number; colors: Record<string, string>}> = ({id, f, start, exit = 1e4, colors}) => (
+const TextBlock: React.FC<{id: string; f: number; start: number[]; exit?: number; colors: Record<string, string>; pulseWord?: number}> = ({id, f, start, exit = 1e4, colors, pulseWord = 0}) => (
   <g>
     {T2[id].lines.map((ln, li) =>
       ln.letters.map((l, i) => {
@@ -65,7 +91,7 @@ const TextBlock: React.FC<{id: string; f: number; start: number[]; exit?: number
         const e = pr(f, exit + li * 2, exit + li * 2 + 10, expoIn);
         return (
           <g key={`${li}-${i}`} clipPath={`url(#${id}c${li})`}>
-            <path d={l.d} fill={colors[l.color]} transform={`translate(0 ${((1 - p) + e) * l.size * 1.3})`} />
+            <path d={l.d} fill={colors[l.color]} transform={l.color === 'O' && pulseWord > 0 ? `translate(540 ${(ln.bb[1] + ln.bb[3]) / 2}) scale(${1 + 0.07 * pulseWord}) translate(-540 ${-(ln.bb[1] + ln.bb[3]) / 2})` : `translate(0 ${((1 - p) + e) * l.size * 1.3})`} />
           </g>
         );
       }),
@@ -76,7 +102,7 @@ const TextBlock: React.FC<{id: string; f: number; start: number[]; exit?: number
 const Scene: React.FC = () => {
   const f = useCurrentFrame();
   const wipe = 2400 * pr(f, LIGHT_ON, LIGHT_ON + 18, expoIO);
-  const adC = mapP(f, AD_P[0], AD_P[1]);
+  const adC: [number, number] = AD_BIG; // a cor se espalha a partir do selo em destaque
 
   // desfoque progressivo da foto (baixa visão); volta a ficar nítida quando o AD acende
   const blurA = 18 * pr(f, 24, 62, Easing.bezier(0.45, 0, 0.55, 1));
@@ -127,6 +153,35 @@ const Scene: React.FC = () => {
     ay += 20 * ant;
     stretch = 1 + 0.08 * ant - 0.14 * Math.sin(Math.PI * pr(f, CLICK, CLICK + 6, expoIO));
   }
+  // ponta da seta fica a (cA * escala) do pivô, na direção da ponta
+  const tipOff = (r: number, k: number): [number, number] => {
+    const a = (r * Math.PI) / 180;
+    const d: [number, number] = [-0.336 * 64.8 * k, -0.942 * 64.8 * k];
+    return [d[0] * Math.cos(a) - d[1] * Math.sin(a), d[0] * Math.sin(a) + d[1] * Math.cos(a)];
+  };
+  if (f >= 158) {
+    const k = 1.7 * 0.8;
+    const r = -160; // ponta para baixo, corpo no vazio à direita de "Com"
+    const o = tipOff(r, k);
+    const target: [number, number] = [AD_WORD_C[0] + 220 - o[0], AD_WORD_C[1] - 46 - o[1]];
+    const t = pr(f, 158, 174, expoIO);
+    const from: [number, number] = [heart[0] + 38, heart[1] + 62];
+    ax = lerp(from[0], target[0], t);
+    ay = lerp(from[1], target[1], t) - 160 * Math.sin(Math.PI * t);
+    rot = lerp(-14, r + 360, t);
+    sc = lerp(1.7 * camK(f), k, t);
+    const ant = pr(f, 172, 176, expoOut) * (1 - pr(f, 176, CLICK2, expoIn));
+    ay -= 22 * ant;
+    stretch = 1 + 0.07 * ant - 0.12 * Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 6, expoIO));
+    if (f >= 190) {
+      const t2 = pr(f, 190, 212, expoIO);
+      ax = lerp(target[0], 900, t2);
+      ay = lerp(target[1], 1420, t2) - 120 * Math.sin(Math.PI * t2);
+      rot = lerp(r + 360, 336, t2);
+      sc = lerp(k, 1.5, t2);
+      stretch = f >= 212 && f < 222 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 212, 222, expoIO)) : 1;
+    }
+  }
   const inBlue = Math.hypot(ax - adC[0], ay - adC[1]) < wipe;
   const arrowColor = inBlue ? ACCENT : BLUE;
   const heartFill = f >= CLICK ? pr(f, CLICK, CLICK + 10) : 0;
@@ -140,12 +195,41 @@ const Scene: React.FC = () => {
     );
   }
 
+  const out = 1500 * pr(f, PHONE_OUT, PHONE_OUT + 16, expoIn);
+  if (f >= CLICK2 && f < CLICK2 + 18) {
+    [-1, 0, 1].forEach((k) =>
+      gestures.push(<Gesture key={`w${k}`} t={(f - CLICK2 - Math.abs(k)) / 16} color={ACCENT} d={`M${AD_WORD_C[0] + 270} ${AD_WORD_C[1] - 60 + k * 30} Q${AD_WORD_C[0] + 330} ${AD_WORD_C[1] - 80 + k * 50} ${AD_WORD_C[0] + 390} ${AD_WORD_C[1] - 110 + k * 80}`} />),
+    );
+  }
   const phone = (c: string, bg: string, blur: number, uid: string, heartColor?: string) => (
-    <g transform={phoneT(f)}>
-      <SocialPost uid={uid} c={c} bg={bg} blur={blur} ad={pr(f, AD_START, AD_START + 14)} heart={heartFill} heartColor={heartColor} />
+    <g transform={`translate(0 ${out}) ${phoneT(f)}`}>
+      <SocialPost uid={uid} c={c} bg={bg} blur={blur} ad={f >= AD_LAND ? 1 : 0} heart={heartFill} heartColor={heartColor} />
     </g>
   );
-  const ring = f >= LIGHT_ON - 4 && f < LIGHT_ON + 10 ? <circle cx={adC[0]} cy={adC[1]} r={lerp(40, 140, pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} fill="none" stroke={BLUE} strokeWidth={10 * (1 - pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} /> : null;
+  // selo AD em destaque: nasce grande, as ondas pulsam como som, depois voa até a foto
+  let adOverlay: React.ReactNode = null;
+  if (f >= AD_START && f < AD_LAND) {
+    const dest = mapP(f, PX + 40 + 80, PY + 90 - 24);
+    const t = pr(f, 112, AD_LAND, expoIO);
+    const cx = lerp(AD_BIG[0], dest[0], t);
+    const cy = lerp(AD_BIG[1], dest[1], t);
+    const S = lerp(3.4, camK(f), t);
+    const col = f >= LIGHT_ON ? LIGHT : BLUE;
+    const waves: React.ReactNode[] = [];
+    for (let k = 0; k < 3; k++) {
+      const w = ((f - AD_START - 8 - k * 5) % 15) / 15;
+      if (f - AD_START - 8 - k * 5 < 0 || t > 0.3) continue;
+      const r = 60 + w * 70;
+      waves.push(<path key={k} d={`M${100 + r * Math.cos(-0.85)} ${-24 + r * Math.sin(-0.85)} A${r} ${r} 0 0 1 ${100 + r * Math.cos(0.85)} ${-24 + r * Math.sin(0.85)}`} {...st(col, 8 * (1 - w))} />);
+    }
+    adOverlay = (
+      <g transform={`translate(${cx} ${cy}) scale(${S}) translate(-80 24)`}>
+        <ADMark x={0} y={0} c={col} p={pr(f, AD_START, AD_START + 14)} />
+        {waves}
+      </g>
+    );
+  }
+  const ring = f >= LIGHT_ON - 4 && f < LIGHT_ON + 10 ? <circle cx={adC[0]} cy={adC[1]} r={lerp(160, 420, pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} fill="none" stroke={BLUE} strokeWidth={10 * (1 - pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} /> : null;
 
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
@@ -166,10 +250,28 @@ const Scene: React.FC = () => {
       {wipe > 0 ? (
         <g clipPath="url(#wipe2)">
           <rect width={1080} height={1920} fill={BLUE} />
-          <TextBlock id="A1" f={f} start={[110, 116, 124]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} />
+          {f < REORG ? (
+            <g transform={f >= CLICK2 ? `translate(${AD_WORD_C[0]} ${AD_WORD_C[1]}) scale(1) translate(${-AD_WORD_C[0]} ${-AD_WORD_C[1]})` : undefined}>
+              <TextBlock id="A1" f={f} start={[110, 116, 124]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} pulseWord={f >= CLICK2 ? Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 10, expoIO)) : 0} />
+            </g>
+          ) : (
+            WA.map((w, k) => {
+              const n = WB[k];
+              const t = pr(f, REORG + k * 2.5, REORG + k * 2.5 + 20, expoIO);
+              const sc = lerp(1, n.size / w.size, t);
+              const x = lerp(w.ox, n.ox, t);
+              const y = lerp(w.oy, n.oy, t);
+              return (
+                <g key={k} transform={`translate(${x} ${y}) scale(${sc}) translate(${-w.ox} ${-w.oy})`}>
+                  {w.letters.map((l, i) => <path key={i} d={l.d} fill={l.color === 'O' ? ACCENT : LIGHT} />)}
+                </g>
+              );
+            })
+          )}
           {phone(LIGHT, BLUE, blurB, 'b', ACCENT)}
         </g>
       ) : null}
+      {adOverlay}
       {gestures}
       <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={arrowColor} />
     </svg>

@@ -22,7 +22,7 @@ export const Root: React.FC = () => (
     <Composition id="AberturaPro" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
     <Composition id="AberturaProSemBlur" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
     <Composition id="Layouts" component={Layouts} durationInFrames={5} fps={30} width={1080} height={1920} />
-    <Composition id="Cena2" component={Scene2} durationInFrames={210} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
-    <Composition id="Cena2SemBlur" component={Scene2} durationInFrames={210} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
+    <Composition id="Cena2" component={Scene2} durationInFrames={240} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
+    <Composition id="Cena2SemBlur" component={Scene2} durationInFrames={240} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
   </>
 );
