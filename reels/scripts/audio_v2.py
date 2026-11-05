@@ -7,7 +7,16 @@ TOTAL = S['s5'] + L['s5']
 n = int(TOTAL / FPS * SR) + 1
 rng = np.random.default_rng(11)
 mus = np.zeros((n, 2)); sfx = np.zeros((n, 2))
-G = lambda sc, fr: (S[sc] + fr) / FPS  # segundo global de um frame local
+W = L.get('warp', {})
+def src2out(sc, fr):
+    out = 0.0; src = 0.0
+    for a_, b_, sp_ in W.get(sc, []):
+        if fr <= a_: return out + (fr - src)
+        out += a_ - src; src = a_
+        if fr <= b_: return out + (fr - a_) / sp_
+        out += (b_ - a_) / sp_; src = b_
+    return out + (fr - src)
+G = lambda sc, fr: (S[sc] + src2out(sc, fr)) / FPS  # segundo global de um frame local (já no tempo ajustado)
 
 def env(L_, tau, att=0.003):
     t = np.arange(L_) / SR; e = np.exp(-t / tau); a = int(att * SR)
@@ -65,7 +74,7 @@ BEAT = 12 / FPS  # 0,4 s
 OFF = (S['s3'] % 12) / FPS  # grade de batidas alinhada com a cena 3 (onda sincronizada)
 chords = {'C': [60, 64, 67], 'G': [55, 59, 62], 'Am': [57, 60, 64], 'F': [53, 57, 60], 'Dm': [50, 53, 57]}
 prog = ['C', 'G', 'Am', 'F']
-problem = [(G('s2', 26), G('s2', 154)), (G('s3', 0), G('s3', L['cut'])), (G('s4', 0), G('s4', 100)), (G('s5', 0), G('s5', 142))]
+problem = [(G('s2', 10), G('s2', 154)), (G('s3', 0), G('s3', L['cut'])), (G('s4', 0), G('s4', 100)), (G('s5', 0), G('s5', 142))]
 in_problem = lambda t: any(a <= t < b for a, b in problem)
 bar = BEAT * 4
 t = OFF; k = 0
@@ -99,9 +108,9 @@ for fr in (2, 6, 10): E.append(('s1', fr, pop(600, 900, .08), -.2, .1))
 E += [('s1', 14, whoosh(.5, 400, 1800), 0, .16), ('s1', 30, thump(.5), 0, .45), ('s1', 28, whoosh(.55, 600, 2400), .3, .14),
       ('s1', 38, pop(500, 1000), 0, .12), ('s1', 50, whoosh(.35, 2400, 800), .4, .1), ('s1', 60, boing(260, 620), .4, .35),
       ('s1', 60, whoosh(.6, 500, 2600), 0, .15), ('s1', 96, whoosh(.6, 300, 3200), 0, .22), ('s1', 114, whoosh(.5, 2600, 500), 0, .14),
-      ('s1', 140, click(), -.3, .2)]
+      ('s1', 132, click(), -.3, .2)]
 # cena 2
-E += [('s2', 6, whoosh(.6, 2200, 600), 0, .12), ('s2', 30, pop(500, 800), 0, .1), ('s2', 72, whoosh(.8, 300, 1800), 0, .18)]
+E += [('s2', 0, whoosh(.6, 2200, 600), 0, .12), ('s2', 12, pop(500, 800), 0, .1), ('s2', 72, whoosh(.8, 300, 1800), 0, .18)]
 for fr in (96, 108, 120): E.append(('s2', fr, pop(700, 420, .2), .2, .12))
 E += [('s2', 140, pop(), 0, .22), ('s2', 154, chime(), 0, .12), ('s2', 154, whoosh(.6, 500, 2600), 0, .16),
       ('s2', 172, whoosh(.7, 2200, 500), 0, .12), ('s2', 222, click(), -.3, .3), ('s2', 222, pop(500, 1200), -.3, .2),
@@ -113,8 +122,9 @@ E += [('s3', 32, pop(400, 1000), .2, .2), ('s3', 64, click(), .3, .3), ('s3', 67
 # depois do silêncio
 E += [('s3', L['silEnd'], whoosh(.6, 300, 2400), 0, .18), ('s3', L['silEnd'] + 18, pop(600, 1200, .08), -.3, .1),
       ('s3', L['silEnd'] + 21, pop(600, 1200, .08), 0, .1), ('s3', L['silEnd'] + 24, pop(600, 1200, .08), .3, .1),
-      ('s3', L['silEnd'] + 44, chime(1568, 1.0), 0, .08), ('s3', L['silEnd'] + 104, whoosh(.5, 2000, 500), 0, .12),
-      ('s3', L['silEnd'] + 116, thump(.4, 80), 0, .3), ('s3', L['silEnd'] + 130, whoosh(.7, 400, 2200), 0, .14)]
+      ('s3', L['silEnd'] + 44, chime(1568, 1.0), 0, .08), ('s3', L['silEnd'] + 48, pop(500, 1100), -.2, .14), ('s3', L['silEnd'] + 56, pop(560, 1200), .2, .14),
+      ('s3', L['silEnd'] + 82, whoosh(.5, 2000, 500), 0, .12),
+      ('s3', L['silEnd'] + 94, thump(.4, 80), 0, .3), ('s3', L['silEnd'] + 108, whoosh(.7, 400, 2200), 0, .14)]
 # cena 4
 for fr in (4, 9, 14, 19): E.append(('s4', fr, pop(420, 640, .08), -.2, .1))
 E += [('s4', 14, pop(), .4, .18), ('s4', 44, thump(1, 55), -.3, .7), ('s4', 76, thump(1.1, 50), -.3, .8),

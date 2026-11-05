@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
+import {warpFrame, Seg} from './warp';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE, ADMark, st} from './kit';
 
 // ============ CENA 2: VISÃO ============
@@ -16,8 +17,8 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const ZIN = [72, 94];
 const ZOUT = [172, 194];
 const camPhase = (f: number) => pr(f, ZIN[0], ZIN[1], expoIO) * (1 - pr(f, ZOUT[0], ZOUT[1], expoIO));
-const camK = (f: number) => lerp(lerp(1.05, 0.66, pr(f, 6, 26, expoIO)), 1.62, camPhase(f));
-const camY = (f: number) => lerp(lerp(890, 1135, pr(f, 6, 26, expoIO)), 960, camPhase(f));
+const camK = (f: number) => lerp(lerp(1, 0.66, pr(f, 0, 16, expoIO)), 1.62, camPhase(f));
+const camY = (f: number) => lerp(lerp(890, 1135, pr(f, 0, 16, expoIO)), 960, camPhase(f));
 const camF = (f: number) => lerp(890, PHONE.y + 150 + (PHONE.w - 88) / 2, camPhase(f));
 const mapP = (f: number, x: number, y: number): [number, number] => [540 + (x - 540) * camK(f), camY(f) + (y - camF(f)) * camK(f)];
 const phoneT = (f: number) => `translate(540 ${camY(f)}) scale(${camK(f)}) translate(-540 ${-camF(f)})`;
@@ -122,13 +123,13 @@ export const S2_ARROW_END = {
   sc: 1.5,
 };
 
-const Scene: React.FC = () => {
-  const f = useCurrentFrame();
+const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
+  const f = warpFrame(useCurrentFrame(), segs);
   const wipe = 2400 * pr(f, LIGHT_ON, LIGHT_ON + 18, expoIO);
   const adC: [number, number] = AD_BIG; // a cor se espalha a partir do selo em destaque
 
   // desfoque progressivo da foto (baixa visão); volta a ficar nítida quando o AD acende
-  const blurA = 18 * pr(f, 24, 62, Easing.bezier(0.45, 0, 0.55, 1));
+  const blurA = 18 * pr(f, 14, 56, Easing.bezier(0.45, 0, 0.55, 1));
   const blurB = blurA * (1 - pr(f, LIGHT_ON, LIGHT_ON + 14));
   // a frase-problema também desfoca por no máximo 1 segundo
   const textBlur = 9 * Math.sin(Math.PI * cl((f - 48) / 20)) * (f >= 48 && f < 68 ? 1 : 0);
@@ -141,7 +142,7 @@ const Scene: React.FC = () => {
   let sc = 1.7 * camK(f);
   let stretch = 1;
   // percebe a foto ficando turva: inclina a ponta na direção dela
-  if (f >= 28 && f < 44) rot = -12 + 30 * pr(f, 28, 40, expoIO);
+  if (f >= 16 && f < 44) rot = -12 + 30 * pr(f, 16, 28, expoIO);
   // perdida: se afasta da câmera e procura, com pausas e hesitação
   if (f >= 44 && f < 188) {
     // posição inicial (no celular) até o mergulho; depois um caminho de busca em tela cheia
@@ -317,7 +318,7 @@ const Scene: React.FC = () => {
       {/* problema: fundo amarelo, tudo azul */}
       <rect width={1080} height={1920} fill={ACCENT} />
       <g filter={textBlur > 0.3 ? 'url(#tb)' : undefined}>
-        <TextBlock id="Q1" f={f} start={[30, 36]} exit={66} colors={{B: BLUE, L: BLUE, O: BLUE}} />
+        <TextBlock id="Q1" f={f} start={[12, 18]} exit={66} colors={{B: BLUE, L: BLUE, O: BLUE}} />
       </g>
       {phone(BLUE, ACCENT, blurA, 'a')}
       {ring}
@@ -371,14 +372,14 @@ const Scene: React.FC = () => {
   );
 };
 
-export const Scene2: React.FC<{blur?: boolean}> = ({blur = true}) => (
+export const Scene2: React.FC<{blur?: boolean; segs?: Seg[]}> = ({blur = true, segs = []}) => (
   <AbsoluteFill style={{backgroundColor: ACCENT}}>
     {blur ? (
       <CameraMotionBlur shutterAngle={180} samples={8}>
-        <Scene />
+        <Scene segs={segs} />
       </CameraMotionBlur>
     ) : (
-      <Scene />
+      <Scene segs={segs} />
     )}
   </AbsoluteFill>
 );

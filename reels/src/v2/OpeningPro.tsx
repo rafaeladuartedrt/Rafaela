@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
+import {warpFrame, Seg} from './warp';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE} from './kit';
 
 // ============ SISTEMA DE MOVIMENTO ============
@@ -87,8 +88,8 @@ const Gesture: React.FC<{d: string; t: number; color: string; w?: number}> = ({d
   return <path d={d} pathLength={1} fill="none" stroke={color} strokeWidth={w * (1 - 0.5 * tail)} strokeLinecap="round" strokeDasharray={`${Math.max(0.001, head - tail)} 2`} strokeDashoffset={-tail} />;
 };
 
-const Scene: React.FC = () => {
-  const f = useCurrentFrame();
+const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
+  const f = warpFrame(useCurrentFrame(), segs);
   const band = 1100 * pr(f, 28, 44, expoIO); // faixa que se abre a partir de "a sua"
   const wipe = 2400 * pr(f, IMPACT, IMPACT + 18, expoIO); // círculo a partir do ponto
   const portal = 0; // o ponto não vira mais portal: quem leva à próxima cena é a seta
@@ -130,12 +131,12 @@ const Scene: React.FC = () => {
   const inC = Math.hypot(ax - DOT_C[0], ay - DOT_C[1]) < wipe;
   const inB = !inC && Math.abs(ay - BAND_Y) < band;
   if (post) {
-    const t = pr(f, 118, 140);
+    const t = pr(f, 116, 132);
     ax = lerp(900, 330, t);
     ay = lerp(1700, 1290, t) - 120 * Math.sin(Math.PI * t);
     rot = lerp(-60, -12, t);
     sc = 1.7;
-    stretch = f >= 140 && f < 150 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 140, 150, expoIO)) : 1;
+    stretch = f >= 132 && f < 140 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 132, 140, expoIO)) : 1;
   }
 
   const gestures: React.ReactNode[] = [];
@@ -148,13 +149,13 @@ const Scene: React.FC = () => {
       gestures.push(<Gesture key={`d${k}`} t={(f - IMPACT) / 12} color={ACCENT} w={9} d={`M${DOT_C[0] + k * 34} ${DOT.bb[3] - 10} Q${DOT_C[0] + k * 70} ${DOT.bb[3] - 40} ${DOT_C[0] + k * 96} ${DOT.bb[3] - 90}`} />),
     );
   }
-  if (post && f >= 140 && f < 156) {
-    [0, 1].forEach((k) => gestures.push(<Gesture key={`p${k}`} t={(f - 140 - k * 2) / 14} color={BLUE} w={9} d={`M${ax + 90 + k * 40} ${ay - 120} Q${ax + 130 + k * 40} ${ay - 170} ${ax + 120 + k * 50} ${ay - 230}`} />));
+  if (post && f >= 132 && f < 146) {
+    [0, 1].forEach((k) => gestures.push(<Gesture key={`p${k}`} t={(f - 132 - k * 2) / 14} color={BLUE} w={9} d={`M${ax + 90 + k * 40} ${ay - 120} Q${ax + 130 + k * 40} ${ay - 170} ${ax + 120 + k * 50} ${ay - 230}`} />));
   }
 
-  const phoneIn = pr(f, 114, 138);
-  const phoneScale = lerp(1.3, 1, phoneIn) + (f > 138 ? (f - 138) * 0.0012 : 0);
-  const roll = lerp(-260, 0, pr(f, 124, 152));
+  const phoneIn = pr(f, 114, 132);
+  const phoneScale = lerp(1.3, 1, phoneIn);
+  const roll = lerp(-260, 0, pr(f, 116, 136));
 
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
@@ -195,14 +196,14 @@ const Scene: React.FC = () => {
   );
 };
 
-export const OpeningPro: React.FC<{blur?: boolean}> = ({blur = true}) => (
+export const OpeningPro: React.FC<{blur?: boolean; segs?: Seg[]}> = ({blur = true, segs = []}) => (
   <AbsoluteFill style={{backgroundColor: BLUE}}>
     {blur ? (
       <CameraMotionBlur shutterAngle={180} samples={8}>
-        <Scene />
+        <Scene segs={segs} />
       </CameraMotionBlur>
     ) : (
-      <Scene />
+      <Scene segs={segs} />
     )}
   </AbsoluteFill>
 );

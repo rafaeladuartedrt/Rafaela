@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
+import {warpFrame, Seg} from './warp';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, HEART_D} from './kit';
 
 // ============ CENA 5: VIRADA (final) ============
@@ -95,8 +96,8 @@ const Rise: React.FC<{id: string; f: number; ins: number[]; out?: number; color:
   </g>
 );
 
-const Scene: React.FC = () => {
-  const f = useCurrentFrame();
+const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
+  const f = warpFrame(useCurrentFrame(), segs);
 
   // ---- 1ª expansão: a linha clara engrossa e toma a tela ----
   const band1 = lerp(11, 2300, pr(f, EXPAND1, EXPAND1 + 18, expoIO));
@@ -291,14 +292,14 @@ const Scene: React.FC = () => {
   );
 };
 
-export const Scene5: React.FC<{blur?: boolean}> = ({blur = true}) => (
+export const Scene5: React.FC<{blur?: boolean; segs?: Seg[]}> = ({blur = true, segs = []}) => (
   <AbsoluteFill style={{backgroundColor: BLUE}}>
     {blur ? (
       <CameraMotionBlur shutterAngle={180} samples={8}>
-        <Scene />
+        <Scene segs={segs} />
       </CameraMotionBlur>
     ) : (
-      <Scene />
+      <Scene segs={segs} />
     )}
   </AbsoluteFill>
 );

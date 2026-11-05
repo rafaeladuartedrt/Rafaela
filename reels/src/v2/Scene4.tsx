@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
+import {warpFrame, Seg} from './warp';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, STAIRS3, RAMP3, st} from './kit';
 
 // ============ CENA 4: MOBILIDADE ============
@@ -64,8 +65,8 @@ const tipOff = (r: number, k: number): [number, number] => {
   return [d0[0] * Math.cos(an) - d0[1] * Math.sin(an), d0[0] * Math.sin(an) + d0[1] * Math.cos(an)];
 };
 
-const Scene: React.FC = () => {
-  const f = useCurrentFrame();
+const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
+  const f = warpFrame(useCurrentFrame(), segs);
   const morph = pr(f, MORPH, MORPH + 16, expoIO);
   const flat = pr(f, FLATTEN, FLATTEN + 16, expoIO);
   const line = lerpPts(lerpPts(STAIRS3, RAMP3, morph), FLAT, flat);
@@ -254,14 +255,14 @@ const Scene: React.FC = () => {
   );
 };
 
-export const Scene4: React.FC<{blur?: boolean}> = ({blur = true}) => (
+export const Scene4: React.FC<{blur?: boolean; segs?: Seg[]}> = ({blur = true, segs = []}) => (
   <AbsoluteFill style={{backgroundColor: LIGHT}}>
     {blur ? (
       <CameraMotionBlur shutterAngle={180} samples={8}>
-        <Scene />
+        <Scene segs={segs} />
       </CameraMotionBlur>
     ) : (
-      <Scene />
+      <Scene segs={segs} />
     )}
   </AbsoluteFill>
 );

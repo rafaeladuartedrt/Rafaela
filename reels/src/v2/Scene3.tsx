@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
+import {warpFrame, Seg} from './warp';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, STAIRS3} from './kit';
 import {S2_ARROW_END} from './Scene2';
 
@@ -35,7 +36,7 @@ const SILENCE_END = CUT + 36; // 1,2 segundo de silêncio absoluto
 const BAND = SILENCE_END; // a onda volta de baixo como faixa azul e toma a tela
 const BARS = BAND + 18;
 // transição para a cena 4: legendas voltam a ser barras, empilham como degraus e o claro sobe de baixo
-const FOLD = BAND + 104; // frase completa fica 2 s em tela antes de virar degraus
+const FOLD = BAND + 82; // frase completa fica ~1,3 s em tela, com pulso nas palavras-chave
 const STACK = FOLD + 12;
 const RISE = FOLD + 26;
 const TREADS: [number, number, number][] = [
@@ -89,8 +90,8 @@ const wavePath = (f: number) => {
   return pts.join('');
 };
 
-const Scene: React.FC = () => {
-  const f = useCurrentFrame();
+const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
+  const f = warpFrame(useCurrentFrame(), segs);
   const bandTop = lerp(1960, -40, pr(f, BAND, BAND + 18, expoIO));
   const live = f < CUT ? beat(f) : 0;
 
@@ -190,7 +191,15 @@ const Scene: React.FC = () => {
           if (wOut < l.bb[0]) return;
           s2 = 0.18 + 0.82 * cl((wOut - l.bb[0]) / 90);
         }
-        out.push(<path key={`s${li}-${i}`} d={l.d} fill={l.color === 'O' ? colO : colL} transform={`translate(0 ${y}) scale(1 ${s2}) translate(0 ${-y})`} />);
+        // LEGENDA e LIBRAS dão um pulso de destaque, uma depois da outra
+        let kw = '';
+        if (l.color === 'O') {
+          const ws = ln.letters.filter((x) => x.color === 'O');
+          const wx = (ws[0].bb[0] + ws[ws.length - 1].bb[2]) / 2;
+          const k = 1 + 0.12 * Math.sin(Math.PI * pr(f, BAND + 48 + li * 8, BAND + 60 + li * 8, expoIO));
+          kw = ` translate(${wx} ${y}) scale(${k}) translate(${-wx} ${-y})`;
+        }
+        out.push(<path key={`s${li}-${i}`} d={l.d} fill={l.color === 'O' ? colO : colL} transform={`translate(0 ${y}) scale(1 ${s2}) translate(0 ${-y})${kw}`} />);
       });
     });
     return out;
@@ -309,14 +318,14 @@ const Scene: React.FC = () => {
   );
 };
 
-export const Scene3: React.FC<{blur?: boolean}> = ({blur = true}) => (
+export const Scene3: React.FC<{blur?: boolean; segs?: Seg[]}> = ({blur = true, segs = []}) => (
   <AbsoluteFill style={{backgroundColor: LIGHT}}>
     {blur ? (
       <CameraMotionBlur shutterAngle={180} samples={8}>
-        <Scene />
+        <Scene segs={segs} />
       </CameraMotionBlur>
     ) : (
-      <Scene />
+      <Scene segs={segs} />
     )}
   </AbsoluteFill>
 );

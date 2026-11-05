@@ -23,7 +23,7 @@ export const Root: React.FC = () => (
     <Composition id="Seta" component={ArrowActing} durationInFrames={210} fps={30} width={1080} height={1920} />
     <Composition id="Profundidade" component={DepthPreview} durationInFrames={110} fps={30} width={1080} height={1920} />
     <Composition id="Abertura" component={OpeningPreview} durationInFrames={180} fps={30} width={1080} height={1920} />
-    <Composition id="AberturaPro" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
+    <Composition id="AberturaPro" component={OpeningPro} durationInFrames={144} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
     <Composition id="AberturaProSemBlur" component={OpeningPro} durationInFrames={180} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
     <Composition id="Layouts" component={Layouts} durationInFrames={5} fps={30} width={1080} height={1920} />
     <Composition id="Cena2" component={Scene2} durationInFrames={338} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
