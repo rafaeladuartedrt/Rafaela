@@ -17,7 +17,7 @@ const A_IN = 18; // "Sentiu desconforto?"
 const A_OUT = 84;
 const B_IN = 96; // "A dificuldade estava na BARREIRA."
 const WALL = 120; // BARREIRA se estica na vertical e vira um muro
-const WALL_S = 5.2;
+const WALL_BOTTOM = 1530; // o muro cresce para baixo até ocupar a metade de baixo da tela
 const COLLAPSE = 182; // o muro desaba numa linha
 const EXPAND2 = 196; // a linha se expande e muda a tela para azul
 const WRITE = 214; // ACESSIBILIDADE escrita traço a traço
@@ -39,16 +39,18 @@ const HEARTS = Array.from({length: 170}, (_, i) => {
     s: lerp(0.9, 9, Math.pow(k, 2.2)) * (0.8 + 0.4 * hash(i * 7.7)), // cada vez maiores
     v: 34 + 30 * hash(i * 5.3),
     sway: 30 * (hash(i * 9.1) - 0.5),
-    c: hash(i * 2.2) > 0.3 ? ACCENT : LIGHT,
+    c: ACCENT, // só corações amarelos
   };
 });
 
-const B_LINE = T2.S5b.lines[1];
-const BAR = B_LINE.letters.filter((l) => l.weight === 800); // BARREIRA.
+const B_LINE = T2.S5b.lines[2];
+const BAR = B_LINE.letters; // BARREIRA (sem ponto final)
 const BX1 = BAR[0].bb[0];
 const BX2 = BAR[BAR.length - 1].bb[2];
 const BASE = B_LINE.y;
 const CAP = BAR[0].size * 0.7;
+const TOPY = BASE - CAP; // o muro cresce a partir do topo das letras, para baixo
+const WALL_S = (WALL_BOTTOM - TOPY) / CAP;
 
 const lineClip = (id: string, li: number, k: string) => {
   const ln = T2[id].lines[li];
@@ -89,12 +91,10 @@ const Scene: React.FC = () => {
   const wallS = lerp(1, WALL_S, pr(f, WALL, WALL + 20, expoIO));
   const collapse = pr(f, COLLAPSE, COLLAPSE + 12, expoIn);
   const sy = lerp(wallS, 11 / CAP, collapse); // desaba até virar uma linha da espessura do traço
-  const wallTop = BASE - CAP * sy;
-  // a linha de cima é empurrada para o alto pelo muro
-  const push = Math.min(0, wallTop - 40 - (T2.S5b.lines[0].y + 10)) * (1 - collapse);
+  const wallBottom = TOPY + CAP * sy;
   // ---- 2ª expansão: a linha do muro desabado engrossa e toma a tela de azul ----
   const band2 = f >= EXPAND2 ? lerp(11, 2400, pr(f, EXPAND2, EXPAND2 + 18, expoIO)) : 0;
-  const lineY2 = BASE - 5.5;
+  const lineY2 = TOPY + 5.5;
 
   // ---- ACESSIBILIDADE: escrita traço a traço, letra por letra, e pulso único ----
   const pulse = 1 + 0.05 * Math.sin(Math.PI * pr(f, PULSE, PULSE + 12, expoIO)) + 0.07 * Math.sin(Math.PI * pr(f, CLICK_A, CLICK_A + 10, expoIO));
@@ -137,9 +137,9 @@ const Scene: React.FC = () => {
   // diante do muro: recua e olha para cima, pequena
   if (f >= WALL - 6 && f < COLLAPSE + 14) {
     const t = pr(f, WALL - 6, WALL + 16, expoIO);
-    ax = lerp(860, 930, t);
-    ay = lerp(1110, 1200, t);
-    rot = lerp(-20, 8, t);
+    ax = lerp(860, 540, t);
+    ay = lerp(1110, 1660, t) - 120 * Math.sin(Math.PI * t);
+    rot = lerp(-20, 18, t); // ponta para cima, olhando o muro
     sc = lerp(1.12, 0.95, t);
     stretch = lerp(1, 0.9, t);
     // desaba o muro: um pulinho de alívio
@@ -147,14 +147,14 @@ const Scene: React.FC = () => {
       const j = Math.sin(Math.PI * pr(f, COLLAPSE, COLLAPSE + 14, expoIO));
       ay -= 70 * j;
       stretch = 0.9 + 0.2 * j;
-      rot = 8 - 20 * j;
+      rot = 18 - 20 * j;
     }
   }
   // final: vai para o centro, embaixo da frase, comemora com o pulso e fica viva
   if (f >= COLLAPSE + 14) {
     const t = pr(f, COLLAPSE + 14, COLLAPSE + 40, expoIO);
-    ax = lerp(930, 540, t);
-    ay = lerp(1200, 1330, t) - 140 * Math.sin(Math.PI * t);
+    ax = lerp(540, 540, t);
+    ay = lerp(1660, 1330, t) - 140 * Math.sin(Math.PI * t);
     rot = lerp(-12, -20 - 360, t);
     sc = lerp(0.95, 1.6, t);
     stretch = 1;
@@ -185,13 +185,14 @@ const Scene: React.FC = () => {
   }
   const inLight1 = Math.abs(ay - LINE_Y) < band1 / 2;
   const inBlue2 = f >= EXPAND2 && Math.abs(ay - lineY2) < band2 / 2;
-  const arrowColor = inBlue2 ? ACCENT : inLight1 ? BLUE : ACCENT;
+  const inWall = f >= WALL && f < COLLAPSE + 12 && ay > TOPY && ay < wallBottom && ax > BX1 && ax < BX2;
+  const arrowColor = inBlue2 || inWall ? ACCENT : inLight1 ? BLUE : ACCENT;
 
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
       <defs>
         {[0, 1].map((li) => lineClip('S5a', li, `S5ac${li}`))}
-        {[0, 1].map((li) => lineClip('S5b', li, `S5bc${li}`))}
+        {[0, 1, 2].map((li) => lineClip('S5b', li, `S5bc${li}`))}
         {[0, 1].map((li) => lineClip('S5c', li, `S5cc${li}`))}
       </defs>
       <rect width={1080} height={1920} fill={BLUE} />
@@ -200,10 +201,10 @@ const Scene: React.FC = () => {
       {f >= A_IN && f < A_OUT + 20 ? <Rise id="S5a" f={f} ins={[A_IN, A_IN + 5]} out={A_OUT} color={BLUE} /> : null}
       {f >= B_IN && f < EXPAND2 + 20 ? (
         <>
-          <Rise id="S5b" f={f} ins={[B_IN, B_IN + 5]} out={COLLAPSE} color={BLUE} skip={(l) => l.weight === 800 && f >= WALL} dy={[push, 0]} />
-          {/* BARREIRA: cresce na vertical a partir da base e vira muro; depois desaba numa linha */}
+          <Rise id="S5b" f={f} ins={[B_IN, B_IN + 5, B_IN + 10]} out={COLLAPSE} color={BLUE} skip={(l) => l.weight === 800 && f >= WALL} />
+          {/* BARREIRA: cresce para baixo e vira muro; depois se recolhe numa linha */}
           {f >= WALL ? (
-            <g transform={`translate(0 ${BASE}) scale(1 ${sy}) translate(0 ${-BASE})`}>
+            <g transform={`translate(0 ${TOPY}) scale(1 ${sy}) translate(0 ${-TOPY})`}>
               {BAR.map((l, i) => <path key={i} d={l.d} fill={BLUE} />)}
             </g>
           ) : null}

@@ -1185,12 +1185,12 @@
  ],
  "S5b": [
   {
-   "y": 825,
+   "y": 520,
    "fit": 930,
    "free": true,
    "seg": [
     [
-     "A dificuldade estava",
+     "A dificuldade",
      500,
      100,
      "L"
@@ -1198,18 +1198,25 @@
    ]
   },
   {
-   "y": 960,
+   "y": 690,
    "fit": 930,
    "free": true,
    "seg": [
     [
-     "na ",
+     "estava na",
      500,
      100,
      "L"
-    ],
+    ]
+   ]
+  },
+  {
+   "y": 860,
+   "fit": 930,
+   "free": true,
+   "seg": [
     [
-     "BARREIRA.",
+     "BARREIRA",
      800,
      100,
      "L"
