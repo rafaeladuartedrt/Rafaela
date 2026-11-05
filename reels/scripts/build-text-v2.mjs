@@ -14,6 +14,7 @@ const r = (n) => Math.round(n * 100) / 100;
 const out = {}; const problems = [];
 for (const [id, lines] of Object.entries(PHRASES)) {
   out[id] = {lines: lines.map((line) => {
+    if (line.fit) { let w0 = 0; for (const [t, w, s] of line.seg) w0 += F[w].getAdvanceWidth(t, s, {kerning: true}); const k = line.fit / w0; line.seg = line.seg.map(([t, w, s, c]) => [t, w, s * k, c]); }
     let width = 0;
     for (const [t, w, s] of line.seg) width += F[w].getAdvanceWidth(t, s, {kerning: true}) + (line.track ?? 0) * [...t].length;
     let x = line.x ?? (line.cx ?? 540) - width / 2;
