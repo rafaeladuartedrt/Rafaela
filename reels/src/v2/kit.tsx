@@ -101,14 +101,14 @@ export const Speed: React.FC<{x: number; y: number; c: string; n?: number; len?:
 
 // ---------- PESSOAS (traço único, mesma estética) ----------
 // Pés em y=0, altura ~215. Rosto simples e gentil. Variantes de deficiência desenhadas com respeito.
-const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number}> = ({c, bg, glasses, y = -178}) => (
+const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number; W?: number}> = ({c, bg, glasses, y = -178, W = SW}) => (
   <g>
-    <circle cx={0} cy={y} r={36} {...st(c, SW, bg)} />
+    <circle cx={0} cy={y} r={36} {...st(c, W, bg)} />
     {glasses ? (
       <g>
         <circle cx={-14} cy={y - 4} r={11} fill={c} />
         <circle cx={14} cy={y - 4} r={11} fill={c} />
-        <path d={`M-3 ${y - 5} L3 ${y - 5}`} {...st(c, 8)} />
+        <path d={`M-3 ${y - 5} L3 ${y - 5}`} {...st(c, W * 0.73)} />
       </g>
     ) : (
       <g>
@@ -116,67 +116,67 @@ const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number}> = (
         <circle cx={12} cy={y - 4} r={4} fill={c} />
       </g>
     )}
-    <path d={`M-11 ${y + 12} Q0 ${y + 20} 11 ${y + 12}`} {...st(c, 8)} />
+    <path d={`M-11 ${y + 12} Q0 ${y + 20} 11 ${y + 12}`} {...st(c, W * 0.73)} />
   </g>
 );
-const Torso: React.FC<{c: string; bg: string; y0?: number; y1?: number}> = ({c, bg, y0 = -138, y1 = -64}) => (
-  <path d={`M-18 ${y0} L18 ${y0} Q24 ${y0} 25 ${y0 + 8} L30 ${y1} L-30 ${y1} L-25 ${y0 + 8} Q-24 ${y0} -18 ${y0} Z`} {...st(c, SW, bg)} />
+const Torso: React.FC<{c: string; bg: string; y0?: number; y1?: number; W?: number}> = ({c, bg, y0 = -138, y1 = -64, W = SW}) => (
+  <path d={`M-18 ${y0} L18 ${y0} Q24 ${y0} 25 ${y0 + 8} L30 ${y1} L-30 ${y1} L-25 ${y0 + 8} Q-24 ${y0} -18 ${y0} Z`} {...st(c, W, bg)} />
 );
-export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: string; bg: string}> = ({kind, c, bg}) => {
+export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: string; bg: string; W?: number}> = ({kind, c, bg, W = SW}) => {
   if (kind === 'wheel')
     return (
       <g>
-        <path d="M-40 -142 L-44 -60 L30 -60" {...st(c)} />
-        <circle cx={-6} cy={-46} r={46} {...st(c, SW, bg)} />
+        <path d="M-40 -142 L-44 -60 L30 -60" {...st(c, W)} />
+        <circle cx={-6} cy={-46} r={46} {...st(c, W, bg)} />
         {[0, 45, 90, 135].map((a) => (
-          <path key={a} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, 9)} />
+          <path key={a} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, W * 0.82)} />
         ))}
         <circle cx={-6} cy={-46} r={6} fill={c} />
-        <circle cx={46} cy={-8} r={8} {...st(c, 6, bg)} />
-        <path d="M30 -60 L46 -16" {...st(c, 9)} />
-        <Head c={c} bg={bg} y={-196} />
-        <Torso c={c} bg={bg} y0={-158} y1={-92} />
-        <path d="M-20 -92 L34 -92 L40 -24 M10 -92 L18 -26 M40 -24 L54 -22 M18 -26 L30 -24" {...st(c)} />
-        <path d="M22 -146 L44 -110 L58 -110" {...st(c)} />
+        <circle cx={46} cy={-8} r={8} {...st(c, W * 0.55, bg)} />
+        <path d="M30 -60 L46 -16" {...st(c, W * 0.82)} />
+        <Head W={W} c={c} bg={bg} y={-196} />
+        <Torso W={W} c={c} bg={bg} y0={-158} y1={-92} />
+        <path d="M-20 -92 L34 -92 L40 -24 M10 -92 L18 -26 M40 -24 L54 -22 M18 -26 L30 -24" {...st(c, W)} />
+        <path d="M22 -146 L44 -110 L58 -110" {...st(c, W)} />
       </g>
     );
-  const legs = <path d="M-12 -64 L-16 -4 L-30 -2 M12 -64 L16 -4 L30 -2" {...st(c)} />;
+  const legs = <path d="M-12 -64 L-16 -4 L-30 -2 M12 -64 L16 -4 L30 -2" {...st(c, W)} />;
   if (kind === 'cane')
     return (
       <g>
         {legs}
-        <Torso c={c} bg={bg} />
-        <Head c={c} bg={bg} glasses />
-        <path d="M-22 -128 L-38 -84" {...st(c)} />
-        <path d="M22 -128 L42 -90" {...st(c)} />
-        <path d="M42 -92 L92 0" {...st(c, 9)} />
+        <Torso W={W} c={c} bg={bg} />
+        <Head W={W} c={c} bg={bg} glasses />
+        <path d="M-22 -128 L-38 -84" {...st(c, W)} />
+        <path d="M22 -128 L42 -90" {...st(c, W)} />
+        <path d="M42 -92 L92 0" {...st(c, W * 0.82)} />
       </g>
     );
   if (kind === 'dog')
     return (
       <g>
         {legs}
-        <Torso c={c} bg={bg} />
-        <Head c={c} bg={bg} glasses />
-        <path d="M-22 -128 L-38 -84" {...st(c)} />
-        <path d="M22 -128 L50 -96 L78 -96" {...st(c)} />
+        <Torso W={W} c={c} bg={bg} />
+        <Head W={W} c={c} bg={bg} glasses />
+        <path d="M-22 -128 L-38 -84" {...st(c, W)} />
+        <path d="M22 -128 L50 -96 L78 -96" {...st(c, W)} />
         {/* cão-guia com guia rígida */}
-        <path d="M78 -96 L96 -58" {...st(c, 9)} />
-        <path d="M84 -56 Q120 -64 150 -56 L152 -30 Q120 -24 86 -30 Z" {...st(c, SW, bg)} />
-        <path d="M150 -58 Q160 -86 178 -78 Q192 -72 186 -58 Q176 -50 156 -52" {...st(c, SW, bg)} />
-        <path d="M170 -80 Q166 -64 160 -66" {...st(c, 8)} />
+        <path d="M78 -96 L96 -58" {...st(c, W * 0.82)} />
+        <path d="M84 -56 Q120 -64 150 -56 L152 -30 Q120 -24 86 -30 Z" {...st(c, W, bg)} />
+        <path d="M150 -58 Q160 -86 178 -78 Q192 -72 186 -58 Q176 -50 156 -52" {...st(c, W, bg)} />
+        <path d="M170 -80 Q166 -64 160 -66" {...st(c, W * 0.73)} />
         <circle cx={180} cy={-70} r={3.5} fill={c} />
-        <path d="M94 -30 L92 0 M112 -28 L112 0 M132 -28 L134 0 M148 -30 L150 0 M86 -50 Q72 -60 68 -76" {...st(c, 9)} />
-        <path d="M96 -58 L120 -58" {...st(c, 9)} />
+        <path d="M94 -30 L92 0 M112 -28 L112 0 M132 -28 L134 0 M148 -30 L150 0 M86 -50 Q72 -60 68 -76" {...st(c, W * 0.82)} />
+        <path d="M96 -58 L120 -58" {...st(c, W * 0.82)} />
       </g>
     );
   return (
     <g>
       {legs}
-      <path d="M-44 -100 L-52 0 M44 -100 L52 0 M-44 -100 L-30 -104 M44 -100 L30 -104" {...st(c, 9)} />
-      <Torso c={c} bg={bg} />
-      <Head c={c} bg={bg} />
-      <path d="M-22 -128 L-40 -96 M22 -128 L40 -96" {...st(c)} />
+      <path d="M-44 -100 L-52 0 M44 -100 L52 0 M-44 -100 L-30 -104 M44 -100 L30 -104" {...st(c, W * 0.82)} />
+      <Torso W={W} c={c} bg={bg} />
+      <Head W={W} c={c} bg={bg} />
+      <path d="M-22 -128 L-40 -96 M22 -128 L40 -96" {...st(c, W)} />
     </g>
   );
 };
@@ -329,15 +329,10 @@ const GuideDog: React.FC<{c: string; bg: string}> = ({c, bg}) => (
 );
 export const PostPhoto: React.FC<{c: string; bg: string; x: number; y: number; s: number}> = ({c, bg, x, y, s}) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
-    {/* fundo da praça: sol, árvore, banco e chão */}
-    <circle cx={370} cy={80} r={34} fill={c} />
-    <path d="M70 330 L70 210" {...st(c)} />
-    <path d="M70 214 C20 214 10 160 40 140 C30 96 90 80 110 112 C150 100 170 150 140 176 C160 206 120 222 70 214 Z" {...st(c)} />
-    <path d="M300 300 L430 300 M310 300 L306 330 M420 300 L424 330 M300 276 L430 276" {...st(c, 6)} />
-    <path d="M0 400 C120 394 300 394 452 400" {...st(c)} />
-    <g transform="translate(150 404) scale(0.9)"><WomanChair c={c} bg={bg} /></g>
-    <g transform="translate(300 404) scale(0.9)"><ManCane c={c} bg={bg} /></g>
-    <g transform="translate(395 404) scale(0.8)"><GuideDog c={c} bg={bg} /></g>
+    <circle cx={370} cy={84} r={34} fill={c} />
+    <path d="M40 112 Q54 88 82 98 Q96 78 122 94 Q146 90 148 112 Z" {...st(c, 5)} />
+    <path d="M0 404 L452 404" {...st(c, 6)} />
+    <g transform="translate(214 404) scale(1.45)"><Person kind="wheel" c={c} bg={bg} W={6.5} /></g>
   </g>
 );
 export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode}> = ({c, bg, photo}) => {
@@ -345,33 +340,34 @@ export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNod
   const px = x + 44;
   const py = y + 150;
   const ps = w - 88;
-  const icon = (d: string, ix: number, iy: number, k: string) => <path key={k} transform={`translate(${ix} ${iy}) scale(0.62)`} d={d} {...st(c)} />;
+  const T = 5; // traço fino do celular
+  const icon = (d: string, ix: number, iy: number, k: string) => <path key={k} transform={`translate(${ix} ${iy}) scale(0.62)`} d={d} {...st(c, T)} />;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={rx} {...st(c, SW, bg)} />
+      <rect x={x} y={y} width={w} height={h} rx={rx} {...st(c, T, bg)} />
       <rect x={x + w / 2 - 50} y={y + 30} width={100} height={20} rx={10} fill={c} />
       {/* cabeçalho do perfil */}
-      <circle cx={x + 80} cy={y + 104} r={28} {...st(c, SW, bg)} />
+      <circle cx={x + 80} cy={y + 104} r={28} {...st(c, T, bg)} />
       <circle cx={x + 80} cy={y + 96} r={9} fill={c} />
       <path d={`M${x + 64} ${y + 120} Q${x + 80} ${y + 104} ${x + 96} ${y + 120}`} {...st(c, 6)} />
-      <path d={`M${x + 128} ${y + 94} L${x + 300} ${y + 94}`} {...st(c, 14)} />
-      <path d={`M${x + 128} ${y + 120} L${x + 230} ${y + 120}`} {...st(c, 8)} />
-      <path d={`M${x + w - 92} ${y + 104} L${x + w - 92} ${y + 104} M${x + w - 72} ${y + 104} L${x + w - 72} ${y + 104} M${x + w - 52} ${y + 104} L${x + w - 52} ${y + 104}`} {...st(c, 12)} />
+      <path d={`M${x + 128} ${y + 94} L${x + 300} ${y + 94}`} {...st(c, 10)} />
+      <path d={`M${x + 128} ${y + 120} L${x + 230} ${y + 120}`} {...st(c, 6)} />
+      <path d={`M${x + w - 92} ${y + 104} L${x + w - 92} ${y + 104} M${x + w - 72} ${y + 104} L${x + w - 72} ${y + 104} M${x + w - 52} ${y + 104} L${x + w - 52} ${y + 104}`} {...st(c, 9)} />
       {/* foto */}
       <defs>
         <clipPath id="photoClip"><rect x={px} y={py} width={ps} height={ps} rx={20} /></clipPath>
       </defs>
       <g clipPath="url(#photoClip)">{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} />}</g>
-      <rect x={px} y={py} width={ps} height={ps} rx={20} {...st(c)} />
+      <rect x={px} y={py} width={ps} height={ps} rx={20} {...st(c, T)} />
       {/* ações */}
       {icon('M0 26 C-14 14 -36 0 -36 -14 C-36 -28 -24 -36 -13 -36 C-6 -36 -2 -32 0 -26 C2 -32 6 -36 13 -36 C24 -36 36 -28 36 -14 C36 0 14 14 0 26 Z', px + 26, py + ps + 52, 'h')}
       {icon('M-18 25 C-31 18 -38 9 -38 -3 C-38 -20 -21 -32 0 -32 C21 -32 38 -20 38 -3 C38 15 21 27 0 27 C-5 27 -10 26 -14 25 L-32 36 Z', px + 92, py + ps + 52, 'c')}
       {icon('M-36 -2 L36 -32 L12 34 L1 8 Z M1 8 L36 -32', px + 158, py + ps + 52, 's')}
       {icon('M-22 -34 L22 -34 L22 36 L0 18 L-22 36 Z', px + ps - 20, py + ps + 52, 'b')}
       {/* curtidas e legenda */}
-      <path d={`M${px} ${py + ps + 112} L${px + 170} ${py + ps + 112}`} {...st(c, 12)} />
-      <path d={`M${px} ${py + ps + 150} L${px + ps - 40} ${py + ps + 150}`} {...st(c, 8)} />
-      <path d={`M${px} ${py + ps + 180} L${px + ps - 160} ${py + ps + 180}`} {...st(c, 8)} />
+      <path d={`M${px} ${py + ps + 112} L${px + 170} ${py + ps + 112}`} {...st(c, 9)} />
+      <path d={`M${px} ${py + ps + 150} L${px + ps - 40} ${py + ps + 150}`} {...st(c, 6)} />
+      <path d={`M${px} ${py + ps + 180} L${px + ps - 160} ${py + ps + 180}`} {...st(c, 6)} />
     </g>
   );
 };

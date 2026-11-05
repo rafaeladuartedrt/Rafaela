@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, spring, Easing} from 'remotion';
 import {BLUE, LIGHT, ACCENT, Words, T2, RubberArrow, Burst, Speed, SocialPost, PHONE} from './kit';
+import {simulateArrow} from './motion';
 
 const io = Easing.bezier(0.65, 0, 0.35, 1);
 const outQ = Easing.bezier(0.22, 1, 0.36, 1);
@@ -54,7 +55,7 @@ export const OpeningPreview: React.FC = () => {
       s = 1 + 0.16 * Math.exp(-t / 2) * Math.cos(t * 0.9);
     }
     // a seta empurra as letras de "percepção." para fora de cena
-    const front = beat.id === 'w6' ? -260 + 1700 * pr(f, 100, 130, Easing.bezier(0.45, 0, 0.7, 1)) : -9999;
+    const front = beat.id === 'w6' && f >= 96 ? simulateArrow([{f: 96, x: -260, y: 0}, {f: 104, x: 60, y: 0}, {f: 130, x: 1240, y: 0}], Math.min(f, 130)).x + 70 : -9999;
     word = (
       <g transform={`translate(${ox + shake} ${oy}) scale(${s}) translate(${-ox} ${-oy})`}>
         <Words id={beat.id} fn={(l, gi) => {
@@ -73,46 +74,30 @@ export const OpeningPreview: React.FC = () => {
     );
   }
 
-  // ----- seta -----
+  // ----- seta: trajetória contínua com física -----
   let arrow: React.ReactNode = null;
   if (f >= 96 && !cover) {
     const [, wy] = center('w6');
-    let x: number;
-    let y = wy + 10;
-    let rot = 112;
-    let stretch = 1;
-    let bend = 0;
-    let bulge = 0;
-    let z = 1;
-    if (f < 131) {
-      // força para empurrar: corpo inclinado, esticado, tremendo de esforço
-      x = -260 + 1700 * pr(f, 100, 130, Easing.bezier(0.45, 0, 0.7, 1)) - 70;
-      if (f < 100) x = -200 + 60 * pr(f, 96, 100, outQ);
-      stretch = 0.86 + 0.06 * Math.sin(f * 1.7);
-      bulge = 0.25;
-      bend = 0.15 * Math.sin(f * 0.9);
-    } else if (f < 140) {
-      // volta para o centro, quicando de alegria
-      x = 1200 - 660 * pr(f, 131, 140, outQ);
-      y = wy + 40 - 160 * Math.sin(Math.PI * pr(f, 131, 140));
-      rot = 112 - 112 * pr(f, 131, 138) - 360 * pr(f, 131, 140);
-      stretch = 1 + 0.2 * Math.sin(Math.PI * pr(f, 131, 140));
-    } else {
-      // mergulha na câmera
-      x = 540;
-      y = wy + 40;
-      rot = -360 - 8 * pr(f, 140, 146);
-      z = 1 - 0.97 * pr(f, 140, 146, inQ);
-      stretch = 1 + 0.2 * pr(f, 140, 145) + jelly(f, 140, 0.1, 3, 1.4);
-    }
-    if (post) {
-      x = 540 + 280 * pr(f, 149, 168, outQ);
-      y = wy + 40 + 300 * pr(f, 149, 168, outQ);
-      z = 0.03 + 1.1 * pr(f, 149, 168, outQ);
-      rot = -368 + 8 * pr(f, 149, 168);
-      stretch = 1 + jelly(f, 166, 0.16, 5, 1.1);
-    }
-    arrow = <RubberArrow x={x} y={y} rot={rot} scale={1.9 / z} rig={{stretch, bend, bulge, phase: f * 0.5}} fill={post ? BLUE : ACCENT} />;
+    const keys = post
+      ? [
+          {f: 149, x: 540, y: wy - 40, z: 0.03, rest: 0},
+          {f: 160, x: 700, y: wy + 160, z: 0.55, rest: -8},
+          {f: 172, x: 830, y: wy + 330, z: 1.05, rest: -14},
+          {f: 180, x: 840, y: wy + 340, z: 1, rest: -10},
+        ]
+      : [
+          {f: 96, x: -260, y: wy + 30, rest: 0},
+          {f: 104, x: 60, y: wy + 10, rest: 0},
+          {f: 130, x: 1240, y: wy + 10, rest: 0},
+          // vira no ar e volta em arco, comemorando
+          {f: 137, x: 900, y: wy - 260, rest: 0},
+          {f: 141, x: 560, y: wy - 120, rest: 0},
+          {f: 144, x: 540, y: wy - 60, z: 0.45, rest: 0},
+          {f: 146, x: 540, y: wy - 40, z: 0.03, rest: 0},
+        ];
+    const a = simulateArrow(keys, f, {lead: f < 131 ? 1 : 0.8});
+    const effort = f >= 104 && f < 130 ? 0.04 * Math.sin(f * 1.9) : 0; // tremor de esforço ao empurrar
+    arrow = <RubberArrow x={a.x} y={a.y} rot={a.rot} scale={1.9 / a.z} rig={{stretch: a.stretch - (f >= 104 && f < 130 ? 0.1 : 0), bend: a.bend + effort, wobble: a.wobble, phase: f * 0.6}} fill={post ? BLUE : ACCENT} />;
   }
 
   return (
@@ -121,7 +106,7 @@ export const OpeningPreview: React.FC = () => {
         <rect width={1080} height={1920} fill={bg} />
         {word}
         {beat?.id === 'w4' && f - 36 >= 8 && f - 36 < 15 ? <Burst x={540} y={990} r={560} n={10} c={BLUE} len={70} /> : null}
-        {f >= 102 && f < 128 ? <Speed x={-260 + 1700 * pr(f, 100, 130, Easing.bezier(0.45, 0, 0.7, 1)) - 260} y={center('w6')[1] + 10} c={ACCENT} len={150} ang={180} /> : null}
+        {f >= 104 && f < 128 ? <Speed x={simulateArrow([{f: 96, x: -260, y: 0}, {f: 104, x: 60, y: 0}, {f: 130, x: 1240, y: 0}], f).x - 200} y={center('w6')[1] + 10} c={ACCENT} len={150} ang={180} /> : null}
         {post ? (
           <g transform={`translate(540 ${PHONE.y + PHONE.h / 2}) scale(${0.5 + 0.5 * sp(f, 150, 12, 110)}) translate(-540 ${-(PHONE.y + PHONE.h / 2)})`}>
             <SocialPost c={BLUE} bg={ACCENT} />
