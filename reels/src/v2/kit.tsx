@@ -122,15 +122,15 @@ const Head: React.FC<{c: string; bg: string; glasses?: boolean; y?: number; W?: 
 const Torso: React.FC<{c: string; bg: string; y0?: number; y1?: number; W?: number}> = ({c, bg, y0 = -138, y1 = -64, W = SW}) => (
   <path d={`M-18 ${y0} L18 ${y0} Q24 ${y0} 25 ${y0 + 8} L30 ${y1} L-30 ${y1} L-25 ${y0 + 8} Q-24 ${y0} -18 ${y0} Z`} {...st(c, W, bg)} />
 );
-export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: string; bg: string; W?: number}> = ({kind, c, bg, W = SW}) => {
+export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: string; bg: string; W?: number; spin?: number}> = ({kind, c, bg, W = SW, spin = 0}) => {
   if (kind === 'wheel')
     return (
       <g>
         <path d="M-40 -142 L-44 -60 L30 -60" {...st(c, W)} />
         <circle cx={-6} cy={-46} r={46} {...st(c, W, bg)} />
-        {[0, 45, 90, 135].map((a) => (
-          <path key={a} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, W * 0.82)} />
-        ))}
+        {[0, 45, 90, 135].map((a0) => { const a = a0 + spin; return (
+          <path key={a0} d={`M${-6 + 40 * Math.cos((a * Math.PI) / 180)} ${-46 + 40 * Math.sin((a * Math.PI) / 180)} L${-6 - 40 * Math.cos((a * Math.PI) / 180)} ${-46 - 40 * Math.sin((a * Math.PI) / 180)}`} {...st(c, W * 0.4)} />
+        ); })}
         <circle cx={-6} cy={-46} r={6} fill={c} />
         <circle cx={46} cy={-8} r={8} {...st(c, W * 0.55, bg)} />
         <path d="M30 -60 L46 -16" {...st(c, W * 0.82)} />
@@ -182,7 +182,7 @@ export const Person: React.FC<{kind: 'wheel' | 'cane' | 'dog' | 'crutch'; c: str
 };
 
 // ---------- CELULAR COM POST ----------
-export const PHONE = {x: 270, y: 640, w: 540, h: 840, rx: 72};
+export const PHONE = {x: 180, y: 300, w: 720, h: 1180, rx: 90};
 export const Phone: React.FC<{c: string; bg: string; people?: boolean; children?: React.ReactNode}> = ({c, bg, people = true, children}) => {
   const {x, y, w, h, rx} = PHONE;
   return (
@@ -327,15 +327,15 @@ const GuideDog: React.FC<{c: string; bg: string}> = ({c, bg}) => (
     <path d="M-40 -8 L-58 -6 M10 -8 L46 -8" {...st(c)} />
   </g>
 );
-export const PostPhoto: React.FC<{c: string; bg: string; x: number; y: number; s: number}> = ({c, bg, x, y, s}) => (
+export const PostPhoto: React.FC<{c: string; bg: string; x: number; y: number; s: number; roll?: number; bob?: number}> = ({c, bg, x, y, s, roll = 0, bob = 0}) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
     <circle cx={370} cy={84} r={34} fill={c} />
     <path d="M40 112 Q54 88 82 98 Q96 78 122 94 Q146 90 148 112 Z" {...st(c, 5)} />
     <path d="M0 404 L452 404" {...st(c, 6)} />
-    <g transform="translate(214 404) scale(1.45)"><Person kind="wheel" c={c} bg={bg} W={6.5} /></g>
+    <g transform={`translate(${214 + roll} ${404 + bob}) scale(1.45)`}><Person kind="wheel" c={c} bg={bg} W={6.5} spin={-roll * 1.1} /></g>
   </g>
 );
-export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode}> = ({c, bg, photo}) => {
+export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode; roll?: number; bob?: number}> = ({c, bg, photo, roll = 0, bob = 0}) => {
   const {x, y, w, h, rx} = PHONE;
   const px = x + 44;
   const py = y + 150;
@@ -357,7 +357,7 @@ export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNod
       <defs>
         <clipPath id="photoClip"><rect x={px} y={py} width={ps} height={ps} rx={20} /></clipPath>
       </defs>
-      <g clipPath="url(#photoClip)">{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} />}</g>
+      <g clipPath="url(#photoClip)">{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} roll={roll} bob={bob} />}</g>
       <rect x={px} y={py} width={ps} height={ps} rx={20} {...st(c, T)} />
       {/* ações */}
       {icon('M0 26 C-14 14 -36 0 -36 -14 C-36 -28 -24 -36 -13 -36 C-6 -36 -2 -32 0 -26 C2 -32 6 -36 13 -36 C24 -36 36 -28 36 -14 C36 0 14 14 0 26 Z', px + 26, py + ps + 52, 'h')}
