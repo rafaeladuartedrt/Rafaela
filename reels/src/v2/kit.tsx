@@ -219,9 +219,10 @@ export const People: React.FC<{c: string; bg: string}> = ({c, bg}) => (
 );
 
 // ---------- ESCADA DE 3 DEGRAUS (grande) ----------
-export const STAIRS3: [number, number][] = [[60, 1400], [250, 1400], [250, 1250], [470, 1250], [470, 1100], [690, 1100], [690, 950], [930, 950]];
+// escada de 2 degraus, grande e centralizada: chão, degrau 1 e degrau 2 (topo)
+export const STAIRS3: [number, number][] = [[80, 1400], [340, 1400], [340, 1200], [660, 1200], [660, 1000], [1000, 1000]];
 // a mesma linha transformada em rampa (mesmo número de pontos)
-export const RAMP3: [number, number][] = [[60, 1400], ...[1, 2, 3, 4, 5].map((k) => [60 + (630 * k) / 6, 1400 - (450 * k) / 6] as [number, number]), [690, 950], [930, 950]];
+export const RAMP3: [number, number][] = [[80, 1400], ...[1, 2, 3].map((k) => [80 + (580 * k) / 4, 1400 - (400 * k) / 4] as [number, number]), [660, 1000], [1000, 1000]];
 export const lineD = (P: [number, number][]) => P.map((p, i) => `${i ? 'L' : 'M'}${p[0]} ${p[1]}`).join('');
 
 // ---------- SETA COM RIG ELÁSTICO ----------

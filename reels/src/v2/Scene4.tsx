@@ -19,7 +19,7 @@ const CLICK = 160;
 const FLATTEN = 228; // a rampa se achata numa linha horizontal (transição)
 export const SCENE4_LEN = FLATTEN + 24;
 
-const BTN = {cx: 810, cy: 870, h: 96}; // flutua acima do último degrau
+const BTN = {cx: 830, cy: 924, h: 96}; // flutua acima do último degrau
 const SC = 1.12; // seta proporcional ao degrau
 const FLAT_Y = 1000;
 const FLAT: [number, number][] = STAIRS3.map((_, i) => [lerp(-40, 1120, i / (STAIRS3.length - 1)), FLAT_Y]);
@@ -131,7 +131,7 @@ const Scene: React.FC = () => {
   };
 
   // ---- SETA ----
-  const START: [number, number] = [130, 1338];
+  const START: [number, number] = [180, 1338];
   let ax = START[0];
   let ay = START[1];
   let rot = -10;
@@ -140,7 +140,7 @@ const Scene: React.FC = () => {
   const RIGHT = 100; // ponta voltada para a direita, correndo para o degrau
   const hitPos = (k: number): [number, number] => {
     const o = tipOff(RIGHT, k);
-    return [250 - 8 - o[0], 1335 - o[1]];
+    return [STAIRS3[1][0] - 8 - o[0], 1335 - o[1]];
   };
   const hp = hitPos(SC);
   const attempt = (s0: number, hit: number, back: number) => {
@@ -172,7 +172,7 @@ const Scene: React.FC = () => {
     ay = START[1] + 6;
   }
   // a escada vira rampa: levanta, olha e sobe tranquila até o botão
-  const rampAt = (u: number): [number, number] => [lerp(60, 690, u), lerp(1400, 950, u)];
+  const rampAt = (u: number): [number, number] => [lerp(80, 660, u), lerp(1400, 1000, u)];
   if (f >= MORPH + 8) {
     const t0 = pr(f, MORPH + 8, CLIMB[0], expoIO);
     sc = lerp(SC * 0.9, SC, t0);
@@ -221,7 +221,7 @@ const Scene: React.FC = () => {
     if (f >= h && f < h + 16)
       [-1, 0, 1].forEach((k) =>
         gestures.push(
-          <Gesture key={`i${n}${k}`} t={(f - h - Math.abs(k)) / 14} color={BLUE} w={n ? 12 : 10} d={`M${262} ${1320 + k * 50} Q${300} ${1300 + k * 70} ${330 + (n ? 30 : 0)} ${1290 + k * 100}`} />,
+          <Gesture key={`i${n}${k}`} t={(f - h - Math.abs(k)) / 14} color={BLUE} w={n ? 12 : 10} d={`M${STAIRS3[1][0] + 12} ${1320 + k * 50} Q${STAIRS3[1][0] + 50} ${1300 + k * 70} ${STAIRS3[1][0] + 80 + (n ? 30 : 0)} ${1290 + k * 100}`} />,
         ),
       );
   });

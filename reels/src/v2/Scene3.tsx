@@ -38,9 +38,9 @@ const FOLD = BAND + 104; // frase completa fica 2 s em tela antes de virar degra
 const STACK = FOLD + 12;
 const RISE = FOLD + 26;
 const TREADS: [number, number, number][] = [
-  [STAIRS3[6][0], STAIRS3[7][0], STAIRS3[6][1]],
-  [STAIRS3[4][0], STAIRS3[5][0], STAIRS3[4][1]],
-  [STAIRS3[2][0], STAIRS3[3][0], STAIRS3[2][1]],
+  [STAIRS3[4][0], STAIRS3[5][0], STAIRS3[4][1]], // linha de cima > degrau do topo
+  [STAIRS3[2][0], STAIRS3[3][0], STAIRS3[2][1]], // linha do meio > primeiro degrau
+  [STAIRS3[0][0], STAIRS3[1][0], STAIRS3[0][1]], // linha de baixo > chão
 ];
 export const SCENE3_LEN = RISE + 34;
 
@@ -198,9 +198,8 @@ const Scene: React.FC = () => {
   const stairExtras = (col: string) =>
     f >= STACK + 12 ? (
       <g>
-        <Draw t={(f - STACK - 12) / 10} color={col} w={11} d={`M${STAIRS3[0][0]} ${STAIRS3[0][1]} L${STAIRS3[1][0]} ${STAIRS3[1][1]} L${STAIRS3[2][0]} ${STAIRS3[2][1]}`} />
-        <Draw t={(f - STACK - 14) / 8} color={col} w={11} d={`M${STAIRS3[3][0]} ${STAIRS3[3][1]} L${STAIRS3[4][0]} ${STAIRS3[4][1]}`} />
-        <Draw t={(f - STACK - 16) / 8} color={col} w={11} d={`M${STAIRS3[5][0]} ${STAIRS3[5][1]} L${STAIRS3[6][0]} ${STAIRS3[6][1]}`} />
+        <Draw t={(f - STACK - 12) / 8} color={col} w={11} d={`M${STAIRS3[1][0]} ${STAIRS3[1][1]} L${STAIRS3[2][0]} ${STAIRS3[2][1]}`} />
+        <Draw t={(f - STACK - 15) / 8} color={col} w={11} d={`M${STAIRS3[3][0]} ${STAIRS3[3][1]} L${STAIRS3[4][0]} ${STAIRS3[4][1]}`} />
       </g>
     ) : null;
   const riseTop = lerp(1960, -40, pr(f, RISE, RISE + 20, expoIO));
@@ -262,8 +261,8 @@ const Scene: React.FC = () => {
     const t = pr(f, FOLD + 4, FOLD + 28, expoIO);
     const fx = 860;
     const fy = 1300;
-    ax = lerp(fx, 140, t);
-    ay = lerp(fy, 1316, t) - 220 * Math.sin(Math.PI * t);
+    ax = lerp(fx, 180, t);
+    ay = lerp(fy, 1338, t) - 220 * Math.sin(Math.PI * t);
     rot = lerp(-384, -370, t) - 360 * pr(f, FOLD + 6, FOLD + 26, expoIO);
     stretch = f >= FOLD + 28 && f < FOLD + 36 ? 1 - 0.12 * Math.sin(Math.PI * pr(f, FOLD + 28, FOLD + 36, expoIO)) : 1 + 0.1 * Math.sin(Math.PI * t);
     sc = 1.5;
