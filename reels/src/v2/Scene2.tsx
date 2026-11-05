@@ -31,6 +31,9 @@ const CLICK = 150;
 const CLICK2 = 178; // clique em AUDIODESCRIÇÃO
 const PHONE_OUT = 182;
 const REORG = 188;
+const TAKEOVER = 228; // a seta toca o ponto final
+const HOP_END = 242; // o ponto salta na frente da seta e quica
+const INFLATE = 244; // e infla até tomar a tela
 
 // palavras de A1 e A2 na mesma ordem: cada palavra viaja e muda de tamanho como um bloco
 type W = {letters: (typeof T2)['A1']['lines'][0]['letters']; ox: number; oy: number; size: number};
@@ -51,6 +54,7 @@ const wordsOf = (id: string): W[] => {
 const WA = wordsOf('A1');
 const WB = wordsOf('A2');
 const WORD_AD = WA[1];
+const DOT_LAST = WA[WA.length - 1].letters[WA[WA.length - 1].letters.length - 1]; // ponto final de "vê."
 const AD_WORD_C: [number, number] = [(WORD_AD.letters[0].bb[0] + WORD_AD.letters[WORD_AD.letters.length - 1].bb[2]) / 2, (WORD_AD.letters[0].bb[1] + WORD_AD.letters[0].bb[3]) / 2];
 
 // Traço de gesto: nasce, viaja e se recolhe
@@ -60,14 +64,18 @@ const Gesture: React.FC<{d: string; t: number; color: string; w?: number}> = ({d
   const tail = expoIn(cl((t - 0.3) / 0.7));
   return <path d={d} pathLength={1} fill="none" stroke={color} strokeWidth={w * (1 - 0.5 * tail)} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={`${Math.max(0.001, head - tail)} 2`} strokeDashoffset={-tail} />;
 };
-// ponto de interrogação desenhado como gesto
-const QMark: React.FC<{x: number; y: number; t: number; color: string; s?: number; rot?: number}> = ({x, y, t, color, s = 1, rot = 0}) => {
+// ponto de interrogação: se desenha, fica no ar balançando e depois se recolhe
+const QMark: React.FC<{x: number; y: number; t: number; color: string; s?: number; rot?: number; f: number}> = ({x, y, t, color, s = 1, rot = 0, f}) => {
   if (t <= 0 || t >= 1) return null;
-  const dot = t > 0.45 && t < 0.85 ? 7 * Math.sin(Math.PI * cl((t - 0.45) / 0.4)) : 0;
+  const head = expoOut(cl(t / 0.28));
+  const tail = expoIn(cl((t - 0.78) / 0.22));
+  const sway = 7 * Math.sin(f * 0.22 + x * 0.01) * (1 - tail);
+  const bob = 6 * Math.sin(f * 0.18 + y * 0.02);
+  const dot = 11 * (t > 0.24 ? expoOut(cl((t - 0.24) / 0.12)) : 0) * (1 - tail);
   return (
-    <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
-      <Gesture t={t} color={color} w={10} d="M-22 -30 C-24 -62 24 -66 24 -32 C24 -10 0 -8 0 18" />
-      {dot > 0.3 ? <circle cx={0} cy={46} r={dot} fill={color} /> : null}
+    <g transform={`translate(${x} ${y + bob}) rotate(${rot + sway}) scale(${s})`}>
+      <path d="M-24 -32 C-26 -66 26 -70 26 -34 C26 -10 0 -8 0 18" pathLength={1} fill="none" stroke={color} strokeWidth={24 / s} strokeLinecap="round" strokeDasharray={`${Math.max(0.001, head - tail)} 2`} strokeDashoffset={-tail} />
+      {dot > 0.4 ? <circle cx={0} cy={52} r={(dot * 1.5) / s} fill={color} /> : null}
     </g>
   );
 };
@@ -125,10 +133,10 @@ const Scene: React.FC = () => {
     const z = 1 + 0.55 * pr(f, 44, 60, expoIO) - 0.55 * pr(f, 108, 116, expoIO);
     const path = [
       [rest[0], rest[1]],
-      [820, 1230],
-      [860, 900],
-      [260, 860],
-      [230, 1250],
+      [880, 1320],
+      [900, 1060],
+      [170, 1090],
+      [190, 1400],
       [rest[0], rest[1]],
     ];
     const seg = Math.min(4, Math.floor(t * 5));
@@ -153,6 +161,9 @@ const Scene: React.FC = () => {
     ay += 20 * ant;
     stretch = 1 + 0.08 * ant - 0.14 * Math.sin(Math.PI * pr(f, CLICK, CLICK + 6, expoIO));
   }
+  const VEw = WB[WB.length - 1];
+  const dotFinal: [number, number] = [VEw.ox + ((DOT_LAST.bb[0] + DOT_LAST.bb[2]) / 2 - WA[WA.length - 1].ox) * (VEw.size / WA[WA.length - 1].size), VEw.oy + ((DOT_LAST.bb[1] + DOT_LAST.bb[3]) / 2 - WA[WA.length - 1].oy) * (VEw.size / WA[WA.length - 1].size)];
+  const dotRad = ((DOT_LAST.bb[2] - DOT_LAST.bb[0]) / 2) * (VEw.size / WA[WA.length - 1].size) * lerp(1, 75, pr(f, INFLATE, INFLATE + 16, expoIn));
   // ponta da seta fica a (cA * escala) do pivô, na direção da ponta
   const tipOff = (r: number, k: number): [number, number] => {
     const a = (r * Math.PI) / 180;
@@ -175,20 +186,39 @@ const Scene: React.FC = () => {
     stretch = 1 + 0.07 * ant - 0.12 * Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 6, expoIO));
     if (f >= 190) {
       const t2 = pr(f, 190, 212, expoIO);
-      ax = lerp(target[0], 900, t2);
-      ay = lerp(target[1], 1420, t2) - 120 * Math.sin(Math.PI * t2);
+      ax = lerp(target[0], dotFinal[0] + 96, t2);
+      ay = lerp(target[1], dotFinal[1] + 110, t2) - 120 * Math.sin(Math.PI * t2);
       rot = lerp(r + 360, 336, t2);
       sc = lerp(k, 1.5, t2);
       stretch = f >= 212 && f < 222 ? 1 - 0.07 * Math.sin(Math.PI * pr(f, 212, 222, expoIO)) : 1;
+      // toque no ponto: antecipação e clique
+      const ant2 = pr(f, 220, 225, expoOut) * (1 - pr(f, 225, TAKEOVER, expoIn));
+      ax += 16 * ant2;
+      ay += 20 * ant2;
+      if (f >= TAKEOVER) stretch = 1 - 0.12 * Math.sin(Math.PI * pr(f, TAKEOVER, TAKEOVER + 6, expoIO));
+      // susto: o ponto pula na frente dela
+      if (f >= TAKEOVER + 4 && f < HOP_END + 6) {
+        const j = Math.sin(Math.PI * pr(f, TAKEOVER + 4, HOP_END + 6, expoIO));
+        ax += 40 * j;
+        ay += 10 * j;
+        rot += 14 * j;
+      }
     }
   }
   const inBlue = Math.hypot(ax - adC[0], ay - adC[1]) < wipe;
-  const arrowColor = inBlue ? ACCENT : BLUE;
+  const inLight = f >= INFLATE && Math.hypot(ax - (dotFinal[0] + 120), ay - (dotFinal[1] + 70)) < dotRad;
+  const arrowColor = inLight ? BLUE : inBlue ? ACCENT : BLUE;
   const heartFill = f >= CLICK ? pr(f, CLICK, CLICK + 10) : 0;
 
   const gestures: React.ReactNode[] = [];
-  gestures.push(<QMark key="q1" x={ax + 70} y={ay - 170} t={(f - 58) / 22} color={arrowColor} rot={-10} />);
-  gestures.push(<QMark key="q2" x={ax - 60} y={ay - 150} t={(f - 80) / 20} color={arrowColor} s={0.75} rot={12} />);
+  // três dúvidas grandes que se acumulam em volta da seta enquanto ela procura
+  const qx = (x: number) => Math.min(960, Math.max(120, x));
+  const qy = (y: number) => Math.max(900, y);
+  void qx;
+  void qy;
+  gestures.push(<QMark key="q1" f={f} x={930} y={960} t={(f - 50) / 46} color={arrowColor} s={2.3} rot={-12} />);
+  gestures.push(<QMark key="q2" f={f} x={150} y={1010} t={(f - 64) / 40} color={arrowColor} s={1.9} rot={14} />);
+  gestures.push(<QMark key="q3" f={f} x={950} y={1330} t={(f - 74) / 30} color={arrowColor} s={1.4} rot={-6} />);
   if (f >= CLICK && f < CLICK + 18) {
     [-1, 0, 1].forEach((k) =>
       gestures.push(<Gesture key={`h${k}`} t={(f - CLICK - Math.abs(k)) / 16} color={ACCENT} d={`M${heart[0] - 10 + k * 30} ${heart[1] - 40} Q${heart[0] - 20 + k * 50} ${heart[1] - 90} ${heart[0] - 10 + k * 80} ${heart[1] - 140}`} />),
@@ -231,8 +261,20 @@ const Scene: React.FC = () => {
   }
   const ring = f >= LIGHT_ON - 4 && f < LIGHT_ON + 10 ? <circle cx={adC[0]} cy={adC[1]} r={lerp(160, 420, pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} fill="none" stroke={BLUE} strokeWidth={10 * (1 - pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} /> : null;
 
+  const VE = WB[WB.length - 1].letters;
+  const DOTL = VE[VE.length - 1];
+  const dotC: [number, number] = [(DOTL.bb[0] + DOTL.bb[2]) / 2, (DOTL.bb[1] + DOTL.bb[3]) / 2];
+  const dotS = lerp(1, 75, pr(f, INFLATE, INFLATE + 16, expoIn));
+  // salto: arco para cima e para a frente, com amassada ao sair e ao cair
+  const hopT = cl((f - TAKEOVER - 2) / (HOP_END - TAKEOVER - 2));
+  const hopY = (f >= TAKEOVER + 2 && f < HOP_END ? -240 * 4 * hopT * (1 - hopT) : 0) + (f >= TAKEOVER + 2 ? 70 * Math.min(1, hopT) : 0);
+  const hopX = f >= TAKEOVER + 2 ? 120 * Math.min(1, hopT) : 0; // salta para a frente da seta
+  const squash = f >= HOP_END && f < HOP_END + 3 ? [1.3, 0.7] : f >= TAKEOVER + 2 && f < HOP_END ? [0.92, 1.1] : [1, 1];
+  const dotR = ((DOTL.bb[2] - DOTL.bb[0]) / 2) * dotS;
+  const cam = undefined;
   return (
     <svg width={1080} height={1920} viewBox="0 0 1080 1920">
+      <g transform={cam}>
       <defs>
         {[0, 1].map((li) => lineClip('Q1', li, `Q1c${li}`))}
         {[0, 1, 2].map((li) => lineClip('A1', li, `A1c${li}`))}
@@ -263,7 +305,7 @@ const Scene: React.FC = () => {
               const y = lerp(w.oy, n.oy, t);
               return (
                 <g key={k} transform={`translate(${x} ${y}) scale(${sc}) translate(${-w.ox} ${-w.oy})`}>
-                  {w.letters.map((l, i) => <path key={i} d={l.d} fill={l.color === 'O' ? ACCENT : LIGHT} />)}
+                  {w.letters.map((l, i) => (l === DOT_LAST ? null : <path key={i} d={l.d} fill={l.color === 'O' ? ACCENT : LIGHT} />))}
                 </g>
               );
             })
@@ -274,6 +316,24 @@ const Scene: React.FC = () => {
       {adOverlay}
       {gestures}
       <RubberArrow x={ax} y={ay} rot={rot} scale={sc} rig={{stretch}} fill={arrowColor} />
+      {f >= REORG ? (() => {
+        const w = WA[WA.length - 1];
+        const n = WB[WB.length - 1];
+        const k = WA.length - 1;
+        const t = pr(f, REORG + k * 2.5, REORG + k * 2.5 + 20, expoIO);
+        const sc2 = lerp(1, n.size / w.size, t);
+        const x = lerp(w.ox, n.ox, t);
+        const y = lerp(w.oy, n.oy, t);
+        const dc0 = [(DOT_LAST.bb[0] + DOT_LAST.bb[2]) / 2, (DOT_LAST.bb[1] + DOT_LAST.bb[3]) / 2];
+        const k2 = n.size / w.size;
+        return (
+          <g transform={`translate(${hopX} ${hopY}) translate(${x} ${y}) scale(${sc2}) translate(${-w.ox} ${-w.oy})`}>
+            <path d={DOT_LAST.d} fill={LIGHT} transform={`translate(${dc0[0]} ${DOT_LAST.bb[3]}) scale(${squash[0] * dotS} ${squash[1] * dotS}) translate(${-dc0[0]} ${-DOT_LAST.bb[3]})`} />
+          </g>
+        );
+        void k2;
+      })() : null}
+      </g>
     </svg>
   );
 };
