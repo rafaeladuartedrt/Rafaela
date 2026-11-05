@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
 import {BLUE, LIGHT, ACCENT, T2, RubberArrow, STAIRS3} from './kit';
+import {S2_ARROW_END} from './Scene2';
 
 // ============ CENA 3: AUDIÇÃO ============
 const expoOut = Easing.bezier(0.16, 1, 0.3, 1);
@@ -211,8 +212,8 @@ const Scene: React.FC = () => {
     return [d0[0] * Math.cos(an) - d0[1] * Math.sin(an), d0[0] * Math.sin(an) + d0[1] * Math.cos(an)];
   };
   const IDLE: [number, number] = [840, 640];
-  let ax = lerp(950, IDLE[0], pr(f, 0, 16, expoIO));
-  let ay = lerp(1470, IDLE[1], pr(f, 0, 16, expoIO)) - 120 * Math.sin(Math.PI * pr(f, 0, 16, expoIO));
+  let ax = lerp(S2_ARROW_END.x, IDLE[0], pr(f, 0, 16, expoIO));
+  let ay = lerp(S2_ARROW_END.y, IDLE[1], pr(f, 0, 16, expoIO)) - 120 * Math.sin(Math.PI * pr(f, 0, 16, expoIO));
   let rot = -24;
   let stretch = 1;
   let sc = 1.5;
@@ -265,7 +266,7 @@ const Scene: React.FC = () => {
     ay = lerp(fy, 1338, t) - 220 * Math.sin(Math.PI * t);
     rot = lerp(-384, -370, t) - 360 * pr(f, FOLD + 6, FOLD + 26, expoIO);
     stretch = f >= FOLD + 28 && f < FOLD + 36 ? 1 - 0.12 * Math.sin(Math.PI * pr(f, FOLD + 28, FOLD + 36, expoIO)) : 1 + 0.1 * Math.sin(Math.PI * t);
-    sc = 1.5;
+    sc = lerp(1.5, 1.12, t); // chega no tamanho da cena 4
   }
   const inBand = f >= BAND && ay > bandTop;
   const arrowColor = f >= RISE && ay > riseTop ? BLUE : inBand ? ACCENT : BLUE;

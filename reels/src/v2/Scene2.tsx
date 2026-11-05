@@ -112,6 +112,16 @@ const TextBlock: React.FC<{id: string; f: number; start: number[]; exit?: number
   </g>
 );
 
+// onde a seta termina a cena 2 (a cena 3 começa exatamente dali)
+const S2_VE = WB[WB.length - 1];
+const S2_K = S2_VE.size / WA[WA.length - 1].size;
+export const S2_ARROW_END = {
+  x: S2_VE.ox + ((DOT_LAST.bb[0] + DOT_LAST.bb[2]) / 2 - WA[WA.length - 1].ox) * S2_K + 96,
+  y: S2_VE.oy + ((DOT_LAST.bb[1] + DOT_LAST.bb[3]) / 2 - WA[WA.length - 1].oy) * S2_K + 110,
+  rot: -24,
+  sc: 1.5,
+};
+
 const Scene: React.FC = () => {
   const f = useCurrentFrame();
   const wipe = 2400 * pr(f, LIGHT_ON, LIGHT_ON + 18, expoIO);

@@ -12,6 +12,7 @@ import {Scene2} from './v2/Scene2';
 import {Scene3, SCENE3_LEN} from './v2/Scene3';
 import {Scene4, SCENE4_LEN} from './v2/Scene4';
 import {Scene5, SCENE5_LEN} from './v2/Scene5';
+import {Full, FULL_LEN} from './v2/Full';
 
 export const Root: React.FC = () => (
   <>
@@ -33,5 +34,7 @@ export const Root: React.FC = () => (
     <Composition id="Cena4SemBlur" component={Scene4} durationInFrames={SCENE4_LEN} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
     <Composition id="Cena5" component={Scene5} durationInFrames={SCENE5_LEN} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
     <Composition id="Cena5SemBlur" component={Scene5} durationInFrames={SCENE5_LEN} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
+    <Composition id="ReelsFinal" component={Full} durationInFrames={FULL_LEN} fps={30} width={1080} height={1920} defaultProps={{blur: true}} />
+    <Composition id="ReelsFinalSemBlur" component={Full} durationInFrames={FULL_LEN} fps={30} width={1080} height={1920} defaultProps={{blur: false}} />
   </>
 );
