@@ -141,7 +141,7 @@ for i in range(70):
     E.append(('s5', fr, pop(700 + 400 * rng.random(), 1300 + 500 * rng.random(), .07), rng.uniform(-.8, .8), .06))
 for sc, fr, sig, pan, gg in E: add(sfx, G(sc, fr), sig, pan, gg)
 
-mix = mus + sfx
+mix = (mus if not L.get('sfxOnly') else 0 * mus) + sfx  # sfxOnly: só os sons dos movimentos, sem trilha
 # abertura densa: 3 dB a menos no primeiro segundo (evita pico entre amostras após o AAC), retorno suave
 ge = np.ones(n); a1 = int(1.0 * SR); a2 = int(1.5 * SR)
 ge[:a1] = 10 ** (-3 / 20); ge[a1:a2] = np.linspace(10 ** (-3 / 20), 1, a2 - a1)
