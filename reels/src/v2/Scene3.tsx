@@ -30,11 +30,11 @@ const DROP = 67; // o bloco cai
 const G = 6; // gravidade (px/frame²)
 const CONTACT = DROP + Math.sqrt((2 * (WAVE_Y - PY2)) / G); // bloco encosta na onda e o som é cortado
 const CUT = Math.round(CONTACT);
-const SILENCE_END = CUT + 60; // 2 segundos de silêncio absoluto
+const SILENCE_END = CUT + 36; // 1,2 segundo de silêncio absoluto
 const BAND = SILENCE_END; // a onda volta de baixo como faixa azul e toma a tela
 const BARS = BAND + 18;
 // transição para a cena 4: legendas voltam a ser barras, empilham como degraus e o claro sobe de baixo
-const FOLD = BAND + 70;
+const FOLD = BAND + 104; // frase completa fica 2 s em tela antes de virar degraus
 const STACK = FOLD + 12;
 const RISE = FOLD + 26;
 const TREADS: [number, number, number][] = [
