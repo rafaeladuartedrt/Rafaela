@@ -367,7 +367,7 @@ export const PostPhoto: React.FC<{c: string; bg: string; x: number; y: number; s
     <circle cx={370} cy={84} r={34} fill={c} />
     <path d="M40 112 Q54 88 82 98 Q96 78 122 94 Q146 90 148 112 Z" {...st(c, 5)} />
     <path d="M0 404 L452 404" {...st(c, 6)} />
-    <g transform={`translate(${214 + roll} ${404 + bob}) scale(1.45)`}><Person kind="wheel" c={c} bg={bg} W={6.5} spin={-roll * 1.1} /></g>
+    <g transform={`translate(${226 + roll} ${404 + bob}) scale(1.2)`}><Person kind="wheel" c={c} bg={bg} W={6.5} spin={-roll * 1.1} /></g>
   </g>
 );
 export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNode; roll?: number; bob?: number; blur?: number; ad?: number; heart?: number; heartColor?: string; hide?: boolean; uid?: string}> = ({c, bg, photo, roll = 0, bob = 0, blur = 0, ad = 0, heart = 0, heartColor, hide = false, uid = ''}) => {
