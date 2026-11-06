@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame, Easing} from 'remotion';
 import {CameraMotionBlur} from '@remotion/motion-blur';
 import {warpFrame, Seg} from './warp';
-import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE, ADMark, st} from './kit';
+import {BLUE, LIGHT, ACCENT, T2, RubberArrow, SocialPost, PHONE, PTVMark, PTV_W, st} from './kit';
 
 // ============ CENA 2: VISÃO ============
 const expoOut = Easing.bezier(0.16, 1, 0.3, 1);
@@ -17,8 +17,9 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const ZIN = [72, 94];
 const ZOUT = [172, 194];
 const camPhase = (f: number) => pr(f, ZIN[0], ZIN[1], expoIO) * (1 - pr(f, ZOUT[0], ZOUT[1], expoIO));
-const camK = (f: number) => lerp(lerp(1, 0.66, pr(f, 0, 16, expoIO)), 1.62, camPhase(f));
-const camY = (f: number) => lerp(lerp(890, 1135, pr(f, 0, 16, expoIO)), 960, camPhase(f));
+const after = (f: number) => pr(f, ZOUT[0], ZOUT[1], expoIO);
+const camK = (f: number) => lerp(lerp(lerp(1, 0.66, pr(f, 0, 16, expoIO)), 0.6, after(f)), 1.62, camPhase(f));
+const camY = (f: number) => lerp(lerp(lerp(890, 1135, pr(f, 0, 16, expoIO)), 1270, after(f)), 960, camPhase(f));
 const camF = (f: number) => lerp(890, PHONE.y + 150 + (PHONE.w - 88) / 2, camPhase(f));
 const mapP = (f: number, x: number, y: number): [number, number] => [540 + (x - 540) * camK(f), camY(f) + (y - camF(f)) * camK(f)];
 const phoneT = (f: number) => `translate(540 ${camY(f)}) scale(${camK(f)}) translate(-540 ${-camF(f)})`;
@@ -270,30 +271,18 @@ const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
       <SocialPost uid={uid} c={c} bg={bg} blur={blur} ad={f >= AD_LAND ? 1 : 0} heart={heartFill} heartColor={heartColor} />
     </g>
   );
-  // selo AD em destaque: nasce grande, as ondas pulsam como som, depois voa até a foto
+  // etiqueta #ParaTodosVerem em destaque: nasce grande no centro, acende e depois voa até a foto
   let adOverlay: React.ReactNode = null;
   if (f >= AD_START && f < AD_LAND) {
-    const dest = mapP(f, PX + 40 + 80, PY + 90 - 24);
+    const dest = mapP(f, PX + 30 + (PTV_W * 0.62) / 2, PY + 56);
     const t = pr(f, 162, AD_LAND, expoIO);
     const cx = lerp(AD_BIG[0], dest[0], t);
     const cy = lerp(AD_BIG[1], dest[1], t);
-    const S = lerp(3.4, camK(f), t);
+    const S2 = lerp(1.5, 0.62 * camK(f), t);
     const col = f >= LIGHT_ON ? LIGHT : BLUE;
-    const waves: React.ReactNode[] = [];
-    for (let k = 0; k < 3; k++) {
-      const w = ((f - AD_START - 8 - k * 5) % 15) / 15;
-      if (f - AD_START - 8 - k * 5 < 0 || t > 0.3) continue;
-      const r = 60 + w * 70;
-      waves.push(<path key={k} d={`M${100 + r * Math.cos(-0.85)} ${-24 + r * Math.sin(-0.85)} A${r} ${r} 0 0 1 ${100 + r * Math.cos(0.85)} ${-24 + r * Math.sin(0.85)}`} {...st(col, 8 * (1 - w))} />);
-    }
-    adOverlay = (
-      <g transform={`translate(${cx} ${cy}) scale(${S}) translate(-80 24)`}>
-        <ADMark x={0} y={0} c={col} p={pr(f, AD_START, AD_START + 14)} />
-        {waves}
-      </g>
-    );
+    adOverlay = <PTVMark x={cx} y={cy} c={col} p={pr(f, AD_START, AD_START + 14)} s={S2} />;
   }
-  const ring = f >= LIGHT_ON - 4 && f < LIGHT_ON + 10 ? <circle cx={adC[0]} cy={adC[1]} r={lerp(160, 420, pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} fill="none" stroke={BLUE} strokeWidth={10 * (1 - pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} /> : null;
+  const ring = f >= LIGHT_ON - 4 && f < LIGHT_ON + 10 ? <circle cx={adC[0]} cy={adC[1]} r={lerp(380, 720, pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} fill="none" stroke={BLUE} strokeWidth={10 * (1 - pr(f, LIGHT_ON - 4, LIGHT_ON + 10))} /> : null;
 
   const VE = WB[WB.length - 1].letters;
   const DOTL = VE[VE.length - 1];
@@ -328,7 +317,7 @@ const Scene: React.FC<{segs?: Seg[]}> = ({segs = []}) => {
           <rect width={1080} height={1920} fill={BLUE} />
           {f < REORG ? (
             <g transform={f >= CLICK2 ? `translate(${AD_WORD_C[0]} ${AD_WORD_C[1]}) scale(1) translate(${-AD_WORD_C[0]} ${-AD_WORD_C[1]})` : undefined}>
-              <TextBlock id="A1" f={f} start={[184, 190, 198]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} pulseWord={f >= CLICK2 ? Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 10, expoIO)) : 0} />
+              <TextBlock id="A1" f={f} start={[184, 189, 194, 200]} colors={{L: LIGHT, O: ACCENT, B: LIGHT}} pulseWord={f >= CLICK2 ? Math.sin(Math.PI * pr(f, CLICK2, CLICK2 + 10, expoIO)) : 0} />
             </g>
           ) : (
             WA.map((w, k) => {

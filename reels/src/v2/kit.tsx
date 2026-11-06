@@ -279,6 +279,23 @@ export const RubberArrow: React.FC<{x: number; y: number; rot?: number; scale?: 
 
 // ---------- POST DE REDE SOCIAL COM FOTO EM TRAÇO ----------
 export const HEART_D = 'M0 26 C-14 14 -36 0 -36 -14 C-36 -28 -24 -36 -13 -36 C-6 -36 -2 -32 0 -26 C2 -32 6 -36 13 -36 C24 -36 36 -28 36 -14 C36 0 14 14 0 26 Z';
+// Etiqueta #ParaTodosVerem: tag arredondada com a hashtag, centrada em (x, y). p = progresso da entrada (0..1)
+export const PTV_W = 563 + 2 * 30; // largura da tag na escala 1
+export const PTV_H = 64 + 30;
+export const PTVMark: React.FC<{x: number; y: number; c: string; p: number; s?: number}> = ({x, y, c, p, s = 1}) => {
+  const t = T2.ptv.lines[0];
+  const pop = 1 + 0.18 * Math.sin(Math.PI * Math.min(1, p * 1.4)) * (p < 0.72 ? 1 : 0);
+  const k = s * Math.min(1, p * 2.2) * pop;
+  if (k <= 0.001) return null;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${k})`}>
+      <rect x={-PTV_W / 2} y={-PTV_H / 2} width={PTV_W} height={PTV_H} rx={PTV_H / 2} {...st(c, 8)} />
+      <g transform={`translate(${-(t.bb[2] + t.bb[0]) / 2} ${22})`}>
+        {t.letters.map((l, i) => <path key={i} d={l.d} fill={c} />)}
+      </g>
+    </g>
+  );
+};
 // Selo de audiodescrição: letras AD + ondas de som. p = progresso do desenho (0..1)
 export const ADMark: React.FC<{x: number; y: number; c: string; p: number; s?: number}> = ({x, y, c, p, s = 1}) => {
   const ad = T2.ad.lines[0];
@@ -380,7 +397,7 @@ export const SocialPost: React.FC<{c: string; bg: string; photo?: React.ReactNod
       </defs>
       <g clipPath={`url(#photoClip${uid})`}>
         <g filter={blur > 0.2 ? `url(#visao${uid})` : undefined}>{photo ?? <PostPhoto c={c} bg={bg} x={px} y={py} s={ps / 452} roll={roll} bob={bob} />}</g>
-        {ad > 0 ? <ADMark x={px + 40} y={py + 90} c={c} p={ad} /> : null}
+        {ad > 0 ? <PTVMark x={px + 30 + (PTV_W * 0.62) / 2} y={py + 56} c={c} p={ad} s={0.62} /> : null}
       </g>
       <rect x={px} y={py} width={ps} height={ps} rx={20} {...st(c, T)} />
       {/* ações */}
