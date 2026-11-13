@@ -322,7 +322,6 @@ def render(i, layers=False):
     # ---------- 02_BLOCOS_COR  (alpha em cairo, com motion blur por subamostras)
     a_coral = np.zeros((Hh, W), np.float32); a_rec = np.zeros((Hh, W), np.float32); a_most = np.zeros((Hh, W), np.float32); a_sil = np.zeros((Hh, W), np.float32)
     p_coral = ease_io((i - 80) / 10.); p_most = ease_io((i - 7) / 10.)
-    if VIEW['ext']: p_most = 1.0    # vistas estendidas (vertical): painel e cruz completos desde o frame 0
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
         if hh is not None and p_coral > 0:
@@ -340,11 +339,17 @@ def render(i, layers=False):
             Pn = torn([(0, 0), (1, 0), (1, 1), (0, 1)], 0.004, 0.012, 5) * [xw - x0, y1 - y0] + [x0, y0]
             s, c = surf(); c.move_to(*Pn[0]); [c.line_to(*p) for p in Pn[1:]]; c.close_path(); c.fill(); a_most += to_np(s) / NB_MB
     a_coral *= (1 - a_rec)
-    if VIEW['ext']:   # fora do quadro original a pedra da cruz so existe dentro do traco do pictograma
+    if VIEW['ext'] and fitq(i) is not None:
+        # vertical: a cruz aparece inteira desde o frame 0. Fora do quadro original nao ha foto,
+        # entao ali a cruz e a silhueta do pictograma preenchida com o tom medio da pedra.
         fora = 1 - warp(np.ones((1080, 1920), np.float32), 'zero', 'zero', cv2.INTER_LINEAR)
-        tira = m_cruz * fora * (1 - a_sil * np.clip(a_most, 0, 1)); m_cruz = m_cruz - tira
+        dentro_q = m_cruz * (1 - fora)
+        tom = (pedra * dentro_q[..., None]).sum((0, 1)) / max(dentro_q.sum(), 1.)
+        pedra = mix(pedra, np.broadcast_to(tom, big.shape), fora)
+        m_cruz = dentro_q + fora * a_sil
         yy_ = (np.arange(Hh, dtype=np.float32)[:, None] - VIEW['ty']) / VIEW['a']
-        m_ceu = np.clip(m_ceu + tira * (yy_ < 540), 0, 1); m_veg = np.clip(m_veg + tira * (yy_ >= 540), 0, 1)
+        resto = fora * (1 - a_sil)
+        m_ceu = m_ceu * (1 - fora) + resto * (yy_ < 540); m_veg = m_veg * (1 - fora) + resto * (yy_ >= 540)
         foto = mix(mix(mix(ceu, veg, m_veg), pedra, np.clip(m_cruz + m_fac, 0, 1)), BRANCO, m_jan)
     # dentro do bloco a foto vira tom sobre a cor (so 2 tons + vazios em laranja queimado)
     sombra = poster(1 - np.clip((lum - 0.06) / 0.42, 0, 1), 3)
