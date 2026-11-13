@@ -3,6 +3,7 @@ O movimento de camera original nao muda: so o recorte acompanha o assunto
 (cruz -> fachada -> janela), com transicoes suaves.
 
 Abordagem A (recorte): recorte de altura cheia que segue o assunto; corta cruz/fachada nos trechos largos.
+Abordagem D (combinada, inversa da C): cruz como na A, ruinas como na B.
 Abordagem C (combinada): cruz como na B, ruinas como na A (altura cheia).
 Abordagem B (extensao): a estrutura principal fica inteira; ceu/papel, gramado e blocos sao
 prolongados para cima e para baixo, no estilo dos cartazes de Vyborg.
@@ -31,19 +32,24 @@ def pista(fmt, modo):
         larg = 234 * q[2]                             # envergadura dos bracos
         topo = q[1] + q[3] * (127 - 300); pe = q[1] + q[3] * 100 + q[4] * (751 - 400)
         alt = pe - topo
-        a = min(a_cheio, w / (1.22 * larg), (h - F['topo'] - F['base']) / (1.04 * alt) if modo in 'BC' else 9)
+        a = min(a_cheio, w / (1.22 * larg), (h - F['topo'] - F['base']) / (1.04 * alt) if modo in 'BCD' else 9)
         cz[i] = (a, q[0], q[1] + q[3] * 20)           # centro: cruzamento dos bracos
-        if modo in 'BC': cz[i, 2] = (topo + pe) / 2
+        if modo in 'BCD': cz[i, 2] = (topo + pe) / 2
     # ----- assunto 2: fachada inteira (enquanto couber no quadro original)
     fc = np.zeros((N, 3)); jn = np.zeros((N, 3))
     for i in range(N):
         j = int(np.clip(i, 40, 212)); Hm = HT[j]
-        P = cv2.perspectiveTransform(np.array([[[270, 60], [1740, 60], [270, 790], [1740, 790], [1001, 406]]], np.float32), Hm)[0]
+        P = cv2.perspectiveTransform(np.array([[[270, 60], [1575, 60], [270, 790], [1575, 790], [1001, 406]]], np.float32), Hm)[0]
         x0, x1 = max(P[:, 0].min(), 0), min(P[:, 0].max(), 1920); y0, y1 = max(P[:2, 1].mean(), -200), min(P[2:4, 1].mean(), 1280)
-        fc[i] = (min(a_cheio, w / (1.06 * (x1 - x0))), (x0 + x1) / 2, (y0 + y1) / 2)
+        fc[i] = (min(a_cheio, w / (1.03 * (x1 - x0))), (x0 + x1) / 2, (y0 + y1) / 2)
         jn[i] = (a_cheio, np.clip(P[4, 0], w / 2 / a_cheio, 1920 - w / 2 / a_cheio), 540)
+    # fachada: enquadra da torre ao pilar direito e, a partir do frame 122, o recorte para de abrir.
+    # Assim a fachada cresce na tela junto com o push-in original, em vez de ficar pequena.
+    fc[122:, 0] = np.maximum.accumulate(fc[122:, 0])
     if modo == 'A':
         cz[:, 0] = a_cheio; fc[:, 0] = a_cheio; cz[:, 2] = 540; fc[:, 2] = 540
+    if modo == 'D':   # cruz como na A (altura cheia, grande); ruinas como na B (fachada inteira, com extensao)
+        cz[:, 0] = a_cheio; cz[:, 2] = 540
     if modo == 'C':   # cruz como na B (inteira, com extensao); ruinas como na A (altura cheia, fachada grande)
         fc[:, 0] = a_cheio; fc[:, 2] = 540
     # ----- pesos (ease in-out): cruz -> fachada (frames 74-96) -> janela (150-186)
@@ -53,6 +59,7 @@ def pista(fmt, modo):
     cy = (1 - w_f) * cz[:, 2] + w_f * ((1 - w_j) * fc[:, 2] + w_j * jn[:, 2])
     alvo_y = (1 - w_j * w_f) * cyc + (w_j * w_f) * (h / 2)
     if modo == 'C': alvo_y = (1 - w_f) * cyc + w_f * (h / 2)
+    if modo == 'D': alvo_y = (1 - w_f) * (h / 2) + w_f * ((1 - w_j) * cyc + w_j * (h / 2))
     la, cx, cy = [gaussian_filter1d(v, 5, mode='nearest') for v in (la, cx, cy)]
     a = np.exp(la)
     if modo == 'A':   # recorte puro: nunca sai do quadro original
@@ -61,7 +68,7 @@ def pista(fmt, modo):
         cx = np.clip(cx, w / 2 / a, 1920 - w / 2 / a)
         a = np.maximum(a, w / 1920.)
     tx = w / 2 - a * cx; ty = alvo_y - a * cy
-    if modo in 'BC':   # quando o recorte ja enche a altura, nao deixa sobrar faixa estendida
+    if modo in 'BCD':   # quando o recorte ja enche a altura, nao deixa sobrar faixa estendida
         cheio = a >= a_cheio - 1e-6
         ty = np.where(cheio, np.clip(ty, h - a * 1080, 0), ty)
     return a, tx, ty
@@ -69,7 +76,7 @@ def pista(fmt, modo):
 if __name__ == '__main__':
     fmt, modo = sys.argv[1], sys.argv[2]
     if modo == 'pista':
-        for m in 'ABC':
+        for m in 'ABCD':
             a, tx, ty = pista(fmt, m)
             for i in range(0, 240, 12): print(m, i, round(a[i], 3), round(tx[i]), round(ty[i]))
         sys.exit()
@@ -77,6 +84,6 @@ if __name__ == '__main__':
     out = f'{RD.R}/out_{fmt}_{modo}'; os.makedirs(out, exist_ok=True)
     for s in sys.argv[3:]:
         i = int(s)
-        RD.set_view(F['w'], F['h'], a[i], tx[i], ty[i], ext=(modo in 'BC'), bloco_y=(-140, 1000) if modo in 'BC' else None)
+        RD.set_view(F['w'], F['h'], a[i], tx[i], ty[i], ext=(modo in 'BCD'), bloco_y=(-140, 1000) if modo in 'BCD' else None)
         RD._paper = None
         RD.save(f'{out}/s_{i:04d}.png', RD.render(i)); print('ok', i, flush=True)
