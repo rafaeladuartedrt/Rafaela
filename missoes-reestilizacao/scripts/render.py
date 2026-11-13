@@ -420,7 +420,18 @@ def render(i, layers=False):
 def save(path, img):
     cv2.imwrite(path, cv2.cvtColor((img * 65535 + 0.5).astype(np.uint16), cv2.COLOR_RGB2BGR))
 
+def save_rgba(path, img):
+    cv2.imwrite(path, cv2.cvtColor((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGBA2BGRA), [cv2.IMWRITE_PNG_COMPRESSION, 3])
+
 if __name__ == '__main__':
+    args = sys.argv[1:]
+    if args and args[0] == '--camadas':     # exporta as camadas com alpha (linhas, traco, blocos)
+        for k in ('linhas_brancas', 'traco_marrom', 'blocos_cor'): os.makedirs(f'{R}/camadas/{k}', exist_ok=True)
+        for a in args[1:]:
+            i = int(a); L = render(i, layers=True)
+            save_rgba(f'{R}/camadas/linhas_brancas/c_{i:04d}.png', L['linhas']); save_rgba(f'{R}/camadas/traco_marrom/c_{i:04d}.png', L['traco'])
+            save_rgba(f'{R}/camadas/blocos_cor/c_{i:04d}.png', L['blocos']); print('ok', i, flush=True)
+        sys.exit()
     os.makedirs(f'{R}/out', exist_ok=True)
-    for a in sys.argv[1:]:
+    for a in args:
         i = int(a); save(f'{R}/out/s_{i:04d}.png', render(i)); print('ok', i, flush=True)
