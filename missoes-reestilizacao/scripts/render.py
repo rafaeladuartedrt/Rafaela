@@ -266,6 +266,35 @@ def paper():
         _paper = cv2.imread(p, cv2.IMREAD_UNCHANGED).astype(np.float32) / 65535
     return _paper
 
+def warp_pad(imp):
+    """Leva uma imagem ja prolongada (1920 x 1080+2*PAD) para a vista de saida."""
+    a = VIEW['a']; M = np.array([[a, 0, VIEW['tx']], [0, a, VIEW['ty'] - a * PAD]], np.float32)
+    return cv2.warpAffine(imp, M, (W, Hh), flags=cv2.INTER_AREA if a < 1 else cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
+
+def textura_cruz(i, rgb):
+    """Luminancia de pedra para a cruz fora do quadro original: a propria foto espelhada na borda
+    (continua na emenda) e, onde o espelho nao cai sobre pedra, a textura da haste repetida."""
+    g = (rgb @ np.array([0.2126, 0.7152, 0.0722], np.float32)).astype(np.float32)
+    cm = cv2.imread(f'{R}/mattes/cruz/m_{i:04d}.png', 0).astype(np.float32) / 255
+    cm = cv2.erode(cm, np.ones((9, 9), np.uint8))
+    esp = cv2.copyMakeBorder(g, PAD, PAD, 0, 0, cv2.BORDER_REFLECT_101); mesp = cv2.copyMakeBorder(cm, PAD, PAD, 0, 0, cv2.BORDER_REFLECT_101)
+    q = FIT[min(i, 94)]; lw = max(12, int(0.34 * 50 * q[2])); cx = int(np.clip(q[0], lw + 1, 1919 - lw))
+    faixa = g[:, cx - lw:cx + lw]; okr = cm[:, cx - lw:cx + lw].min(1) > 0.5
+    faixa = faixa[okr] if okr.sum() > 40 else faixa
+    reps_y = int(np.ceil((1080 + 2 * PAD) / faixa.shape[0])) + 1; reps_x = int(np.ceil(1920 / faixa.shape[1])) + 2
+    col = np.concatenate([faixa if k % 2 == 0 else faixa[::-1] for k in range(reps_y)], 0)
+    lad = np.concatenate([col if k % 2 == 0 else col[:, ::-1] for k in range(reps_x)], 1)
+    off = (cx - lw) % (2 * faixa.shape[1]); lad = np.roll(lad, off, 1)[:1080 + 2 * PAD, :1920]
+    mesp = cv2.GaussianBlur(mesp, (0, 0), 4)
+    return warp_pad(esp * mesp + lad * (1 - mesp))
+
+def tom_pedra(lum):
+    """P&B quente de alto contraste (marrom -> cinza quente -> branco)."""
+    lp = np.clip((lum - 0.10) / 0.50, 0, 1) ** 0.85
+    lp = 0.65 * poster(lp, 5) + 0.35 * lp
+    cinza = MARROM * 0.55 + 0.42; sh = lum.shape + (3,)
+    return np.where((lp < 0.5)[..., None], mix(np.broadcast_to(MARROM, sh), cinza, lp * 2), mix(np.broadcast_to(cinza, sh), BRANCO, lp * 2 - 1))
+
 def poster(x, n, soft=0.18):
     """Posterize com transicao suave (evita serrilhado e banding duro)."""
     y = x * n; f = np.floor(y); r = y - f
@@ -344,8 +373,8 @@ def render(i, layers=False):
         # entao ali a cruz e a silhueta do pictograma preenchida com o tom medio da pedra.
         fora = 1 - warp(np.ones((1080, 1920), np.float32), 'zero', 'zero', cv2.INTER_LINEAR)
         dentro_q = m_cruz * (1 - fora)
-        tom = (pedra * dentro_q[..., None]).sum((0, 1)) / max(dentro_q.sum(), 1.)
-        pedra = mix(pedra, np.broadcast_to(tom, big.shape), fora)
+        lum = lum * (1 - fora) + textura_cruz(i, rgb) * fora      # textura de pedra na cruz inteira
+        pedra = tom_pedra(lum)
         m_cruz = dentro_q + fora * a_sil
         yy_ = (np.arange(Hh, dtype=np.float32)[:, None] - VIEW['ty']) / VIEW['a']
         resto = fora * (1 - a_sil)
@@ -356,7 +385,6 @@ def render(i, layers=False):
     coral_l = mix(np.broadcast_to(CORAL, big.shape), LARANJA, 0.78 * sombra * m_fac)
     coral_l = mix(coral_l, BRANCO, m_jan)
     tom_cz = 0.80 * sombra * m_cruz
-    if VIEW['ext']: tom_cz = np.maximum(tom_cz, 0.30)   # vertical: a cruz inteira tem um tom base, inclusive fora do quadro original
     most_l = mix(np.broadcast_to(MOST, big.shape), LARANJA, tom_cz * a_sil)
     blocos = np.zeros_like(big); a_bl = np.clip(a_coral + a_most, 0, 1) * CTRL['opac_blocos']
     blocos = mix(most_l, coral_l, a_coral / np.maximum(a_coral + a_most, 1e-4))
