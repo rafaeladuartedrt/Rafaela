@@ -10,6 +10,41 @@ import a4_fit_cruz as FC
 
 R = '/home/user/Rafaela/missoes-reestilizacao/work'
 W, Hh, S = 3840, 2160, 2.0
+# VISTA: saida = a * (coords do original 1080p) + (tx, ty). Padrao = master 4K, enquadramento identico.
+# ext=True prolonga a ilustracao acima e abaixo do quadro original (ceu/papel, gramado, blocos).
+VIEW = dict(a=2.0, tx=0., ty=0., ext=False, bloco_y=None)
+PAD = 1500
+def set_view(w, h, a, tx, ty, ext=False, bloco_y=None):
+    global W, Hh
+    W, Hh = int(w), int(h); VIEW.update(a=float(a), tx=float(tx), ty=float(ty), ext=ext, bloco_y=bloco_y)
+def XF(P): return np.asarray(P, np.float32) * VIEW['a'] + np.array([VIEW['tx'], VIEW['ty']], np.float32)
+def LS(): return VIEW['a'] / 2.0          # escala de espessuras e desfoques em relacao ao master 4K
+def is_master(): return (W, Hh) == (3840, 2160) and VIEW['a'] == 2.0 and VIEW['tx'] == 0 and VIEW['ty'] == 0
+def pad_tb(im, top, bottom):
+    """Prolonga o quadro original para cima e para baixo. Modos: 'rep', 'zero', 'one', 'ceu', 'grama'."""
+    h, w = im.shape[:2]; sh = (PAD, w) + im.shape[2:]
+    def mk(mode, row_src):
+        if mode == 'zero': return np.zeros(sh, np.float32)
+        if mode == 'one': return np.ones(sh, np.float32)
+        row = im[row_src].astype(np.float32).mean(0, keepdims=True) if isinstance(row_src, slice) else im[row_src:row_src + 1].astype(np.float32)
+        if mode == 'rep': return np.repeat(row, PAD, 0)
+        row = cv2.GaussianBlur(np.ascontiguousarray(row), (0, 0), sigmaX=60 if mode == 'grama' else 40, sigmaY=0.1, borderType=cv2.BORDER_REPLICATE)
+        blk = np.repeat(row, PAD, 0)
+        if mode == 'ceu':   # clareia para branco conforme se afasta do quadro
+            d = np.arange(PAD, 0, -1, dtype=np.float32).reshape(-1, 1, *([1] * (im.ndim - 2)))
+            blk = blk + (1 - blk) * (1 - np.exp(-d / 380.))
+        return blk
+    return np.vstack([mk(top, 0 if top != 'grama' else slice(0, 12)), im.astype(np.float32), mk(bottom, slice(h - 24, h) if bottom == 'grama' else h - 1)])
+def warp(im, top='rep', bottom='rep', interp=cv2.INTER_LANCZOS4, bordas=None):
+    """Leva uma imagem do quadro original (1920x1080) para a vista de saida."""
+    if is_master(): return cv2.resize(im, (W, Hh), interpolation=interp)
+    a, tx, ty = VIEW['a'], VIEW['tx'], VIEW['ty']
+    if VIEW['ext']:
+        if bordas is not None:      # linhas de borda ja limpas (so ceu no topo, so gramado na base)
+            im = im.copy(); im[0] = bordas[0]; im[-24:] = bordas[1]
+        im = pad_tb(im, top, bottom); ty = ty - a * PAD
+    M = np.array([[a, 0, tx], [0, a, ty]], np.float32)
+    return cv2.warpAffine(im, M, (W, Hh), flags=cv2.INTER_AREA if a < 1 else interp, borderMode=cv2.BORDER_REPLICATE)
 hexc = lambda h: np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)], np.float32) / 255
 CORAL, MOST, OLIVA, LARANJA, MARROM, BRANCO = map(hexc, ['#E76847', '#E7A22B', '#9A9F30', '#BB5108', '#592400', '#FFFFFF'])
 
@@ -77,7 +112,8 @@ def load_rgb(i):
 def matte(k, i, blur=1.3):
     m = cv2.imread(f'{R}/mattes/{k}/m_{i:04d}.png', 0).astype(np.float32) / 255
     m = cv2.GaussianBlur(m, (0, 0), blur)
-    m = cv2.resize(m, (W, Hh), interpolation=cv2.INTER_CUBIC)
+    top, bot = dict(ceu=('one', 'zero'), veg=('zero', 'rep'), cruz=('rep', 'rep'), fachada=('zero', 'rep'), janela=('zero', 'zero'))[k]
+    m = warp(m, top, bot, cv2.INTER_CUBIC)
     return sstep(0.35, 0.65, m)
 
 def Hof(i, t=0.):
@@ -91,7 +127,7 @@ def proj(P, hh):
     h0, h1, t = hh
     P = np.asarray(P, np.float32)[None]
     a = cv2.perspectiveTransform(P, h0)[0]; b = cv2.perspectiveTransform(P, h1)[0]
-    return (a * (1 - t) + b * t) * S
+    return XF(a * (1 - t) + b * t)
 
 def surf():
     s = cairo.ImageSurface(cairo.FORMAT_A8, W, Hh); c = cairo.Context(s)
@@ -160,6 +196,7 @@ BLOCO_F = None
 def bloco_fachada_pts(p):
     """Bloco coral em coords do plano da fachada, com wipe (p=0..1) da esquerda p/ direita."""
     (x0, y0), (x1, _), (_, y1), _ = G.BLOCO
+    if VIEW['bloco_y']: y0, y1 = VIEW['bloco_y']
     xw = x0 + (x1 - x0) * p
     base = torn([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 2.2, 7, 7)
     if p >= 1: return base
@@ -186,11 +223,11 @@ def cruz_rect(i, t=0.):
 def hatch(Hm, mask_dens, period=7.0, ang=0.7):
     """Hachura presa ao plano da fachada, com oitavas que se revelam conforme o zoom."""
     Hi = np.linalg.inv(Hm)
-    ys, xs = np.mgrid[0:Hh, 0:W].astype(np.float32); xs /= S; ys /= S
+    ys, xs = np.mgrid[0:Hh, 0:W].astype(np.float32); xs = (xs - VIEW['tx']) / VIEW['a']; ys = (ys - VIEW['ty']) / VIEW['a']
     d = Hi[2, 0] * xs + Hi[2, 1] * ys + Hi[2, 2]
     u = (Hi[0, 0] * xs + Hi[0, 1] * ys + Hi[0, 2]) / d; v = (Hi[1, 0] * xs + Hi[1, 1] * ys + Hi[1, 2]) / d
-    z = math.sqrt(abs(np.linalg.det(Hm[:2, :2] / Hm[2, 2]))) * S  # px de tela por unidade do plano
-    k = math.log2(max(z / S, 1e-3)); k0 = math.floor(k); fr = k - k0
+    z = math.sqrt(abs(np.linalg.det(Hm[:2, :2] / Hm[2, 2]))) * VIEW['a']  # px de tela por unidade do plano
+    k = math.log2(max(z / VIEW['a'], 1e-3)); k0 = math.floor(k); fr = k - k0
     s = u * math.cos(ang) + v * math.sin(ang)
     out = np.zeros((Hh, W), np.float32)
     for o, wgt in ((k0, 1.0), (k0 + 1, ease_io(fr))):
@@ -203,7 +240,7 @@ _paper = None
 def paper():
     global _paper
     if _paper is None:
-        p = f'{R}/papel_4k.png'
+        p = f'{R}/papel_4k.png' if (W, Hh) == (3840, 2160) else f'{R}/papel_{W}x{Hh}.png'
         if not os.path.exists(p):
             rng = np.random.default_rng(4); acc = np.zeros((Hh, W), np.float32)
             for sc, a in ((270, .5), (90, .3), (30, .22), (8, .2), (2, .25)):
@@ -233,23 +270,32 @@ def mix(a, b, t): return a + (b - a) * t[..., None]
 # =====================================================================
 def render(i, layers=False):
     rgb = load_rgb(i)
-    big = np.clip(cv2.resize(rgb, (W, Hh), interpolation=cv2.INTER_LANCZOS4), 0, 1)
+    bordas = None
+    if VIEW['ext']:
+        def limpa(faixa, mk):       # troca na faixa o que nao e ceu/gramado pela cor media do ceu/gramado
+            ok = mk > 127; cor = faixa[ok].mean(0) if ok.sum() > 50 else faixa.reshape(-1, 3).mean(0)
+            r = faixa.mean(0); okc = ok.mean(0) > 0.5; r[~okc] = cor; return r
+        mc = cv2.imread(f'{R}/mattes/ceu/m_{i:04d}.png', 0); mv = cv2.imread(f'{R}/mattes/veg/m_{i:04d}.png', 0)
+        bordas = (limpa(rgb[:8], mc[:8]), limpa(rgb[-24:], mv[-24:]))
+        okv = mv[-60:] > 127   # gramado estendido em tom unico (sem faixas verticais)
+        bordas = (bordas[0], np.broadcast_to(rgb[-60:][okv].mean(0) if okv.sum() > 50 else bordas[1].mean(0), bordas[1].shape).copy())
+    big = np.clip(warp(rgb, 'ceu', 'grama', bordas=bordas), 0, 1); k_ = LS()
     lum = big @ np.array([0.2126, 0.7152, 0.0722], np.float32)
     m_ceu, m_veg, m_cruz, m_fac, m_jan = [matte(k, i) for k in ('ceu', 'veg', 'cruz', 'fachada', 'janela')]
     hh = Hof(i) if 40 <= i <= 212 else None
     if hh is not None:   # recorta o matte da fachada pelo contorno folgado do conjunto
         s, c = surf(); P = proj(G.CONTORNO, (hh[0], hh[0], 0)); c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill()
-        dentro = cv2.GaussianBlur(to_np(s), (0, 0), 3)
+        dentro = cv2.GaussianBlur(to_np(s), (0, 0), max(.6, 3 * k_))
         m_veg = np.clip(m_veg + m_fac * (1 - dentro), 0, 1); m_fac = m_fac * dentro
     m_pedra = np.clip(m_cruz + m_fac, 0, 1)
 
     # ---------- 01_FOTO_ESTILIZADA
     # ceu: branco -> mostarda conforme a densidade das nuvens
-    ls = cv2.GaussianBlur(lum, (0, 0), 6)
+    ls = cv2.GaussianBlur(lum, (0, 0), max(.6, 6 * k_))
     t_ceu = np.clip((0.97 - ls) * 1.5, 0, 0.62)
     ceu = mix(np.broadcast_to(BRANCO, big.shape), MOST, t_ceu)
     # vegetacao: verde oliva chapado em 3 tons
-    lv = poster(np.clip((cv2.GaussianBlur(lum, (0, 0), 3) - 0.08) / 0.5, 0, 1), 3)
+    lv = poster(np.clip((cv2.GaussianBlur(lum, (0, 0), max(.6, 3 * k_)) - 0.08) / 0.5, 0, 1), 3)
     veg = mix(mix(np.broadcast_to(OLIVA, big.shape), MARROM, np.full_like(lv, 0.55)), OLIVA, sstep(0.0, 0.5, lv))
     veg = mix(veg, BRANCO, 0.22 * sstep(0.6, 1.0, lv))
     # pedra: P&B quente de alto contraste (marrom -> cinza quente -> branco)
@@ -274,13 +320,19 @@ def render(i, layers=False):
         q = fitq(i, t)
         if q is not None:
             qq = q.copy(); qq[5] = qq[6] = 0
-            (x0, y0), (x1, y1) = FC.T(np.array([PAINEL[:2], PAINEL[2:]]), qq) * S; xw = x0 + (x1 - x0) * p_most
-            s, c = surf(); Pz = FC.T(np.array(PCZ['silhueta']), q) * S
+            (x0, y0), (x1, y1) = XF(FC.T(np.array([PAINEL[:2], PAINEL[2:]]), qq)); xw = x0 + (x1 - x0) * p_most
+            s, c = surf(); Pz = XF(FC.T(np.array(PCZ['silhueta']), q))
             c.move_to(*Pz[0]); [c.line_to(*p) for p in Pz[1:]]; c.close_path(); c.fill(); a_sil += to_np(s) / NB_MB
         if q is not None and p_most > 0:
             Pn = torn([(0, 0), (1, 0), (1, 1), (0, 1)], 0.004, 0.012, 5) * [xw - x0, y1 - y0] + [x0, y0]
             s, c = surf(); c.move_to(*Pn[0]); [c.line_to(*p) for p in Pn[1:]]; c.close_path(); c.fill(); a_most += to_np(s) / NB_MB
     a_coral *= (1 - a_rec)
+    if VIEW['ext']:   # fora do quadro original a pedra da cruz so existe dentro do traco do pictograma
+        fora = 1 - warp(np.ones((1080, 1920), np.float32), 'zero', 'zero', cv2.INTER_LINEAR)
+        tira = m_cruz * fora * (1 - a_sil * np.clip(a_most, 0, 1)); m_cruz = m_cruz - tira
+        yy_ = (np.arange(Hh, dtype=np.float32)[:, None] - VIEW['ty']) / VIEW['a']
+        m_ceu = np.clip(m_ceu + tira * (yy_ < 540), 0, 1); m_veg = np.clip(m_veg + tira * (yy_ >= 540), 0, 1)
+        foto = mix(mix(mix(ceu, veg, m_veg), pedra, np.clip(m_cruz + m_fac, 0, 1)), BRANCO, m_jan)
     # dentro do bloco a foto vira tom sobre a cor (so 2 tons + vazios em laranja queimado)
     sombra = poster(1 - np.clip((lum - 0.06) / 0.42, 0, 1), 3)
     coral_l = mix(np.broadcast_to(CORAL, big.shape), LARANJA, 0.78 * sombra * m_fac)
@@ -301,7 +353,7 @@ def render(i, layers=False):
 
     # ---------- 04 linhas vetoriais (cruz por contorno do matte; fachada por geometria + tracking)
     lin = np.zeros((Hh, W), np.float32); lin_jan = np.zeros((Hh, W), np.float32)
-    wm = 26.0 * CTRL['espessura']; ws_ = 7.0 * CTRL['espessura']; amp = 1.6 * CTRL['boil']
+    wm = 26.0 * CTRL['espessura'] * k_; ws_ = 7.0 * CTRL['espessura'] * k_; amp = 1.6 * CTRL['boil'] * k_
     f_cruz = expo_out(i / 16.)
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
@@ -309,7 +361,7 @@ def render(i, layers=False):
         q = fitq(i, t)
         if q is not None:
             for k, P in enumerate(CZ_LIN):
-                Q = boil_suave(i, k, FC.T(P, q).astype(np.float32) * S, amp)
+                Q = boil_suave(i, k, XF(FC.T(P, q)), amp, 70. * k_)
                 stroke(c, trim(Q, f_cruz), wm)
         if hh is not None:
             h3 = (hh[0], hh[1], t)
@@ -320,13 +372,13 @@ def render(i, layers=False):
                 yb = P[:, 1].max(); st_k = st + (1 - (yb - YT) / (YB - YT)) * 0.45 * du
                 f = expo_out((i - st_k) / (0.55 * du))
                 if f <= 0: continue
-                Q = trim(boil_suave(i, 100 + k, proj(P, h3), amp), f)
+                Q = trim(boil_suave(i, 100 + k, proj(P, h3), amp, 70. * k_), f)
                 stroke(c2 if g == 'janela' else c, Q, wm)
             for k, (bx, by, bw, bh, g) in enumerate(tijolos()):
                 st, du = TIMING[g]; f = expo_out((i - st - 0.6 * du - (1 - (by - YT) / (YB - YT)) * 14 - (k % 7)) / 8.)
                 if f <= 0: continue
                 Q = proj([(bx, by), (bx + bw, by), (bx + bw, by + bh), (bx, by + bh), (bx, by)], h3)
-                stroke(c, trim(Q, f), 4.5 * CTRL['espessura'])
+                stroke(c, trim(Q, f), 4.5 * CTRL['espessura'] * k_)
             # 6-9 s: linhas de construcao convergem para a janela
             if 144 <= i <= 212:
                 e = ease_io((i - 144) / 18.) * (1 - ease_io((i - 176) / 30.))
@@ -340,11 +392,11 @@ def render(i, layers=False):
     fade = 1 - ease_io((i - 198) / 16.)
     lin *= fade; lin_jan *= fade
     dest = ease_io((i - 144) / 24.)                     # destaque da janela
-    glow = cv2.GaussianBlur(lin_jan, (0, 0), 14) * 0.9 * dest + cv2.GaussianBlur(lin_jan, (0, 0), 40) * 0.8 * dest
+    glow = cv2.GaussianBlur(lin_jan, (0, 0), 14 * k_) * 0.9 * dest + cv2.GaussianBlur(lin_jan, (0, 0), 40 * k_) * 0.8 * dest
     allin = np.clip(lin + lin_jan, 0, 1)
     # cor da linha: marrom sobre papel/ceu claro, branca sobre pedra e blocos
     claro = m_ceu * (1 - a_bl) + m_jan * (1 - dest)
-    claro = np.clip(cv2.GaussianBlur(claro, (0, 0), 2), 0, 1)
+    claro = np.clip(cv2.GaussianBlur(claro, (0, 0), max(.6, 2 * k_)), 0, 1)
     l_mar = allin * claro; l_bra = allin * (1 - claro)
     comp = mix(comp, MARROM, l_mar)
     comp = mix(comp, BRANCO, np.clip(glow, 0, 1) * 0.55)
