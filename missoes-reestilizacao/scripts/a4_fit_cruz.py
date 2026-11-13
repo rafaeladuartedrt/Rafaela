@@ -29,10 +29,20 @@ if __name__=='__main__':
         mk=cv2.morphologyEx(mk,cv2.MORPH_OPEN,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(23,23)))
         tg=cv2.resize(mk,(1920//D,1080//D),interpolation=cv2.INTER_AREA).astype(np.float32)/255
         tg=cv2.GaussianBlur(tg,(0,0),1.5)
-        best=None
-        for st in ([40,40,.4,.3,.3,.06,.06],[15,15,.12,.1,.1,.03,.03]):
-            r=minimize(cost,q,args=(tg,q),method='Nelder-Mead',options=dict(initial_simplex=np.vstack([q]+[q+np.eye(7)[j]*st[j] for j in range(7)]),maxiter=500,xatol=.02,fatol=1e-5))
-            q=r.x
+        if i<=72:
+            for st in ([40,40,.4,.3,.3,.06,.06],[15,15,.12,.1,.1,.03,.03]):
+                r=minimize(cost,q,args=(tg,q),method='Nelder-Mead',options=dict(initial_simplex=np.vstack([q]+[q+np.eye(7)[j]*st[j] for j in range(7)]),maxiter=500,xatol=.02,fatol=1e-5))
+                q=r.x
+        else:
+            # saida de quadro: a cruz fica cortada pela borda, entao a forma e travada
+            # (so posicao + uma escala uniforme); evita que o traco estique ao sair
+            base=F[72].copy()
+            def mk_q(v): qq=base.copy(); qq[0],qq[1]=v[0],v[1]; qq[2:5]=base[2:5]*v[2]; return qq
+            v0=np.array([q[0],q[1],q[2]/base[2]])
+            c3=lambda v:cost(mk_q(v),tg,mk_q(v0))+2.0*(v[2]-v0[2])**2
+            for st in ([40,15,.05],[12,6,.02]):
+                r=minimize(c3,v0,method='Nelder-Mead',options=dict(initial_simplex=np.vstack([v0]+[v0+np.eye(3)[j]*st[j] for j in range(3)]),maxiter=300,xatol=.02,fatol=1e-5)); v0=r.x
+            q=mk_q(v0)
         q[5]=q[6]=0; F[i]=q
         if i%8==0: print(i,q.round(2),'IoU',round(1-cost(q,tg,q),3),flush=True)
     for c in range(7): F[:last+1,c]=gaussian_filter1d(F[:last+1,c],1.2,mode='nearest')
