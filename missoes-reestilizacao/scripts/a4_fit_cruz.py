@@ -15,11 +15,12 @@ def T(P,q):
     return np.stack([X,Y],1)
 if __name__=='__main__':
     def rast(q):
+        q=q.copy(); q[5]=q[6]=0      # cruz sempre a prumo: sem inclinacao de bracos, haste ou base
         m=np.zeros((1080//D,1920//D),np.uint8); cv2.fillPoly(m,[np.round(T(SIL,q)/D*16).astype(np.int32)],255,cv2.LINE_AA,4); return m.astype(np.float32)/255
     def cost(q,tg,q0):
         m=rast(q); i=(m*tg).sum(); u=m.sum()+tg.sum()-i
         return 1-i/max(u,1)+0.02*np.sum(((q-q0)/np.array([200,200,2,2,1.0,.3,.3]))**2)
-    qi=np.array([468,399,2.29,1.93,1.45,-0.03,-0.08]); q=qi.copy(); F=np.full((240,7),np.nan); last=0
+    qi=np.array([468,399,2.29,1.93,1.45,0,0]); q=qi.copy(); F=np.full((240,7),np.nan); last=0
     for i in list(range(72,-1,-1))+list(range(73,96)):
         if i==73: q=F[72].copy()
         mk=cv2.imread(f'{B}/mattes/cruz/m_{i:04d}.png',0)
@@ -32,7 +33,7 @@ if __name__=='__main__':
         for st in ([40,40,.4,.3,.3,.06,.06],[15,15,.12,.1,.1,.03,.03]):
             r=minimize(cost,q,args=(tg,q),method='Nelder-Mead',options=dict(initial_simplex=np.vstack([q]+[q+np.eye(7)[j]*st[j] for j in range(7)]),maxiter=500,xatol=.02,fatol=1e-5))
             q=r.x
-        F[i]=q
+        q[5]=q[6]=0; F[i]=q
         if i%8==0: print(i,q.round(2),'IoU',round(1-cost(q,tg,q),3),flush=True)
     for c in range(7): F[:last+1,c]=gaussian_filter1d(F[:last+1,c],1.2,mode='nearest')
     np.save(f'{B}/fit_cruz.npy',F); print('cruz encaixada de 0 a',last)

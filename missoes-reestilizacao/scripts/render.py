@@ -301,7 +301,7 @@ def render(i, layers=False):
 
     # ---------- 04 linhas vetoriais (cruz por contorno do matte; fachada por geometria + tracking)
     lin = np.zeros((Hh, W), np.float32); lin_jan = np.zeros((Hh, W), np.float32)
-    wm = 15.0 * CTRL['espessura']; ws_ = 7.0 * CTRL['espessura']; amp = 1.6 * CTRL['boil']
+    wm = 26.0 * CTRL['espessura']; ws_ = 7.0 * CTRL['espessura']; amp = 1.6 * CTRL['boil']
     f_cruz = expo_out(i / 16.)
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
@@ -326,7 +326,7 @@ def render(i, layers=False):
                 st, du = TIMING[g]; f = expo_out((i - st - 0.6 * du - (1 - (by - YT) / (YB - YT)) * 14 - (k % 7)) / 8.)
                 if f <= 0: continue
                 Q = proj([(bx, by), (bx + bw, by), (bx + bw, by + bh), (bx, by + bh), (bx, by)], h3)
-                stroke(c, trim(Q, f), 3.0 * CTRL['espessura'])
+                stroke(c, trim(Q, f), 4.5 * CTRL['espessura'])
             # 6-9 s: linhas de construcao convergem para a janela
             if 144 <= i <= 212:
                 e = ease_io((i - 144) / 18.) * (1 - ease_io((i - 176) / 30.))
