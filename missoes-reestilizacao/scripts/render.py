@@ -350,7 +350,9 @@ def render(i, layers=False):
     sombra = poster(1 - np.clip((lum - 0.06) / 0.42, 0, 1), 3)
     coral_l = mix(np.broadcast_to(CORAL, big.shape), LARANJA, 0.78 * sombra * m_fac)
     coral_l = mix(coral_l, BRANCO, m_jan)
-    most_l = mix(np.broadcast_to(MOST, big.shape), LARANJA, 0.80 * sombra * m_cruz * a_sil)
+    tom_cz = 0.80 * sombra * m_cruz
+    if VIEW['ext']: tom_cz = np.maximum(tom_cz, 0.30)   # vertical: a cruz inteira tem um tom base, inclusive fora do quadro original
+    most_l = mix(np.broadcast_to(MOST, big.shape), LARANJA, tom_cz * a_sil)
     blocos = np.zeros_like(big); a_bl = np.clip(a_coral + a_most, 0, 1) * CTRL['opac_blocos']
     blocos = mix(most_l, coral_l, a_coral / np.maximum(a_coral + a_most, 1e-4))
     comp = mix(foto, blocos, a_bl)
@@ -368,6 +370,7 @@ def render(i, layers=False):
     lin = np.zeros((Hh, W), np.float32); lin_jan = np.zeros((Hh, W), np.float32)
     wm = 26.0 * CTRL['espessura'] * k_; ws_ = 7.0 * CTRL['espessura'] * k_; amp = 1.6 * CTRL['boil'] * k_
     f_cruz = expo_out(i / 16.)
+    if VIEW['ext']: f_cruz = 1.0    # vertical: traco da cruz completo desde o frame 0
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
         s, c = surf(); s2, c2 = surf()
