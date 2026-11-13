@@ -6,6 +6,7 @@ Uso: python3 render.py <frame> [<frame> ...]   -> work/out/s_####.png (3840x2160
 import cv2, numpy as np, cairo, json, sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import geometria as G
+import a4_fit_cruz as FC
 
 R = '/home/user/Rafaela/missoes-reestilizacao/work'
 W, Hh, S = 3840, 2160, 2.0
@@ -17,6 +18,30 @@ CTRL = dict(espessura=1.0, boil=1.0, opac_blocos=1.0, grao=1.0)
 
 HT = np.load(f'{R}/track_fachada.npy')
 CR = {int(k): v for k, v in json.load(open(f'{R}/track_cruz.json')).items()}
+FIT = np.load(f'{R}/fit_cruz.npy')
+for _i in range(40):      # haste fora de quadro: inclinacao da haste acompanha a dos bracos
+    _w = clamp_ = min(1., max(0., (_i - 30) / 10.)); FIT[_i, 6] = FIT[_i, 5] * (1 - _w) + FIT[_i, 6] * _w
+PIG = json.load(open(f'{R}/picto_igreja.json'))
+PCZ = json.load(open(f'{R}/picto_cruz.json'))
+CZ_LIN = [np.array(p, np.float32) for p in PCZ['linhas']]
+PAINEL = (75., 85., 363., 690.)     # painel mostarda em coords do pictograma da cruz
+def fitq(i, t=0.):
+    if i < 0 or i > 239 or np.isnan(FIT[i, 0]): return None
+    j = i + 1 if i + 1 < 240 and not np.isnan(FIT[i + 1, 0]) else i
+    return FIT[i] * (1 - t) + FIT[j] * t
+def dens(P, step=6.0):
+    o = [P[0]]
+    for a, b in zip(P[:-1], P[1:]):
+        n = max(1, int(np.linalg.norm(b - a) / step)); o += [a + (b - a) * k / n for k in range(1, n + 1)]
+    return np.array(o, np.float32)
+CZ_LIN = [dens(p, 3.0) for p in CZ_LIN]
+def boil_suave(i, k, Q, amp, periodo=70.):
+    """Line boil de baixa frequencia: desloca a linha como um todo, sem tremer os vertices."""
+    if amp <= 0 or len(Q) < 2: return Q
+    d = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(Q, axis=0), axis=1))])
+    n = int(d[-1] / periodo) + 3; rng = np.random.default_rng(7919 * (i // 2) + k)
+    c = rng.normal(0, amp, (n, 2)).astype(np.float32); u = d / periodo
+    return Q + np.stack([np.interp(u, np.arange(n), c[:, 0]), np.interp(u, np.arange(n), c[:, 1])], 1).astype(np.float32)
 NB_MB = 8  # amostras de motion blur (obturador 180 graus)
 
 def lum1080(i):
@@ -29,7 +54,7 @@ def tijolos():
     if _tij is None:
         rng = np.random.default_rng(12); g = cv2.GaussianBlur(lum1080(120), (0, 0), 4); out = []
         for (x, y, w, h) in G.ZONAS:
-            n = int(w * h / 520)
+            n = int(w * h / 1100)
             for _ in range(n):
                 bw = rng.uniform(12, 26); bx = rng.uniform(x, x + w - bw); by = y + round(rng.uniform(0, h - 7) / 9) * 9
                 if any(a - 6 < bx + bw / 2 < c_ + 6 and b - 6 < by < d + 6 for a, b, c_, d in G.VAOS): continue
@@ -237,7 +262,7 @@ def render(i, layers=False):
     foto = mix(foto, BRANCO, m_jan)
 
     # ---------- 02_BLOCOS_COR  (alpha em cairo, com motion blur por subamostras)
-    a_coral = np.zeros((Hh, W), np.float32); a_rec = np.zeros((Hh, W), np.float32); a_most = np.zeros((Hh, W), np.float32)
+    a_coral = np.zeros((Hh, W), np.float32); a_rec = np.zeros((Hh, W), np.float32); a_most = np.zeros((Hh, W), np.float32); a_sil = np.zeros((Hh, W), np.float32)
     p_coral = ease_io((i - 80) / 10.); p_most = ease_io((i - 7) / 10.)
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
@@ -246,8 +271,13 @@ def render(i, layers=False):
             c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill(); a_coral += to_np(s) / NB_MB
             s, c = surf(); P = proj(torn(RECORTE, 1.2, 6, 21), (hh[0], hh[1], t))
             c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill(); a_rec += to_np(s) / NB_MB
-        if i in CR and p_most > 0:
-            x0, y0, x1, y1 = cruz_rect(i, t); xw = x0 + (x1 - x0) * p_most
+        q = fitq(i, t)
+        if q is not None:
+            qq = q.copy(); qq[5] = qq[6] = 0
+            (x0, y0), (x1, y1) = FC.T(np.array([PAINEL[:2], PAINEL[2:]]), qq) * S; xw = x0 + (x1 - x0) * p_most
+            s, c = surf(); Pz = FC.T(np.array(PCZ['silhueta']), q) * S
+            c.move_to(*Pz[0]); [c.line_to(*p) for p in Pz[1:]]; c.close_path(); c.fill(); a_sil += to_np(s) / NB_MB
+        if q is not None and p_most > 0:
             Pn = torn([(0, 0), (1, 0), (1, 1), (0, 1)], 0.004, 0.012, 5) * [xw - x0, y1 - y0] + [x0, y0]
             s, c = surf(); c.move_to(*Pn[0]); [c.line_to(*p) for p in Pn[1:]]; c.close_path(); c.fill(); a_most += to_np(s) / NB_MB
     a_coral *= (1 - a_rec)
@@ -255,7 +285,7 @@ def render(i, layers=False):
     sombra = poster(1 - np.clip((lum - 0.06) / 0.42, 0, 1), 3)
     coral_l = mix(np.broadcast_to(CORAL, big.shape), LARANJA, 0.78 * sombra * m_fac)
     coral_l = mix(coral_l, BRANCO, m_jan)
-    most_l = mix(np.broadcast_to(MOST, big.shape), LARANJA, 0.80 * sombra * m_cruz)
+    most_l = mix(np.broadcast_to(MOST, big.shape), LARANJA, 0.80 * sombra * m_cruz * a_sil)
     blocos = np.zeros_like(big); a_bl = np.clip(a_coral + a_most, 0, 1) * CTRL['opac_blocos']
     blocos = mix(most_l, coral_l, a_coral / np.maximum(a_coral + a_most, 1e-4))
     comp = mix(foto, blocos, a_bl)
@@ -271,65 +301,32 @@ def render(i, layers=False):
 
     # ---------- 04 linhas vetoriais (cruz por contorno do matte; fachada por geometria + tracking)
     lin = np.zeros((Hh, W), np.float32); lin_jan = np.zeros((Hh, W), np.float32)
-    wm = 9.0 * CTRL['espessura']; ws_ = 6.0 * CTRL['espessura']; amp = 1.5 * CTRL['boil']
-    # cruz
-    cont = []
-    if i in CR:
-        mk = cv2.imread(f'{R}/mattes/cruz/m_{i:04d}.png', 0)
-        mk = cv2.morphologyEx(mk, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (23, 23)))
-        mk = (cv2.GaussianBlur(mk, (0, 0), 3) > 127).astype(np.uint8)
-        cs, hier = cv2.findContours(mk, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
-        amax = max([cv2.contourArea(c_) for c_ in cs] + [1])
-        for c_ in cs:
-            if cv2.contourArea(c_) < 0.02 * amax: continue
-            ap = cv2.approxPolyDP(c_, 2.2, True)[:, 0].astype(np.float32)
-            ap = np.vstack([ap, ap[:1]])
-            # quebra onde o contorno corre pela borda do quadro
-            onb = (ap[:, 0] < 3) | (ap[:, 0] > 1916) | (ap[:, 1] < 3) | (ap[:, 1] > 1076)
-            cur = []
-            for k in range(len(ap)):
-                if onb[k] and (k + 1 < len(ap) and onb[k + 1] or k > 0 and onb[k - 1]):
-                    if cur and not onb[k - 1]: cur.append(ap[k])
-                    if len(cur) > 1: cont.append(np.array(cur))
-                    cur = [ap[k]] if (k + 1 < len(ap) and not onb[k + 1]) else []
-                else: cur.append(ap[k])
-            if len(cur) > 1: cont.append(np.array(cur))
-        vx = np.zeros(2, np.float32)
-        if i + 1 < 240:   # velocidade da cruz: mediana do fluxo optico dentro do matte
-            g0 = (lum1080(i) * 255).astype(np.uint8); g1 = (lum1080(i + 1) * 255).astype(np.uint8)
-            pts = cv2.goodFeaturesToTrack(g0, 400, 0.01, 8, mask=cv2.erode(mk * 255, np.ones((15, 15), np.uint8)))
-            if pts is not None and len(pts) > 10:
-                q, st, _ = cv2.calcOpticalFlowPyrLK(g0, g1, pts, None, winSize=(41, 41), maxLevel=4)
-                d = (q - pts).reshape(-1, 2)[st.ravel() == 1]
-                if len(d) > 10: vx = np.median(d, 0).astype(np.float32)
+    wm = 15.0 * CTRL['espessura']; ws_ = 7.0 * CTRL['espessura']; amp = 1.6 * CTRL['boil']
     f_cruz = expo_out(i / 16.)
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
         s, c = surf(); s2, c2 = surf()
-        for k, P in enumerate(cont):
-            Q = (P + vx * t) * S + boil_offset(i, k, len(P), amp)
-            stroke(c, trim(Q, f_cruz), wm)
+        q = fitq(i, t)
+        if q is not None:
+            for k, P in enumerate(CZ_LIN):
+                Q = boil_suave(i, k, FC.T(P, q).astype(np.float32) * S, amp)
+                stroke(c, trim(Q, f_cruz), wm)
         if hh is not None:
             h3 = (hh[0], hh[1], t)
-            for k, it in enumerate(G.L):
-                g = it[0]; st, du = TIMING[g]
-                P = item_pts(it)
+            for k, it in enumerate(PIG):
+                g = it['g']; st, du = TIMING[g]
+                P = np.array(it['p'], np.float32)
                 if P[0, 1] < P[-1, 1]: P = P[::-1]            # desenha da base para o topo
                 yb = P[:, 1].max(); st_k = st + (1 - (yb - YT) / (YB - YT)) * 0.45 * du
                 f = expo_out((i - st_k) / (0.55 * du))
                 if f <= 0: continue
-                Q = proj(P, h3)
-                if it[1] == 'pl' and np.linalg.norm(P[0] - P[-1]) > 1: Q = overshoot(Q, 26)
-                if it[1] == 'rect': Q = np.vstack([overshoot(Q[:5], 16), Q[5:]])
-                Q = Q + np.repeat(boil_offset(i, 100 + k, len(Q) // 4 + 2, amp), 4, 0)[:len(Q)]
-                Q = trim(Q, f)
-                if g == 'janela': stroke(c2, Q, wm)
-                else: stroke(c, Q, wm if it[1] != 'q' and g != 'frontao' else ws_ + 1.5)
+                Q = trim(boil_suave(i, 100 + k, proj(P, h3), amp), f)
+                stroke(c2 if g == 'janela' else c, Q, wm)
             for k, (bx, by, bw, bh, g) in enumerate(tijolos()):
                 st, du = TIMING[g]; f = expo_out((i - st - 0.6 * du - (1 - (by - YT) / (YB - YT)) * 14 - (k % 7)) / 8.)
                 if f <= 0: continue
                 Q = proj([(bx, by), (bx + bw, by), (bx + bw, by + bh), (bx, by + bh), (bx, by)], h3)
-                stroke(c, trim(Q, f), 3.2 * CTRL['espessura'])
+                stroke(c, trim(Q, f), 3.0 * CTRL['espessura'])
             # 6-9 s: linhas de construcao convergem para a janela
             if 144 <= i <= 212:
                 e = ease_io((i - 144) / 18.) * (1 - ease_io((i - 176) / 30.))
