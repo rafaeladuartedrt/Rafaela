@@ -56,6 +56,12 @@ CR = {int(k): v for k, v in json.load(open(f'{R}/track_cruz.json')).items()}
 FIT = np.load(f'{R}/fit_cruz.npy')
 for _i in range(40):      # haste fora de quadro: inclinacao da haste acompanha a dos bracos
     _w = clamp_ = min(1., max(0., (_i - 30) / 10.)); FIT[_i, 6] = FIT[_i, 5] * (1 - _w) + FIT[_i, 6] * _w
+JAN = np.load(f'{R}/janela_rect.npy')
+def janela_pts(i, t=0.):
+    """Retangulo limpo da janela (coords 1080p) no instante i+t, ou None."""
+    if i < 0 or i > 239 or np.isnan(JAN[i, 0]): return None
+    j = i + 1 if i + 1 < 240 and not np.isnan(JAN[i + 1, 0]) else i
+    return JAN[i] * (1 - t) + JAN[j] * t
 PIG = json.load(open(f'{R}/picto_igreja.json'))
 PCZ = json.load(open(f'{R}/picto_cruz.json'))
 CZ_LIN = [np.array(p, np.float32) for p in PCZ['linhas']]
@@ -287,6 +293,12 @@ def render(i, layers=False):
         s, c = surf(); P = proj(G.CONTORNO, (hh[0], hh[0], 0)); c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill()
         dentro = cv2.GaussianBlur(to_np(s), (0, 0), max(.6, 3 * k_))
         m_veg = np.clip(m_veg + m_fac * (1 - dentro), 0, 1); m_fac = m_fac * dentro
+    if janela_pts(i) is not None:   # janela = retangulo limpo (o brilho do sol nao deforma o recorte)
+        ret = np.zeros((Hh, W), np.float32)
+        for sidx in range(NB_MB):
+            x0, y0, x1, y1 = janela_pts(i, 0.5 * sidx / NB_MB); s, c = surf(); P = XF([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+            c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill(); ret += to_np(s) / NB_MB
+        m_fac = np.clip(m_fac + m_jan * (1 - ret), 0, 1); m_ceu = m_ceu * (1 - ret); m_fac = m_fac * (1 - ret); m_jan = ret
     m_pedra = np.clip(m_cruz + m_fac, 0, 1)
 
     # ---------- 01_FOTO_ESTILIZADA
@@ -310,6 +322,7 @@ def render(i, layers=False):
     # ---------- 02_BLOCOS_COR  (alpha em cairo, com motion blur por subamostras)
     a_coral = np.zeros((Hh, W), np.float32); a_rec = np.zeros((Hh, W), np.float32); a_most = np.zeros((Hh, W), np.float32); a_sil = np.zeros((Hh, W), np.float32)
     p_coral = ease_io((i - 80) / 10.); p_most = ease_io((i - 7) / 10.)
+    if VIEW['ext']: p_most = 1.0    # vistas estendidas (vertical): painel e cruz completos desde o frame 0
     for sidx in range(NB_MB):
         t = 0.5 * sidx / NB_MB
         if hh is not None and p_coral > 0:
@@ -345,8 +358,8 @@ def render(i, layers=False):
     # ---------- 03_TRACO_MARROM : hachura (so na pedra fora dos blocos)
     hat = np.zeros((Hh, W), np.float32)
     if hh is not None:
-        dens = sstep(0.50, 0.25, lum) * m_fac * (1 - a_bl)
-        hat = hatch(hh[0], dens)
+        dens_h = sstep(0.50, 0.25, lum) * m_fac * (1 - a_bl)
+        hat = hatch(hh[0], dens_h)
         hat_in = hatch(hh[0], sstep(0.42, 0.2, lum) * m_fac * a_coral, period=7.0, ang=0.7) * 0.55
         comp = mix(comp, BRANCO, hat_in * 0.0)  # reservado: hachura branca dentro do bloco (desligada)
     comp = mix(comp, MARROM, hat * 0.38)
@@ -372,6 +385,10 @@ def render(i, layers=False):
                 yb = P[:, 1].max(); st_k = st + (1 - (yb - YT) / (YB - YT)) * 0.45 * du
                 f = expo_out((i - st_k) / (0.55 * du))
                 if f <= 0: continue
+                if g == 'janela' and janela_pts(i, t) is not None:
+                    x0, y0, x1, y1 = janela_pts(i, t)
+                    Q = trim(boil_suave(i, 100 + k, XF(dens(np.array([(x0, y1), (x0, y0), (x1, y0), (x1, y1), (x0, y1)], np.float32), 4.)), amp, 70. * k_), f)
+                    stroke(c2, Q, wm); continue
                 Q = trim(boil_suave(i, 100 + k, proj(P, h3), amp, 70. * k_), f)
                 stroke(c2 if g == 'janela' else c, Q, wm)
             for k, (bx, by, bw, bh, g) in enumerate(tijolos()):
@@ -383,10 +400,10 @@ def render(i, layers=False):
             if 144 <= i <= 212:
                 e = ease_io((i - 144) / 18.) * (1 - ease_io((i - 176) / 30.))
                 if e > 0:
-                    x0, y0, x1, y1 = 972, 357, 1030, 455; Lx, Ly = 420 * e, 300 * e
+                    x0, y0, x1, y1 = janela_pts(i, t); zz = (x1 - x0) / 58.; Lx, Ly = 420 * e * zz, 300 * e * zz
                     for A, B in (((x0 - Lx, y0), (x0, y0)), ((x1 + Lx, y0), (x1, y0)), ((x0 - Lx, y1), (x0, y1)), ((x1 + Lx, y1), (x1, y1)),
                                  ((x0, y0 - Ly), (x0, y0)), ((x1, y0 - Ly), (x1, y0)), ((x0, y1 + Ly), (x0, y1)), ((x1, y1 + Ly), (x1, y1))):
-                        stroke(c2, proj([A, B], h3), ws_ * 0.8)
+                        stroke(c2, XF([A, B]), ws_ * 0.8)
         lin += to_np(s) / NB_MB; lin_jan += to_np(s2) / NB_MB
     # dissolucao final das linhas no papel
     fade = 1 - ease_io((i - 198) / 16.)
