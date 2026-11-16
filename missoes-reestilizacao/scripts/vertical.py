@@ -68,6 +68,15 @@ def pista(fmt, modo):
         cx = np.clip(cx, w / 2 / a, 1920 - w / 2 / a)
         a = np.maximum(a, w / 1920.)
     tx = w / 2 - a * cx; ty = alvo_y - a * cy
+    if modo in 'BCD':
+        # Quando a base da fachada passa da borda inferior do quadro original, nao ha fachada real
+        # abaixo dela. Em vez de inventar pedra, o recorte encosta a base do quadro original na base
+        # da tela (a extensao fica so para cima: ceu e bloco coral), com transicao suave.
+        chao = np.array([cv2.perspectiveTransform(np.array([[[998, 782]]], np.float32), HT[int(np.clip(i, 40, 212))])[0, 0, 1] for i in range(N)])
+        passa = np.where((chao > 1075) & (f > 100))[0]; g0 = int(passa[0]) if len(passa) else N
+        w_b = ease((f - (g0 - 42)) / 42.)
+        ty = ty * (1 - w_b) + np.maximum(ty, h - a * 1080) * w_b
+        print_g0 = g0
     if modo in 'BCD':   # quando o recorte ja enche a altura, nao deixa sobrar faixa estendida
         cheio = a >= a_cheio - 1e-6
         ty = np.where(cheio, np.clip(ty, h - a * 1080, 0), ty)
