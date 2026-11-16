@@ -271,14 +271,90 @@ def warp_pad(imp):
     a = VIEW['a']; M = np.array([[a, 0, VIEW['tx']], [0, a, VIEW['ty'] - a * PAD]], np.float32)
     return cv2.warpAffine(imp, M, (W, Hh), flags=cv2.INTER_AREA if a < 1 else cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
 
-def textura_cruz(i, rgb):
-    """Luminancia de pedra para a cruz fora do quadro original: a propria foto espelhada na borda
-    (continua na emenda) e, onde o espelho nao cai sobre pedra, a textura da haste repetida."""
+def _pingue(banda, n, para_cima):
+    """Prolonga uma faixa por n linhas. O primeiro trecho (curto) espelha a borda para a emenda ser
+    continua; os seguintes sao copias da faixa deslocadas e invertidas na horizontal, fundidas entre
+    si, para nao aparecer simetria nem repeticao evidente."""
+    b = banda if para_cima else banda[::-1]          # b[0] = linha encostada no quadro (topo da faixa do ceu / base da faixa do gramado)
+    # tira o degrade vertical da faixa (mantem so a textura): as copias fundidas ficam no mesmo tom
+    med = b.mean(1, keepdims=True); alvo = med[:max(8, min(40, b.shape[0]))].mean(0, keepdims=True)
+    med = cv2.GaussianBlur(med.reshape(b.shape[0], 1, -1), (0, 0), sigmaX=0.1, sigmaY=12).reshape(med.shape)
+    pes = np.clip(np.arange(b.shape[0], dtype=np.float32) / 60., 0, 1).reshape(-1, *([1] * (b.ndim - 1)))
+    b = b - (med - alvo) * pes
+    h, w = b.shape[:2]; ov = max(8, min(70, h // 3))
+    # torna a faixa continua na horizontal (as copias deslocadas nao mostram a costura lateral)
+    Mx = 260; tx_ = np.linspace(0, 1, Mx, dtype=np.float32).reshape(1, -1, *([1] * (b.ndim - 2)))
+    b = b.copy(); b[:, -Mx:] = b[:, -Mx:] * (1 - tx_) + b[:, :Mx][:, ::-1] * tx_
+    out = b[:min(h, 90 + ov)].copy(); k = 1
+    while out.shape[0] < n + ov:
+        seg = np.roll(b, (k * 613) % w, 1)      # sem inverter: todas as copias andam junto com a camera
+        t = np.linspace(0, 1, ov, dtype=np.float32).reshape(-1, *([1] * (b.ndim - 1)))
+        out = np.concatenate([out[:-ov], out[-ov:] * (1 - t) + seg[:ov] * t, seg[ov:]], 0); k += 1
+    out = out[:n]
+    return out[::-1] if para_cima else out
+
+def _copia_lado(rgb, m):
+    """Tapa buracos estreitos da mascara (ex.: haste da cruz no gramado) com a textura vizinha da mesma linha."""
+    ok = m > 0.5; res = rgb.copy(); furo = ~ok
+    larg = int(furo.sum(1).max()) + 30
+    for dx in (larg, -larg, 2 * larg, -2 * larg):
+        if not furo.any() or abs(dx) >= rgb.shape[1] - 2: break
+        src_ok = np.roll(ok, dx, 1); src = np.roll(rgb, dx, 1)
+        if dx > 0: src_ok[:, :dx] = False
+        else: src_ok[:, dx:] = False
+        pega = furo & src_ok; res[pega] = src[pega]; furo = furo & ~pega
+    m2 = (~furo).astype(np.float32)
+    borda = cv2.GaussianBlur(ok.astype(np.float32), (0, 0), 3)       # suaviza a costura
+    suave = cv2.GaussianBlur(res, (0, 0), 2.5); wgt = (np.abs(borda - 0.5) < 0.42).astype(np.float32)[..., None]
+    return res * (1 - wgt) + suave * wgt, m2
+
+def _preenche(rgb, m, sig):
+    """Troca o que nao pertence a mascara pela vizinhanca da propria mascara (convolucao normalizada)."""
+    den = cv2.GaussianBlur(m, (0, 0), sig); num = cv2.GaussianBlur(rgb * m[..., None], (0, 0), sig)
+    med = (rgb * m[..., None]).sum((0, 1)) / max(m.sum(), 1.) if m.sum() > 200 else rgb.mean((0, 1))
+    f = np.where(den[..., None] > 0.03, num / np.maximum(den[..., None], 1e-4), med)
+    ms = (np.clip((cv2.GaussianBlur(m, (0, 0), 22) - 0.5) * 2, 0, 1) * m)[..., None]    # transicao larga: sem borda dura no preenchimento
+    return rgb * ms + f * (1 - ms)
+
+def rgb_ext(i, rgb):
+    """Foto prolongada para cima e para baixo COM textura: o ceu real (nuvens) continua espelhado
+    acima do quadro e o gramado real continua abaixo. Nada de areas lisas."""
+    mc = cv2.imread(f'{R}/mattes/ceu/m_{i:04d}.png', 0).astype(np.float32) / 255
+    mv = cv2.imread(f'{R}/mattes/veg/m_{i:04d}.png', 0).astype(np.float32) / 255
+    # ---- ceu
+    hs = 300
+    if mc[:hs].mean() > 0.04: banda = _preenche(rgb[:hs], cv2.erode(mc[:hs], np.ones((7, 7), np.uint8)), 45)
+    else: banda = np.broadcast_to(np.array([1, 1, 1], np.float32), (hs, 1920, 3)).copy()   # sem ceu no topo (final): papel branco
+    topo = _pingue(banda, PAD, True)
+    d = np.arange(PAD, 0, -1, dtype=np.float32)[:, None, None]
+    topo = topo + (1 - topo) * (1 - np.exp(-d / 1100.)) * 0.85            # clareia devagar para o papel
+    # ---- gramado
+    fr = mv.mean(1); hb = 0
+    for y in range(1079, 600, -1):
+        if fr[y] < 0.55: break
+        hb += 1
+    if hb >= 60:
+        hb = min(hb, 280); mb = cv2.erode(mv[-hb:], np.ones((7, 7), np.uint8))
+        banda, mb = _copia_lado(rgb[-hb:], mb); banda = _preenche(banda, mb, 45)
+    else:
+        cor = rgb[mv > 0.5].mean(0) if (mv > 0.5).sum() > 500 else rgb[-40:].mean((0, 1))
+        banda = np.broadcast_to(cor.astype(np.float32), (60, 1920, 3)).copy()
+    base = _pingue(banda, PAD, False)
+    return np.vstack([topo, rgb, base]).astype(np.float32)
+
+def textura_pedra(i, rgb, hh):
+    """Luminancia de pedra para cruz/fachada fora do quadro original: a propria foto espelhada na borda
+    (continua na emenda) e, onde o espelho nao cai sobre pedra, uma faixa de pedra repetida."""
     g = (rgb @ np.array([0.2126, 0.7152, 0.0722], np.float32)).astype(np.float32)
-    cm = cv2.imread(f'{R}/mattes/cruz/m_{i:04d}.png', 0).astype(np.float32) / 255
+    cm = np.maximum(cv2.imread(f'{R}/mattes/cruz/m_{i:04d}.png', 0), cv2.imread(f'{R}/mattes/fachada/m_{i:04d}.png', 0)).astype(np.float32) / 255
     cm = cv2.erode(cm, np.ones((9, 9), np.uint8))
     esp = cv2.copyMakeBorder(g, PAD, PAD, 0, 0, cv2.BORDER_REFLECT_101); mesp = cv2.copyMakeBorder(cm, PAD, PAD, 0, 0, cv2.BORDER_REFLECT_101)
-    q = FIT[min(i, 94)]; lw = max(12, int(0.34 * 50 * q[2])); cx = int(np.clip(q[0], lw + 1, 1919 - lw))
+    if fitq(i) is not None:
+        q = FIT[i]; lw = max(12, int(0.34 * 50 * q[2])); cx = int(np.clip(q[0], lw + 1, 1919 - lw))
+    elif hh is not None:
+        c0 = cv2.perspectiveTransform(np.array([[[860, 400], [1140, 400]]], np.float32), hh[0])[0]
+        lw = int(np.clip((c0[1, 0] - c0[0, 0]) / 2, 40, 500)); cx = int(np.clip(c0[:, 0].mean(), lw + 1, 1919 - lw))
+    else: lw, cx = 200, 960
     faixa = g[:, cx - lw:cx + lw]; okr = cm[:, cx - lw:cx + lw].min(1) > 0.5
     faixa = faixa[okr] if okr.sum() > 40 else faixa
     reps_y = int(np.ceil((1080 + 2 * PAD) / faixa.shape[0])) + 1; reps_x = int(np.ceil(1920 / faixa.shape[1])) + 2
@@ -286,7 +362,11 @@ def textura_cruz(i, rgb):
     lad = np.concatenate([col if k % 2 == 0 else col[:, ::-1] for k in range(reps_x)], 1)
     off = (cx - lw) % (2 * faixa.shape[1]); lad = np.roll(lad, off, 1)[:1080 + 2 * PAD, :1920]
     mesp = cv2.GaussianBlur(mesp, (0, 0), 4)
-    return warp_pad(esp * mesp + lad * (1 - mesp))
+    piso = float(np.percentile(g[cm > 0.5], 12)) if (cm > 0.5).sum() > 500 else 0.15     # sem manchas escuras de sombra no prolongamento
+    base = esp * mesp + lad * (1 - mesp)
+    escuro = sstep(piso + 0.04, piso - 0.02, cv2.GaussianBlur(base, (0, 0), 3))    # sombras espelhadas: troca pela faixa de pedra
+    lad = np.maximum(lad, piso - 0.03)
+    return warp_pad(base * (1 - escuro) + lad * escuro)
 
 def tom_pedra(lum):
     """P&B quente de alto contraste (marrom -> cinza quente -> branco)."""
@@ -305,16 +385,7 @@ def mix(a, b, t): return a + (b - a) * t[..., None]
 # =====================================================================
 def render(i, layers=False):
     rgb = load_rgb(i)
-    bordas = None
-    if VIEW['ext']:
-        def limpa(faixa, mk):       # troca na faixa o que nao e ceu/gramado pela cor media do ceu/gramado
-            ok = mk > 127; cor = faixa[ok].mean(0) if ok.sum() > 50 else faixa.reshape(-1, 3).mean(0)
-            r = faixa.mean(0); okc = ok.mean(0) > 0.5; r[~okc] = cor; return r
-        mc = cv2.imread(f'{R}/mattes/ceu/m_{i:04d}.png', 0); mv = cv2.imread(f'{R}/mattes/veg/m_{i:04d}.png', 0)
-        bordas = (limpa(rgb[:8], mc[:8]), limpa(rgb[-24:], mv[-24:]))
-        okv = mv[-60:] > 127   # gramado estendido em tom unico (sem faixas verticais)
-        bordas = (bordas[0], np.broadcast_to(rgb[-60:][okv].mean(0) if okv.sum() > 50 else bordas[1].mean(0), bordas[1].shape).copy())
-    big = np.clip(warp(rgb, 'ceu', 'grama', bordas=bordas), 0, 1); k_ = LS()
+    big = np.clip(warp_pad(rgb_ext(i, rgb)) if VIEW['ext'] else warp(rgb), 0, 1); k_ = LS()
     lum = big @ np.array([0.2126, 0.7152, 0.0722], np.float32)
     m_ceu, m_veg, m_cruz, m_fac, m_jan = [matte(k, i) for k in ('ceu', 'veg', 'cruz', 'fachada', 'janela')]
     hh = Hof(i) if 40 <= i <= 212 else None
@@ -368,18 +439,26 @@ def render(i, layers=False):
             Pn = torn([(0, 0), (1, 0), (1, 1), (0, 1)], 0.004, 0.012, 5) * [xw - x0, y1 - y0] + [x0, y0]
             s, c = surf(); c.move_to(*Pn[0]); [c.line_to(*p) for p in Pn[1:]]; c.close_path(); c.fill(); a_most += to_np(s) / NB_MB
     a_coral *= (1 - a_rec)
-    if VIEW['ext'] and fitq(i) is not None:
-        # vertical: a cruz aparece inteira desde o frame 0. Fora do quadro original nao ha foto,
-        # entao ali a cruz e a silhueta do pictograma preenchida com o tom medio da pedra.
+    if VIEW['ext']:
+        # Vistas estendidas (vertical): fora do quadro original nao ha foto. A cruz e completada pela
+        # silhueta do pictograma, torre/frontao pela silhueta do conjunto, e tudo recebe textura real
+        # (pedra espelhada/repetida; ceu e gramado ja vem texturizados de rgb_ext).
         fora = 1 - warp(np.ones((1080, 1920), np.float32), 'zero', 'zero', cv2.INTER_LINEAR)
-        dentro_q = m_cruz * (1 - fora)
-        lum = lum * (1 - fora) + textura_cruz(i, rgb) * fora      # textura de pedra na cruz inteira
-        pedra = tom_pedra(lum)
-        m_cruz = dentro_q + fora * a_sil
+        fora = np.clip(cv2.dilate(fora, np.ones((5, 5), np.uint8)) * 1.5, 0, 1)      # cobre a linha de emenda
         yy_ = (np.arange(Hh, dtype=np.float32)[:, None] - VIEW['ty']) / VIEW['a']
-        resto = fora * (1 - a_sil)
+        cima = fora * (yy_ < 540); baixo = fora * (yy_ >= 540)
+        if fitq(i) is not None: m_cruz = m_cruz * (1 - fora) + fora * a_sil
+        else: m_cruz = m_cruz * (1 - fora)
+        if hh is not None:
+            s, c = surf(); P = proj(G.SILH, (hh[0], hh[0], 0)); c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.fill()
+            m_fac = m_fac * (1 - cima) + to_np(s) * cima * (1 - m_cruz)
+        m_fac = m_fac * (1 - baixo * m_cruz)
+        pedra_m = np.clip(m_cruz + m_fac, 0, 1)
+        lum = lum * (1 - fora * pedra_m) + textura_pedra(i, rgb, hh) * fora * pedra_m
+        pedra = tom_pedra(lum)
+        resto = fora * np.clip(1 - pedra_m - m_jan, 0, 1)
         m_ceu = m_ceu * (1 - fora) + resto * (yy_ < 540); m_veg = m_veg * (1 - fora) + resto * (yy_ >= 540)
-        foto = mix(mix(mix(ceu, veg, m_veg), pedra, np.clip(m_cruz + m_fac, 0, 1)), BRANCO, m_jan)
+        foto = mix(mix(mix(ceu, veg, m_veg), pedra, pedra_m), BRANCO, m_jan)
     # dentro do bloco a foto vira tom sobre a cor (so 2 tons + vazios em laranja queimado)
     sombra = poster(1 - np.clip((lum - 0.06) / 0.42, 0, 1), 3)
     coral_l = mix(np.broadcast_to(CORAL, big.shape), LARANJA, 0.78 * sombra * m_fac)
