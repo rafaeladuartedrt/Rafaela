@@ -87,18 +87,81 @@ def tom_pedra(lum):
     cinza = RD.MARROM * 0.55 + 0.42; sh = lum.shape + (3,)
     return np.where((lp < 0.5)[..., None], RD.mix(np.broadcast_to(RD.MARROM, sh), cinza, lp * 2), RD.mix(np.broadcast_to(cinza, sh), RD.BRANCO, lp * 2 - 1))
 
+import cairo
 _clahe = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8, 8))
-def linhas(ln, esc):
-    """Traco branco de contorno (XDoG) sobre a luminancia estabilizada com contraste local:
-    linhas continuas nas formas principais, sem pontinhos soltos."""
-    eq = _clahe.apply(np.clip(ln * 255, 0, 255).astype(np.uint8)).astype(np.float32) / 255
-    eq = cv2.bilateralFilter(eq, 0, 0.08, 3 * esc)               # alisa textura miuda, preserva bordas
-    s = 1.5 * esc
-    d = cv2.GaussianBlur(eq, (0, 0), s * 1.8) - cv2.GaussianBlur(eq, (0, 0), s)
-    L = RD.sstep(0.010, 0.030, d)
-    b = (L > 0.5).astype(np.uint8); n, lab, st, _ = cv2.connectedComponentsWithStats(b, 8)
-    keep = np.zeros(n, np.float32); keep[1:] = (st[1:, cv2.CC_STAT_AREA] > 90 * esc * esc)
-    return cv2.GaussianBlur(L * keep[lab], (0, 0), 0.7)
+def _chaikin(P, n=3, fechado=False):
+    for _ in range(n):
+        Q = P if not fechado else np.vstack([P, P[:1]])
+        R = np.empty((2 * (len(Q) - 1), 2), np.float32)
+        R[0::2] = 0.75 * Q[:-1] + 0.25 * Q[1:]; R[1::2] = 0.25 * Q[:-1] + 0.75 * Q[1:]
+        P = R if fechado else np.vstack([P[:1], R, P[-1:]])
+    return P
+
+def _segmentos(g, W, Hh, sx, sy):
+    """Linhas retas longas da arquitetura (como no desenho tecnico do video 1), unindo segmentos colineares."""
+    ed = cv2.Canny(g, 30, 90)
+    ls = cv2.HoughLinesP(ed, 1, np.pi / 360, 40, minLineLength=int(0.10 * min(g.shape)), maxLineGap=int(0.025 * min(g.shape)))
+    if ls is None: return []
+    segs = []
+    for x0, y0, x1, y1 in ls.reshape(-1, 4):
+        p, q = np.array([x0 * sx, y0 * sy], np.float32), np.array([x1 * sx, y1 * sy], np.float32)
+        segs.append((p, q, np.linalg.norm(q - p)))
+    segs.sort(key=lambda t: -t[2]); out = []
+    for p, q, L in segs:                                   # descarta quase duplicados (paralelos e proximos)
+        d = (q - p) / L; nrm = np.array([-d[1], d[0]])
+        dup = False
+        for P2, Q2, _ in out:
+            d2 = (Q2 - P2) / np.linalg.norm(Q2 - P2)
+            if abs(d @ d2) > 0.995 and abs((P2 - p) @ nrm) < 0.012 * (W + Hh) / 2:
+                t0, t1 = sorted([(P2 - p) @ d, (Q2 - p) @ d])
+                if t1 > -0.02 * L and t0 < 1.02 * L: dup = True; break
+        if not dup: out.append((p, q, L))
+        if len(out) >= 22: break
+    return out
+
+from skimage.morphology import skeletonize
+def tracos(i, k, formato, W, Hh, cx, cy, cw, ch):
+    """Traco no estilo dos videos iniciais (linha do logo): linhas continuas, espessura constante e
+    pontas arredondadas, desenhando as bordas principais da imagem.
+    1) bordas de escala media (diferenca de gaussianas sobre a luminancia estabilizada e alisada);
+    2) afinadas ate a linha de centro (esqueleto), descartando pedacos curtos;
+    3) cada linha e simplificada (retas na arquitetura, curvas suaves nas pessoas) e redesenhada em vetor.
+    Atualiza a cada 2 frames (o line boil do estilo)."""
+    j = i - (i - plano(i)[1]) % 2
+    l = cv2.imread(f'{V2}/work/lum/l_{j:04d}.png', 0)[cy:cy + ch, cx:cx + cw]
+    sc = W / cw * 0.5                                    # trabalha na metade da resolucao final
+    g = cv2.resize(l, (int(cw * sc), int(ch * sc)), interpolation=cv2.INTER_CUBIC)
+    g = _clahe.apply(g)
+    for _ in range(2): g = cv2.bilateralFilter(g, 0, 22, 4 * sc)
+    g = g.astype(np.float32) / 255
+    s1 = 1.6 * sc
+    d = cv2.GaussianBlur(g, (0, 0), s1 * 1.7) - cv2.GaussianBlur(g, (0, 0), s1)
+    m = (d > (0.017 if k in RUINAS else 0.022)).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    sk = skeletonize(m > 0).astype(np.uint8)
+    # poda das ramificacoes curtas (tira os 'espinhos' do esqueleto)
+    K8 = np.ones((3, 3), np.float32); K8[1, 1] = 0
+    for _ in range(int(5 * sc)):
+        viz = cv2.filter2D(sk, cv2.CV_8U, K8, borderType=cv2.BORDER_CONSTANT)
+        sk = sk * ~((sk == 1) & (viz <= 1)) & 1
+        sk = sk.astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(sk, 8)
+    minlen = 0.07 * (g.shape[0] + g.shape[1])
+    keep = np.zeros(n, np.uint8); keep[1:] = (np.maximum(st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_HEIGHT]) > minlen * 0.5) & (st[1:, cv2.CC_STAT_AREA] > minlen)
+    sk = keep[lab]
+    cs, _ = cv2.findContours(sk, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    reto = k in RUINAS
+    S = cairo.ImageSurface(cairo.FORMAT_A8, W, Hh); c = cairo.Context(S)
+    c.set_line_cap(cairo.LINE_CAP_ROUND); c.set_line_join(cairo.LINE_JOIN_ROUND); c.set_antialias(cairo.ANTIALIAS_BEST)
+    c.set_line_width(8.0 * W / 1080 if formato == 'v' else 7.0 * Hh / 1080)
+    f = np.array([W / g.shape[1], Hh / g.shape[0]], np.float32)
+    for cc in cs:
+        if len(cc) < 2 * minlen: continue
+        ap = cv2.approxPolyDP(cc, (2.4 if reto else 1.6) * sc, True)[:, 0].astype(np.float32) * f
+        P = ap if reto else _chaikin(ap, 2, True)
+        c.move_to(*P[0]); [c.line_to(*p) for p in P[1:]]; c.close_path(); c.stroke()
+    S.flush(); a = np.frombuffer(S.get_data(), np.uint8).reshape(Hh, S.get_stride())[:, :W]
+    return a.astype(np.float32) / 255
 
 def para_tela(r, k, formato, W, Hh):
     """Retangulo em fracoes do original -> pixels da tela (recortado as bordas, com margem)."""
@@ -155,8 +218,8 @@ def estiliza(i, formato='v'):
     sombra = poster(1 - np.clip((ln - 0.08) / 0.5, 0, 1), 3)
     c_bl = RD.mix(cor_bl, RD.LARANJA, 0.38 * sombra * (1 - ceu))           # tom leve: o traco branco e quem desenha
     comp = RD.mix(foto, c_bl, alfa)
-    tr = linhas(ln, esc / 1.875)
-    comp = RD.mix(comp, RD.BRANCO, np.clip(tr * alfa * 1.25, 0, 1))
+    tr = tracos(i, k, formato, W, Hh, cx, cy, cw, ch)
+    comp = RD.mix(comp, RD.BRANCO, np.clip(tr * alfa, 0, 1))
     return comp
 
 def acabamento(comp, i):
