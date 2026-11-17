@@ -1,0 +1,4 @@
+work/
+*.pyc
+__pycache__/
+output/*.mov
