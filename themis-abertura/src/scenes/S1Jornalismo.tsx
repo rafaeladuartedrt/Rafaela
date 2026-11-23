@@ -45,7 +45,7 @@ const Mosaic: React.FC = () => {
     <AbsoluteFill>
       {/* A: operação policial */}
       <Tile x={0} y={0} w={1750} h={667} p={pA} from="top">
-        <Photo src={asset('foto1_bw.jpg')} iw={1478} ih={985} w={1750} h={667} scale={1.0} fx={0.08} fy={0.3} dx={-30 + 60 * seg(t, 3.3, 7.8, E.soft)} />
+        <Photo src={asset('foto1_bw.jpg')} iw={1478} ih={985} w={1750} h={667} scale={1.06} fy={0.35} dx={-30 + 60 * seg(t, 3.3, 7.8, E.soft)} />
       </Tile>
       {/* B: Foro de Canoas */}
       <Tile x={1750} y={0} w={1750} h={1333} p={pB} from="right">
@@ -54,7 +54,7 @@ const Mosaic: React.FC = () => {
       {/* C: criança / enchente — entrada lenta e respeitosa, sem zoom */}
       <Tile x={0} y={667} w={1750} h={1333} p={pC} from="bottom">
         <div style={{ opacity: pC }}>
-          <Photo src={asset('foto4_duo.jpg')} iw={3120} ih={2080} w={1750} h={1333} scale={1.0} fy={0.95} />
+          <Photo src={asset('foto4_duo.jpg')} iw={3120} ih={2080} w={1750} h={1333} scale={1.0} fy={0.6} />
         </div>
       </Tile>
       {/* D: bloco cinza com texto de apoio */}
