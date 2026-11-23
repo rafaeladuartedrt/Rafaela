@@ -18,6 +18,8 @@ export type TileSpec = {
   color?: string; label?: string; support?: string[];
   /** padrão de texto repetido pequeno sobre a foto (ref. A: "WORLD NEWS") */
   pattern?: string;
+  /** janela [entra, sai] da palavra/padrão dentro do bloco (palavras nunca juntas na tela) */
+  labelIn?: number; labelOut?: number;
   inAt: number; inDur?: number; inFrom?: Dir;
   outAt?: number; outDur?: number; outTo?: Dir;
 };
@@ -38,6 +40,9 @@ export const Tile: React.FC<{ s: TileSpec; t0: number; t1: number }> = ({ s, t0,
   const tx = ox * pout * (to === 'left' ? s.x + s.w : 3500 - s.x) ;
   const ty = oy * pout * (to === 'top' ? s.y + s.h : 2000 - s.y);
   const dp = seg(t, t0, t1, E.soft);
+  const labelP = Math.min(
+    s.labelIn !== undefined ? seg(t, s.labelIn, s.labelIn + 0.45, E.out) : 1,
+    s.labelOut !== undefined ? 1 - seg(t, s.labelOut, s.labelOut + 0.35, E.soft) : 1);
   const [dx, dy] = s.drift ?? [0, 0];
   let body: React.ReactNode = null;
   if (s.kind === 'photo') {
@@ -56,14 +61,14 @@ export const Tile: React.FC<{ s: TileSpec; t0: number; t1: number }> = ({ s, t0,
   } else {
     body = (
       <AbsoluteFill style={{ background: s.color, alignItems: 'center', justifyContent: 'center' }}>
-        {s.label && <Tag text={s.label} dark={s.color === C.green} />}
+        {s.label && <Tag text={s.label} dark={s.color === C.green} p={labelP} />}
         {s.support && s.support.map((l, i) => (
           <Word key={i} size={46} weight={FONT.light} tracking={FONT.trackingSupport} color={C.white}>{l}</Word>
         ))}
       </AbsoluteFill>
     );
   }
-  const pattern = s.pattern ? <Pattern text={s.pattern} w={s.w} h={s.h} /> : null;
+  const pattern = s.pattern && labelP > 0 ? <div style={{ position: 'absolute', inset: 0, opacity: labelP }}><Pattern text={s.pattern} w={s.w} h={s.h} /></div> : null;
   return (
     <div style={{
       position: 'absolute', left: u(s.x), top: u(s.y), width: u(s.w), height: u(s.h), overflow: 'hidden',
@@ -74,10 +79,14 @@ export const Tile: React.FC<{ s: TileSpec; t0: number; t1: number }> = ({ s, t0,
 };
 
 /** palavra como pequena informação dentro do bloco (suave: SemiBold, sem caixa alta pesada) */
-export const Tag: React.FC<{ text: string; dark?: boolean }> = ({ text, dark }) => {
-  const t = useT();
-  void t;
-  return <Word size={112} weight={600} tracking="0.08em" color={dark ? C.grayDeep : C.white}>{text}</Word>;
+export const Tag: React.FC<{ text: string; dark?: boolean; p?: number }> = ({ text, dark, p = 1 }) => {
+  const u = useU();
+  if (p <= 0) return null;
+  return (
+    <div style={{ opacity: p, transform: `translateY(${u(24) * (1 - p)}px)` }}>
+      <Word size={112} weight={600} tracking="0.08em" color={dark ? C.grayDeep : C.white}>{text}</Word>
+    </div>
+  );
 };
 
 const Pattern: React.FC<{ text: string; w: number; h: number }> = ({ text, w, h }) => {

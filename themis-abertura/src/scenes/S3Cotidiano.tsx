@@ -15,10 +15,13 @@ const TILES: TileSpec[] = [
     inAt: 12.35, inDur: 1.0, inFrom: 'bottom', outAt: OUT, outTo: 'left' },
   { x: 1750, y: 0, w: 1750, h: 1333, kind: 'photo', src: 'foto5_bw.jpg', iw: 3120, ih: 2080, fx: 0.7, fy: 0.25, drift: [-20, 0],
     inAt: 12.6, inDur: 1.0, inFrom: 'right', outAt: OUT + 0.08, outTo: 'right' },
-  { x: 1750, y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.green, label: WORDS.cotidiano,
+  // COTIDIANO sozinha (13.4–14.8), depois IMAGEM sozinha em outro bloco (15.0–16.3)
+  { x: 1750, y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.green, label: WORDS.cotidiano, labelIn: 13.6, labelOut: 14.65,
     inAt: 13.2, inDur: 0.7, inFrom: 'left', outAt: OUT + 0.14, outTo: 'bottom' },
-  { x: 2625, y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep, label: WORDS.imagem,
+  { x: 2625, y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep,
     inAt: 13.5, inDur: 0.7, inFrom: 'top', outAt: OUT + 0.2, outTo: 'right' },
+  { x: 0, y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep, label: WORDS.imagem, labelIn: 15.2,
+    inAt: 14.95, inDur: 0.7, inFrom: 'bottom', outAt: OUT + 0.02, outTo: 'left' },
 ];
 
 export const S3Cotidiano: React.FC = () => {
