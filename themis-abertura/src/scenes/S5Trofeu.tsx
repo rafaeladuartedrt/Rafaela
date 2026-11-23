@@ -3,6 +3,7 @@ import { AbsoluteFill, Img } from 'remotion';
 import { C } from '../theme';
 import { E, env, lerp, seg, useT } from '../lib/time';
 import { asset, TROPHY, useU } from '../lib/units';
+import { MotionBlur } from '../lib/MotionBlur';
 
 /**
  * 0:21–0:26 Troféu (plano herói). A arte vertical do troféu (silhueta verde + fotografia
@@ -10,7 +11,9 @@ import { asset, TROPHY, useU } from '../lib/units';
  * no hold o PNG é desenhado sem máscara, filtro ou camada por cima.
  */
 export const trophyScale = (t: number) =>
-  lerp(0.93, 1, seg(t, 21.2, 24.7, E.dolly)) * lerp(1, 0.9, seg(t, 25.8, 26.8, E.in));
+  lerp(0.93, 1, seg(t, 21.2, 24.7, E.dolly)) * lerp(1, 3.2, seg(t, 25.8, 26.75, E.in));
+/** origem do movimento: centro da tela (o troféu avança em direção à câmera) */
+export const TROPHY_ORIGIN = { x: 1750, y: 1000 };
 
 export const DarkStage: React.FC = () => {
   const t = useT();
@@ -22,23 +25,25 @@ export const DarkStage: React.FC = () => {
 export const S5Trofeu: React.FC = () => {
   const t = useT();
   const u = useU();
-  if (t < 21.0 || t > 27.0) return null;
+  if (t < 21.0 || t > 26.8) return null;
   const sc = trophyScale(t);
   const left = TROPHY.x, top = TROPHY.y; // inteiros: no hold a arte cai 1:1 no grid de pixels
   // a arte do troféu entra estourada de luz e assenta
   const inn = seg(t, 21.15, 21.8, E.soft);
   const blown = 0.95 * (1 - seg(t, 21.35, 23.6, E.soft));
-  const fade = 1 - seg(t, 26.1, 26.9, E.soft);
-  const darken = seg(t, 25.8, 26.6, E.soft);
+  // saída: avança para a câmera e some
+  const fade = 1 - seg(t, 26.25, 26.75, E.soft);
   const cone = env(t, 21.4, 22.6, 25.7, 26.5, E.soft);
   const glow = env(t, 21.2, 22.2, 25.8, 26.6, E.soft);
   const spec = seg(t, 23.75, 24.6, E.main);
   const box: React.CSSProperties = {
     position: 'absolute', left: u(left), top: u(top), width: u(TROPHY.w), height: u(TROPHY.h),
-    transform: sc === 1 ? undefined : `scale(${sc})`, transformOrigin: 'center center',
+    transform: sc === 1 ? undefined : `scale(${sc})`,
+    transformOrigin: `${u(TROPHY_ORIGIN.x - left)}px ${u(TROPHY_ORIGIN.y - top)}px`,
   };
   const amask = { WebkitMaskImage: `url(${asset(TROPHY.alpha)})`, maskImage: `url(${asset(TROPHY.alpha)})`, WebkitMaskSize: '100% 100%', maskSize: '100% 100%' } as React.CSSProperties;
   return (
+    <MotionBlur windows={[[25.85, 26.8]]} samples={6}>
     <AbsoluteFill>
       {/* luz de fundo e cone volumétrico do spot, ATRÁS do troféu */}
       <div style={{ position: 'absolute', left: u(1750 - 1300), top: 0, width: u(2600), height: u(1900), opacity: glow * fade,
@@ -65,11 +70,7 @@ export const S5Trofeu: React.FC = () => {
             background: `linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(${C.whiteRGB},.42) 50%, rgba(255,255,255,0) 100%)` }} />
         </div>
       )}
-      {/* recuo: escurece por camada (máscara da silhueta), sem tocar nos pixels */}
-      {darken > 0 && (
-        <div style={{ ...box, background: '#000', opacity: 0.7 * darken * fade,
-          ...amask }} />
-      )}
     </AbsoluteFill>
+    </MotionBlur>
   );
 };
