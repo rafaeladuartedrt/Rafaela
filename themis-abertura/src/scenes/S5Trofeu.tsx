@@ -24,7 +24,7 @@ export const S5Trofeu: React.FC = () => {
   const u = useU();
   if (t < 21.0 || t > 27.0) return null;
   const sc = trophyScale(t);
-  const left = (3500 - TROPHY.w) / 2, top = (2000 - TROPHY.h) / 2; // 1287, 201 (inteiros)
+  const left = TROPHY.x, top = TROPHY.y; // inteiros: no hold a arte cai 1:1 no grid de pixels
   // a arte do troféu entra estourada de luz e assenta
   const inn = seg(t, 21.15, 21.8, E.soft);
   const blown = 0.95 * (1 - seg(t, 21.35, 23.6, E.soft));

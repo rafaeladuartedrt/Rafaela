@@ -24,7 +24,7 @@ const usePostMask = (t: number): React.CSSProperties | undefined => {
   if (t >= 22.0 && t < 25.8) {
     const s = trophyScale(t);
     const w = TROPHY.w * s, h = TROPHY.h * s;
-    return excludeMask(asset(TROPHY.exclude), u(1750 - w / 2 - 8 * s), u(1000 - h / 2 - 8 * s), u(w + 16 * s), u(h + 16 * s));
+    return excludeMask(asset(TROPHY.exclude), u(TROPHY.x + TROPHY.w / 2 - w / 2 - 8 * s), u(TROPHY.y + TROPHY.h / 2 - h / 2 - 8 * s), u(w + 16 * s), u(h + 16 * s));
   }
   if (t >= 26.9 && t < 29.5) return excludeMask(logoEx, 0, 0, u(3500), u(2000));
   return undefined;
