@@ -17,6 +17,8 @@ export type Piece = {
   rot?: number; at: number; dur?: number; until?: number; dim?: number;
   /** desfoque fixo (px master) e borda esfumada, para fotos de fundo no espaço */
   blur?: number; feather?: boolean; shadow?: boolean;
+  /** 0..1: imagem de fundo estourada de luz (lavada, clara, baixo contraste) */
+  blown?: number;
 };
 
 export type Cam = { x: number; y: number; zoom: number };
@@ -43,7 +45,8 @@ export const PieceView: React.FC<{ p: Piece; cam: Cam }> = ({ p, cam }) => {
     <div style={{
       position: 'absolute', left: u(x - w / 2), top: u(y - h / 2), width: u(w), height: u(h),
       transform: p.rot ? `rotate(${p.rot}deg)` : undefined, opacity: op * (p.dim ?? 1), boxShadow: shadow,
-      filter: [blur > 0.3 ? `blur(${u(blur)}px)` : '', p.kind === 'headline' ? `drop-shadow(0 0 ${u(16)}px rgba(0,0,0,.85))` : ''].join(' ').trim() || undefined,
+      filter: [blur > 0.3 ? `blur(${u(blur)}px)` : '', p.blown ? `brightness(${1 + 0.9 * p.blown}) contrast(${1 - 0.4 * p.blown})` : '',
+        p.kind === 'headline' ? `drop-shadow(0 0 ${u(16)}px rgba(0,0,0,.85))` : ''].join(' ').trim() || undefined,
       WebkitMaskImage: fm, maskImage: fm,
     }}>
       <Img src={asset(p.src)} style={{ width: '100%', height: '100%', display: 'block' }} />
