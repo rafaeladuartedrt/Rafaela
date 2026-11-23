@@ -48,6 +48,8 @@ export const S5Trofeu: React.FC = () => {
         background: `linear-gradient(180deg, rgba(${C.whiteRGB},.16) 0%, rgba(${C.whiteRGB},.06) 55%, rgba(${C.whiteRGB},0) 100%)` }} />
       <div style={{ ...box, opacity: inn * fade }}>
         <Img src={asset(TROPHY.src)} style={{ width: '100%', height: '100%', display: 'block' }} />
+        {/* placas ilegíveis: camada derivada da arte, desfocada só sobre as placas */}
+        <Img src={asset(TROPHY.placas)} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
       </div>
       {/* estouro de luz: camada aditiva separada, mascarada pela silhueta; os pixels da arte não são alterados.
           Começa como silhueta de luz quase branca e se apaga conforme a arte assenta. */}

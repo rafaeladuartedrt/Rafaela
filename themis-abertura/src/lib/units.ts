@@ -16,4 +16,4 @@ export const useRasterAsset = (name: 'logo' | 'seda' | 'seda_sheen') => {
 export const asset = (p: string) => staticFile(`assets/${p}`);
 
 /** troféu: arte vertical (silhueta verde + foto em Multiply), rasterizada do PDF no tamanho de exibição, 1:1, centrada */
-export const TROPHY = { w: 926, h: 1598, src: 'trofeu2.png', alpha: 'trofeu2_alpha.png', exclude: 'trofeu2_exclude.png' };
+export const TROPHY = { w: 926, h: 1598, src: 'trofeu2.png', alpha: 'trofeu2_alpha.png', exclude: 'trofeu2_exclude.png', placas: 'trofeu2_placas.png' };
