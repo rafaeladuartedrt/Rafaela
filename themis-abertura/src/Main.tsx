@@ -42,11 +42,12 @@ export const Main: React.FC<RenderConfig> = ({ post }) => {
       <AbsoluteFill style={{ backgroundColor: C.gray }}>
         <Silk />
         <DarkStage />
+        {/* ordem: cada cena sai revelando a seguinte, que está por baixo */}
+        <S5Trofeu />
+        <S4Inovacao />
+        <S3Cotidiano />
         <S2Judiciario />
         <S1Jornalismo />
-        <S3Cotidiano />
-        <S4Inovacao />
-        <S5Trofeu />
         <S6Logo />
         <GreenLine />
         {post && (

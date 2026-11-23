@@ -5,6 +5,7 @@ import { E, lerp, seg, useT } from '../lib/time';
 import { asset, useU } from '../lib/units';
 import { Photo, Word } from '../lib/ui';
 import { MotionBlur } from '../lib/MotionBlur';
+import { HeroWord, SweepEdge } from '../lib/HeroWord';
 
 /**
  * 0:03–0:08 JORNALISMO (ref. A): a linha abre em grid, fotos 1/2/4 entram em blocos
@@ -60,7 +61,10 @@ const Mosaic: React.FC = () => {
       {/* D: bloco cinza com texto de apoio */}
       <Tile x={1750} y={1333} w={875} h={667} p={pD} from="right">
         <AbsoluteFill style={{ background: C.grayMid, alignItems: 'center', justifyContent: 'center' }}>
-          <Word size={52} weight={FONT.light} tracking={FONT.trackingSupport} color={C.white}>6º Prêmio</Word>
+          <div style={{ textAlign: 'center' }}>
+            <Word size={46} weight={FONT.light} tracking={FONT.trackingSupport} color={C.white}>6º Prêmio Themis</Word>
+            <Word size={46} weight={FONT.light} tracking={FONT.trackingSupport} color={C.white}>de Jornalismo</Word>
+          </div>
         </AbsoluteFill>
       </Tile>
       {/* E: bloco verde */}
@@ -78,34 +82,8 @@ const Mosaic: React.FC = () => {
   );
 };
 
-const CenterBlock: React.FC = () => {
-  const t = useT();
-  const u = useU();
-  const slide = seg(t, 4.85, 5.35, E.main);
-  const grow = seg(t, 5.45, 6.05, E.main);
-  if (slide <= 0) return null;
-  const w = lerp(900, 3540, grow), h = lerp(520, 2040, grow);
-  const cx = lerp(-700, 1750, slide);
-  const wordIn = seg(t, 5.8, 6.25, E.out);
-  // a palavra cresce devagar e acelera para "tela cheia" na saída
-  const sc = 1 + 0.12 * seg(t, 6.1, 7.2, E.soft) + 0.4 * seg(t, 6.95, 7.75, E.in);
-  return (
-    <AbsoluteFill>
-      <div style={{ position: 'absolute', left: u(cx - w / 2), top: u(1000 - h / 2), width: u(w), height: u(h), background: C.green }} />
-      <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ overflow: 'hidden', padding: `${u(40)}px ${u(80)}px`, transform: `scale(${sc})` }}>
-          <div style={{ transform: `translateY(${(1 - wordIn) * 110}%)`, opacity: wordIn }}>
-            <Word size={330} color={C.grayDeep}>{WORDS.jornalismo}</Word>
-          </div>
-        </div>
-      </AbsoluteFill>
-    </AbsoluteFill>
-  );
-};
-
 export const S1Jornalismo: React.FC = () => {
   const t = useT();
-  const u = useU();
   if (t < 2.95 || t > 7.85) return null;
   const push = 1 + 0.07 * seg(t, 3.2, 6.2, E.dolly);
   const sweep = seg(t, 7.15, 7.75, E.main);
@@ -115,11 +93,8 @@ export const S1Jornalismo: React.FC = () => {
         <AbsoluteFill style={{ transform: `scale(${push})` }}>
           <Mosaic />
         </AbsoluteFill>
-        <CenterBlock />
-        {/* borda verde da varredura */}
-        {sweep > 0 && sweep < 1 && (
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: `calc(${sweep * 100}% - ${u(1)}px)`, width: u(46), background: C.green }} />
-        )}
+        <HeroWord word={WORDS.jornalismo} b={4.85} />
+        <SweepEdge p={sweep} />
       </MotionBlur>
     </AbsoluteFill>
   );

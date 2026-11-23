@@ -1,70 +1,61 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
-import { C, FONT, WORDS } from '../theme';
-import { E, lerp, rand, seg, spring, useT } from '../lib/time';
-import { asset, useU } from '../lib/units';
-import { Clipping, Word } from '../lib/ui';
+import { C, WORDS } from '../theme';
+import { E, seg, useT } from '../lib/time';
+import { G, Mosaic, TileSpec } from '../lib/Mosaic';
 import { MotionBlur } from '../lib/MotionBlur';
+import { HeroWord, heroTimes, SweepEdge } from '../lib/HeroWord';
+import { useU } from '../lib/units';
 
 /**
- * 0:08–0:13 JUDICIÁRIO + TJRS (ref. B): recortes 8, 11 e 12 caem sobre a mesa em
- * 3 profundidades, travelling lateral com parallax, foco puxa para o plano da frente.
- * Faixa verde a 70% revela a palavra letra a letra, fora de ordem (carimbo).
+ * 0:07–0:13 JUDICIÁRIO (destaque igual ao JORNALISMO) + TJRS como informação no bloco.
+ * Mosaico com matérias inteiras (papel, 1:1) e fotos; bloco verde central cresce.
  */
-const DROPS = [
-  { src: 'recorte8.png', w: 761, h: 364, scale: 1.3, cx: 860, cy: 470, rot: -3.5, at: 7.5, depth: 0.45 },
-  { src: 'recorte12.png', w: 565, h: 832, scale: 1.26, cx: 2640, cy: 640, rot: 3.2, at: 7.8, depth: 0.7 },
-  { src: 'recorte11.png', w: 815, h: 662, scale: 1.4, cx: 1660, cy: 630, rot: -1.2, at: 8.1, depth: 1 },
+const B = 9.9;
+const TILES: TileSpec[] = [
+  { x: G.x(0), y: G.y(0), w: G.w, h: G.h, kind: 'paper', src: 'recorte8.png', iw: 761, ih: 364, inAt: 7.2, inFrom: 'top', drift: [20, 0] },
+  { x: G.x(1), y: G.y(0), w: G.w, h: G.h, kind: 'paper', src: 'recorte11.png', iw: 815, ih: 662, inAt: 7.35, inFrom: 'left' },
+  { x: G.x(2), y: G.y(0), w: G.w, h: G.h, kind: 'photo', src: 'foto2_bw.jpg', iw: 3000, ih: 2000, scale: 2.1, fx: 0.62, fy: 0.02, drift: [-60, 0], inAt: 7.5, inFrom: 'right' },
+  { x: G.x(3), y: G.y(0), w: G.w, h: G.h, kind: 'color', color: C.green, label: WORDS.tjrs, inAt: 7.75, inFrom: 'bottom' },
+  { x: G.x(0), y: G.y(1), w: G.w, h: G.h, kind: 'color', color: C.grayMid, support: ['6º Prêmio Themis', 'de Jornalismo'], inAt: 7.6, inFrom: 'left' },
+  { x: G.x(1), y: G.y(1), w: G.w * 2, h: G.h, kind: 'photo', src: 'foto1_bw.jpg', iw: 1478, ih: 985, scale: 1.04, fy: 0.3, drift: [50, 0], inAt: 7.3, inFrom: 'bottom' },
+  { x: G.x(3), y: G.y(1), w: G.w, h: G.h, kind: 'paper', src: 'recorte12.png', iw: 565, ih: 832, inAt: 7.9, inFrom: 'right' },
+  { x: G.x(0), y: G.y(2), w: G.w, h: G.h, kind: 'photo', src: 'foto2_bw.jpg', iw: 3000, ih: 2000, scale: 1.9, fx: 0.95, fy: 0.9, drift: [40, 0], inAt: 7.85, inFrom: 'top' },
+  { x: G.x(1), y: G.y(2), w: G.w, h: G.h, kind: 'paper', src: 'recorte10.png', iw: 816, ih: 658, inAt: 8.0, inFrom: 'left' },
+  { x: G.x(2), y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep, inAt: 8.1, inFrom: 'right' },
+  { x: G.x(3), y: G.y(2), w: G.w, h: G.h, kind: 'paper', src: 'recorte9.png', iw: 713, ih: 831, inAt: 8.2, inFrom: 'bottom' },
 ];
-
-const ORDER = WORDS.judiciario.split('').map((_, i) => i).sort((a, b) => rand(a + 3.7) - rand(b + 3.7));
 
 export const S2Judiciario: React.FC = () => {
   const t = useT();
-  const u = useU();
-  if (t < 7.1 || t > 13.45) return null;
-  const out = 1 - seg(t, 12.75, 13.4, E.soft);
-  const travel = seg(t, 7.3, 13.4, E.soft);
-  const band = seg(t, 8.9, 9.35, E.main);
-  const tj = seg(t, 10.25, 10.95, E.out);
+  if (t < 7.1 || t > 12.85) return null;
+  const { sweep, mb } = heroTimes(B);
+  const sw = seg(t, sweep[0], sweep[1], E.main);
+  const push = 1 + 0.06 * seg(t, 7.2, B + 1.2, E.dolly);
   return (
-    <AbsoluteFill style={{ opacity: out }}>
-      {/* mesa: escurece levemente a seda para destacar o papel */}
-      <AbsoluteFill style={{ background: 'rgba(20,20,20,.35)', opacity: seg(t, 7.1, 7.6, E.soft) }} />
-      <MotionBlur windows={[[7.45, 8.6]]} samples={6}>
-        {DROPS.map((d, i) => {
-          const s = spring(t, d.at, 0.9);
-          const lift = 1 - s;
-          // puxada de foco: tudo desfocado na chegada; a frente assenta nítida, o fundo fica suave
-          const focus = (1 - d.depth) * 4 * seg(t, 8.3, 9.0, E.soft) + lift * 5;
-          const px = lerp(160, -160, travel) * d.depth;
-          return (
-            <Clipping key={i} src={asset(d.src)} w={d.w} h={d.h} scale={d.scale}
-              cx={d.cx + px + lift * 120} cy={d.cy - lift * 60} rot={d.rot + lift * 7}
-              lift={lift} opacity={Math.min(1, seg(t, d.at - 0.05, d.at + 0.25, E.out))} blur={focus} />
-          );
-        })}
+    <AbsoluteFill style={{ clipPath: sw > 0 ? `inset(0 0 0 ${sw * 100}%)` : undefined, backgroundColor: C.gray }}>
+      <MotionBlur windows={[[8.6, 9.0], ...mb]}>
+        <AbsoluteFill style={{ transform: `scale(${push})` }}>
+          <Mosaic tiles={TILES} t0={7.2} t1={12.8} />
+          {/* barras verdes deslizando entre os blocos */}
+          <GreenBars t={t} />
+        </AbsoluteFill>
+        <HeroWord word={WORDS.judiciario} b={B} />
+        <SweepEdge p={sw} />
       </MotionBlur>
-      {/* faixa verde translúcida */}
-      <div style={{
-        position: 'absolute', left: u(430), top: u(1180), width: u(2640), height: u(300),
-        background: `rgba(${C.greenRGB},.7)`, transform: `scaleX(${band})`, transformOrigin: 'left center',
-      }} />
-      <AbsoluteFill style={{ alignItems: 'center' }}>
-        <div style={{ position: 'absolute', top: u(1180), height: u(300), display: 'flex', alignItems: 'center' }}>
-          <Word size={290} color={C.grayDeep}>
-            {WORDS.judiciario.split('').map((ch, i) => {
-              const at = 9.2 + ORDER.indexOf(i) * 0.1;
-              const p = seg(t, at, at + 0.07, E.out);
-              const st = 1 + 0.12 * (1 - seg(t, at, at + 0.16, E.out));
-              return <span key={i} style={{ display: 'inline-block', opacity: p, transform: `scale(${st})` }}>{ch}</span>;
-            })}
-          </Word>
-        </div>
-        <div style={{ position: 'absolute', top: u(1520), opacity: tj, transform: `translateY(${u(40) * (1 - tj)}px)` }}>
-          <Word size={262} weight={FONT.light} tracking="0.4em" color={C.white}>{WORDS.tjrs}</Word>
-        </div>
-      </AbsoluteFill>
     </AbsoluteFill>
+  );
+};
+
+const GreenBars: React.FC<{ t: number }> = ({ t }) => {
+  const u = useU();
+  const bar = (x: number, y: number, w: number) => (
+    <div style={{ position: 'absolute', top: u(y), height: u(54), width: u(w), left: u(x), background: C.green }} />
+  );
+  return (
+    <>
+      {bar(-1000 + 4600 * seg(t, 8.55, 9.2, E.main), 640, 900)}
+      {bar(3600 - 4400 * seg(t, 8.75, 9.4, E.main), 1306, 640)}
+    </>
   );
 };
