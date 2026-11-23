@@ -51,7 +51,7 @@ export const Tile: React.FC<{ s: TileSpec; t0: number; t1: number }> = ({ s, t0,
       fx={s.fx ?? 0.5} fy={s.fy ?? 0.5} dx={lerp(-dx / 2, dx / 2, dp)} dy={lerp(-dy / 2, dy / 2, dp)} />;
   } else if (s.kind === 'cut') {
     // matéria recortada do fundo branco: peça centrada no bloco escuro, ampliação limitada
-    const k = Math.min(s.maxScale ?? 1.35, (s.w * 0.74) / s.iw!, (s.h * 0.74) / s.ih!);
+    const k = Math.min(s.maxScale ?? 1.35, (s.w * 0.7) / s.iw!, (s.h * 0.7) / s.ih!);
     const w = s.iw! * k, h = s.ih! * k;
     const isPhoto = s.src!.endsWith('.jpg');
     body = (

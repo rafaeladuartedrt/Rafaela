@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill } from 'remotion';
+import { AbsoluteFill, Img } from 'remotion';
 import { C, FONT, WORDS } from '../theme';
 import { E, lerp, seg, useT } from '../lib/time';
 import { asset, useU } from '../lib/units';
@@ -69,7 +69,8 @@ const Mosaic: React.FC = () => {
       </Tile>
       {/* E: bloco verde */}
       <Tile x={2625} y={1333} w={875} h={667} p={pE} from="bottom">
-        <AbsoluteFill style={{ background: C.green }} />
+        {/* bloco com conteúdo (nenhum vazio): foto da matéria do casamento coletivo preenchendo o bloco */}
+        <Photo src={asset('notfoto11.jpg')} iw={727} ih={364} w={875} h={667} />
       </Tile>
       {/* linhas do grid */}
       <div style={line({ left: u(1750 - hw / 2), top: u(hy1 - 2.5), width: u(hw), height: u(5) })} />
@@ -85,7 +86,7 @@ const Mosaic: React.FC = () => {
 export const S1Jornalismo: React.FC = () => {
   const t = useT();
   if (t < 2.95 || t > 7.85) return null;
-  const push = 1 + 0.07 * seg(t, 3.2, 6.2, E.dolly);
+  const push = 1 + 0.035 * seg(t, 3.2, 6.2, E.dolly);
   const sweep = seg(t, 7.15, 7.75, E.main);
   return (
     <AbsoluteFill style={{ clipPath: sweep > 0 ? `inset(0 0 0 ${sweep * 100}%)` : undefined }}>

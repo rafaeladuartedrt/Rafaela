@@ -9,8 +9,8 @@ import { BandWord, LightLeak, NEUTRAL, Piece, PieceView, screenX, worldX } from 
  * travelling lateral por uma colagem em camadas: fotos ao fundo desfocadas, manchetes
  * recortadas e fotos das matérias à frente, e as palavras na mesma dimensão, cada uma no
  * seu momento e lugar: COTIDIANO (matérias de crianças e reeducação de homens), IMAGENS
- * (fotografias 3 e 5), INOVAÇÃO (matérias 6 e 7) e NOTÍCIAS (casamento coletivo e Justiça
- * Itinerante). Movimentos lentos nas imagens sensíveis.
+ * (as cinco fotografias do arquivo), INOVAÇÃO (matérias 6 e 7) e NOTÍCIAS (Porto Alegre pós-enchente,
+ * casamento coletivo e Justiça Itinerante). O mosaico do início é só prévia; aqui entra tudo. Movimentos lentos nas imagens sensíveis.
  */
 const T0 = 12.2, T1 = 21.0, L = 5200;
 const travel = bezier(0.32, 0, 0.6, 1);
@@ -22,29 +22,33 @@ type W = Omit<Piece, 'cx'> & { tc: number; sx: number };
 // a ordem de desenho segue a profundidade z (fundo -> frente)
 const ITEMS: W[] = [
   // COTIDIANO: crianças (p9) e reeducação de homens (p10); movimento lento
-  { kind: 'photo', src: 'notfoto10.jpg', iw: 710, ih: 352, w: 5600, cy: 1000, z: 0.04, tc: 13.3, sx: 1750, at: 12.25, dur: 1.0, until: 14.7, blur: 11, feather: true, dim: 0.5 },
-  { kind: 'headline', src: 'manchete10.png', iw: 709, ih: 200, w: 1000, cy: 470, z: 0.35, tc: 13.4, sx: 1250, at: 12.5, until: 14.75 },
-  { kind: 'photo', src: 'notfoto9.jpg', iw: 645, ih: 427, w: 1250, cy: 830, z: 0.7, rot: -1.5, tc: 13.6, sx: 2150, at: 12.7, dur: 1.4, until: 14.8 },
-  { kind: 'headline', src: 'manchete9.png', iw: 625, ih: 301, w: 920, cy: 1270, z: 0.88, tc: 13.8, sx: 1250, at: 13.0, until: 14.8 },
-  // IMAGENS: fotografias do arquivo, uma grande e outra menor sobre o canto dela
-  { kind: 'photo', src: 'foto5_bw.jpg', iw: 3120, ih: 2080, w: 1450, cy: 840, z: 0.5, rot: 1.5, tc: 15.5, sx: 1500, at: 14.65, dur: 1.0, until: 16.35 },
-  { kind: 'photo', src: 'foto3_bw.jpg', iw: 2855, ih: 1903, w: 880, cy: 1280, z: 0.82, rot: -3, tc: 15.7, sx: 2450, at: 15.05, dur: 1.0, until: 16.45 },
+  { kind: 'photo', src: 'notfoto10.jpg', iw: 710, ih: 352, w: 5600, cy: 1000, z: 0.04, tc: 13.3, sx: 1750, at: 12.25, dur: 1.0, until: 14.55, blur: 11, feather: true, dim: 0.5 },
+  { kind: 'headline', src: 'manchete10.png', iw: 709, ih: 200, w: 1000, cy: 470, z: 0.35, tc: 13.4, sx: 1250, at: 12.5, until: 14.6 },
+  { kind: 'photo', src: 'notfoto9.jpg', iw: 645, ih: 427, w: 1250, cy: 830, z: 0.7, rot: -1.5, tc: 13.6, sx: 2150, at: 12.7, dur: 1.4, until: 14.65 },
+  { kind: 'headline', src: 'manchete9.png', iw: 625, ih: 301, w: 920, cy: 1270, z: 0.88, tc: 13.8, sx: 1250, at: 13.0, until: 14.65 },
+  // IMAGENS: as cinco fotografias do arquivo, uma depois da outra, tamanhos diferentes, sobrepostas
+  { kind: 'photo', src: 'foto2_bw.jpg', iw: 3000, ih: 2000, w: 1250, cy: 720, z: 0.45, rot: -1.5, tc: 15.95, sx: 1250, at: 14.5, dur: 0.9, until: 16.8 },
+  { kind: 'photo', src: 'foto1_bw.jpg', iw: 1478, ih: 985, w: 1000, cy: 560, z: 0.55, rot: 2, tc: 15.95, sx: 2350, at: 14.8, dur: 0.9, until: 16.85 },
+  { kind: 'photo', src: 'foto4_bw.jpg', iw: 3120, ih: 2080, w: 1100, cy: 1300, z: 0.65, rot: -2, tc: 15.95, sx: 2500, at: 15.1, dur: 0.9, until: 16.9 },
+  { kind: 'photo', src: 'foto5_bw.jpg', iw: 3120, ih: 2080, w: 850, cy: 1300, z: 0.75, rot: 2.5, tc: 15.95, sx: 1050, at: 15.4, dur: 0.9, until: 16.95 },
+  { kind: 'photo', src: 'foto3_bw.jpg', iw: 2855, ih: 1903, w: 800, cy: 1060, z: 0.85, rot: -3, tc: 15.95, sx: 1920, at: 15.7, dur: 0.9, until: 17.0 },
   // INOVAÇÃO: matérias 6 (IA) e 7 (inovação e tecnologia)
-  { kind: 'photo', src: 'notfoto7.jpg', iw: 808, ih: 535, w: 5600, cy: 1000, z: 0.04, tc: 17.2, sx: 1750, at: 16.0, dur: 1.0, until: 18.3, blur: 11, feather: true, dim: 0.5 },
-  { kind: 'headline', src: 'manchete7.png', iw: 624, ih: 189, w: 1040, cy: 520, z: 0.35, tc: 17.2, sx: 1300, at: 16.15, until: 18.25 },
-  { kind: 'photo', src: 'notfoto6.jpg', iw: 787, ih: 522, w: 1250, cy: 900, z: 0.7, rot: 2, tc: 17.3, sx: 2150, at: 16.4, until: 18.3 },
-  { kind: 'headline', src: 'manchete6.png', iw: 787, ih: 289, w: 900, cy: 1380, z: 0.88, tc: 17.5, sx: 1350, at: 16.8, until: 18.3 },
-  // NOTÍCIAS: casamento coletivo (p11) e Justiça Itinerante (p12)
-  { kind: 'headline', src: 'manchete11.png', iw: 726, ih: 190, w: 1000, cy: 470, z: 0.35, tc: 19.3, sx: 1000, at: 18.25, until: 20.45 },
-  { kind: 'photo', src: 'notfoto11.jpg', iw: 727, ih: 364, w: 1350, cy: 820, z: 0.55, rot: 1.5, tc: 19.4, sx: 1750, at: 18.45, until: 20.45 },
-  { kind: 'photo', src: 'notfoto12.jpg', iw: 472, ih: 296, w: 700, cy: 1220, z: 0.8, rot: -3, tc: 19.6, sx: 2600, at: 18.7, until: 20.45 },
-  { kind: 'headline', src: 'manchete12.png', iw: 443, ih: 156, w: 600, cy: 1640, z: 0.9, tc: 19.8, sx: 2650, at: 18.95, until: 20.45 },
+  { kind: 'photo', src: 'notfoto7.jpg', iw: 808, ih: 535, w: 5600, cy: 1000, z: 0.04, tc: 17.6, sx: 1750, at: 16.6, dur: 1.0, until: 18.75, blur: 11, feather: true, dim: 0.5 },
+  { kind: 'headline', src: 'manchete7.png', iw: 624, ih: 189, w: 1040, cy: 520, z: 0.35, tc: 17.7, sx: 1300, at: 16.7, until: 18.7 },
+  { kind: 'photo', src: 'notfoto6.jpg', iw: 787, ih: 522, w: 1250, cy: 900, z: 0.7, rot: 2, tc: 17.8, sx: 2150, at: 16.9, until: 18.75 },
+  { kind: 'headline', src: 'manchete6.png', iw: 787, ih: 289, w: 900, cy: 1380, z: 0.88, tc: 18.0, sx: 1350, at: 17.25, until: 18.75 },
+  // NOTÍCIAS: Porto Alegre pós-enchente (p8), casamento coletivo (p11) e Justiça Itinerante (p12)
+  { kind: 'headline', src: 'manchete8.png', iw: 670, ih: 281, w: 900, cy: 330, z: 0.25, tc: 19.6, sx: 2650, at: 18.7, until: 20.45, dim: 0.85 },
+  { kind: 'headline', src: 'manchete11.png', iw: 726, ih: 190, w: 1000, cy: 470, z: 0.35, tc: 19.6, sx: 1000, at: 18.6, until: 20.45 },
+  { kind: 'photo', src: 'notfoto11.jpg', iw: 727, ih: 364, w: 1350, cy: 820, z: 0.55, rot: 1.5, tc: 19.7, sx: 1750, at: 18.8, until: 20.45 },
+  { kind: 'photo', src: 'notfoto12.jpg', iw: 472, ih: 296, w: 700, cy: 1220, z: 0.8, rot: -3, tc: 19.8, sx: 2600, at: 19.0, until: 20.45 },
+  { kind: 'headline', src: 'manchete12.png', iw: 443, ih: 156, w: 600, cy: 1640, z: 0.9, tc: 20.0, sx: 2650, at: 19.2, until: 20.45 },
 ];
 const WORDS_IN_SPACE = [
-  { word: WORDS.cotidiano, z: 0.55, tc: 13.8, sx: 2450, cy: 1560, at: 13.2, until: 14.5, seed: 3 },
-  { word: WORDS.imagem, z: 0.9, tc: 15.7, sx: 860, cy: 1560, at: 15.15, until: 16.25, seed: 4 },
-  { word: WORDS.inovacao, z: 0.55, tc: 17.3, sx: 2600, cy: 1600, at: 16.7, until: 17.95, seed: 5 },
-  { word: WORDS.noticia, z: 0.7, tc: 19.5, sx: 1050, cy: 1480, at: 18.9, until: 20.35, seed: 6 },
+  { word: WORDS.cotidiano, z: 0.55, tc: 13.8, sx: 2450, cy: 1560, at: 13.2, until: 14.45, seed: 3 },
+  { word: WORDS.imagem, z: 0.92, tc: 15.9, sx: 1150, cy: 320, at: 15.0, until: 16.7, seed: 4 },
+  { word: WORDS.inovacao, z: 0.55, tc: 17.8, sx: 2600, cy: 1600, at: 17.15, until: 18.4, seed: 5 },
+  { word: WORDS.noticia, z: 0.7, tc: 19.8, sx: 1050, cy: 1480, at: 19.15, until: 20.35, seed: 6 },
 ];
 
 export const S3Espaco: React.FC = () => {
