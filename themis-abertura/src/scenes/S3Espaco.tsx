@@ -8,8 +8,9 @@ import { BandWord, LightLeak, NEUTRAL, Piece, PieceView, screenX, worldX } from 
  * 0:12–0:21 Espaço 2.5D contínuo (ref. B). Depois do JUDICIÁRIO, a câmera faz um único
  * travelling lateral por uma colagem em camadas: fotos ao fundo desfocadas, manchetes
  * recortadas e fotos das matérias à frente, e as palavras na mesma dimensão, cada uma no
- * seu momento e lugar: COTIDIANO, IMAGEM, INOVAÇÃO, NOTÍCIA.
- * Início lento (momento emocional das fotos 3 e 5), sem zoom em rostos.
+ * seu momento e lugar: COTIDIANO (matérias de crianças e reeducação de homens), IMAGENS
+ * (fotografias 3 e 5), INOVAÇÃO (matérias 6 e 7) e NOTÍCIAS (casamento coletivo e Justiça
+ * Itinerante). Movimentos lentos nas imagens sensíveis.
  */
 const T0 = 12.2, T1 = 21.0, L = 5200;
 const travel = bezier(0.32, 0, 0.6, 1);
@@ -17,21 +18,33 @@ export const camX = (t: number) => lerp(0, L, travel(Math.min(1, Math.max(0, (t 
 
 type W = Omit<Piece, 'cx'> & { tc: number; sx: number };
 // tc = instante em que o elemento passa por sx (posição na tela); o mundo é derivado disso
+// cada trecho é um cacho de peças de tamanhos diferentes, sobrepostas (ref. B);
+// a ordem de desenho segue a profundidade z (fundo -> frente)
 const ITEMS: W[] = [
-  // fundo (z baixo): fotos grandes, desfocadas e esfumadas, uma dando lugar à outra
-  { kind: 'photo', src: 'foto5_bw.jpg', iw: 3120, ih: 2080, w: 5800, cy: 1000, z: 0.04, tc: 13.6, sx: 1750, at: 12.25, dur: 1.0, until: 17.2, blur: 7, feather: true, dim: 0.55 },
-  { kind: 'photo', src: 'notfoto7.jpg', iw: 808, ih: 535, w: 5600, cy: 1000, z: 0.04, tc: 19.0, sx: 1750, at: 16.6, dur: 1.2, until: 20.5, blur: 11, feather: true, dim: 0.5 },
-  // camada média e frente
-  { kind: 'headline', src: 'manchete7.png', iw: 624, ih: 189, w: 1080, cy: 430, z: 0.35, tc: 17.7, sx: 1150, at: 16.9, until: 20.4 },
-  { kind: 'photo', src: 'foto3_bw.jpg', iw: 2855, ih: 1903, w: 1700, cy: 900, z: 0.72, rot: -1.5, tc: 14.0, sx: 2250, at: 12.55, dur: 1.5, until: 16.6 },
-  { kind: 'photo', src: 'notfoto6.jpg', iw: 787, ih: 522, w: 1050, cy: 860, z: 0.7, rot: 2, tc: 18.4, sx: 2450, at: 17.3, until: 20.45 },
-  { kind: 'headline', src: 'manchete6.png', iw: 787, ih: 289, w: 980, cy: 1560, z: 0.9, tc: 19.3, sx: 950, at: 18.0, until: 20.45 },
+  // COTIDIANO: crianças (p9) e reeducação de homens (p10); movimento lento
+  { kind: 'photo', src: 'notfoto10.jpg', iw: 710, ih: 352, w: 5600, cy: 1000, z: 0.04, tc: 13.3, sx: 1750, at: 12.25, dur: 1.0, until: 14.7, blur: 11, feather: true, dim: 0.5 },
+  { kind: 'headline', src: 'manchete10.png', iw: 709, ih: 200, w: 1000, cy: 470, z: 0.35, tc: 13.4, sx: 1250, at: 12.5, until: 14.75 },
+  { kind: 'photo', src: 'notfoto9.jpg', iw: 645, ih: 427, w: 1250, cy: 830, z: 0.7, rot: -1.5, tc: 13.6, sx: 2150, at: 12.7, dur: 1.4, until: 14.8 },
+  { kind: 'headline', src: 'manchete9.png', iw: 625, ih: 301, w: 920, cy: 1270, z: 0.88, tc: 13.8, sx: 1250, at: 13.0, until: 14.8 },
+  // IMAGENS: fotografias do arquivo, uma grande e outra menor sobre o canto dela
+  { kind: 'photo', src: 'foto5_bw.jpg', iw: 3120, ih: 2080, w: 1450, cy: 840, z: 0.5, rot: 1.5, tc: 15.5, sx: 1500, at: 14.65, dur: 1.0, until: 16.35 },
+  { kind: 'photo', src: 'foto3_bw.jpg', iw: 2855, ih: 1903, w: 880, cy: 1280, z: 0.82, rot: -3, tc: 15.7, sx: 2450, at: 15.05, dur: 1.0, until: 16.45 },
+  // INOVAÇÃO: matérias 6 (IA) e 7 (inovação e tecnologia)
+  { kind: 'photo', src: 'notfoto7.jpg', iw: 808, ih: 535, w: 5600, cy: 1000, z: 0.04, tc: 17.2, sx: 1750, at: 16.0, dur: 1.0, until: 18.3, blur: 11, feather: true, dim: 0.5 },
+  { kind: 'headline', src: 'manchete7.png', iw: 624, ih: 189, w: 1040, cy: 520, z: 0.35, tc: 17.2, sx: 1300, at: 16.15, until: 18.25 },
+  { kind: 'photo', src: 'notfoto6.jpg', iw: 787, ih: 522, w: 1250, cy: 900, z: 0.7, rot: 2, tc: 17.3, sx: 2150, at: 16.4, until: 18.3 },
+  { kind: 'headline', src: 'manchete6.png', iw: 787, ih: 289, w: 900, cy: 1380, z: 0.88, tc: 17.5, sx: 1350, at: 16.8, until: 18.3 },
+  // NOTÍCIAS: casamento coletivo (p11) e Justiça Itinerante (p12)
+  { kind: 'headline', src: 'manchete11.png', iw: 726, ih: 190, w: 1000, cy: 470, z: 0.35, tc: 19.3, sx: 1000, at: 18.25, until: 20.45 },
+  { kind: 'photo', src: 'notfoto11.jpg', iw: 727, ih: 364, w: 1350, cy: 820, z: 0.55, rot: 1.5, tc: 19.4, sx: 1750, at: 18.45, until: 20.45 },
+  { kind: 'photo', src: 'notfoto12.jpg', iw: 472, ih: 296, w: 700, cy: 1220, z: 0.8, rot: -3, tc: 19.6, sx: 2600, at: 18.7, until: 20.45 },
+  { kind: 'headline', src: 'manchete12.png', iw: 443, ih: 156, w: 600, cy: 1640, z: 0.9, tc: 19.8, sx: 2650, at: 18.95, until: 20.45 },
 ];
 const WORDS_IN_SPACE = [
-  { word: WORDS.cotidiano, z: 0.55, tc: 14.1, sx: 860, cy: 1500, at: 13.4, until: 14.75, seed: 3 },
-  { word: WORDS.imagem, z: 0.9, tc: 15.7, sx: 2550, cy: 1520, at: 15.0, until: 16.3, seed: 4 },
-  { word: WORDS.inovacao, z: 0.55, tc: 17.9, sx: 1250, cy: 1060, at: 17.2, until: 18.6, seed: 5 },
-  { word: WORDS.noticia, z: 0.6, tc: 19.6, sx: 2400, cy: 1560, at: 18.8, until: 20.35, seed: 6 },
+  { word: WORDS.cotidiano, z: 0.55, tc: 13.8, sx: 2450, cy: 1560, at: 13.2, until: 14.5, seed: 3 },
+  { word: WORDS.imagem, z: 0.9, tc: 15.7, sx: 860, cy: 1560, at: 15.15, until: 16.25, seed: 4 },
+  { word: WORDS.inovacao, z: 0.55, tc: 17.3, sx: 2600, cy: 1600, at: 16.7, until: 17.95, seed: 5 },
+  { word: WORDS.noticia, z: 0.7, tc: 19.5, sx: 1050, cy: 1480, at: 18.9, until: 20.35, seed: 6 },
 ];
 
 export const S3Espaco: React.FC = () => {

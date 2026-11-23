@@ -43,7 +43,8 @@ export const PieceView: React.FC<{ p: Piece; cam: Cam }> = ({ p, cam }) => {
     <div style={{
       position: 'absolute', left: u(x - w / 2), top: u(y - h / 2), width: u(w), height: u(h),
       transform: p.rot ? `rotate(${p.rot}deg)` : undefined, opacity: op * (p.dim ?? 1), boxShadow: shadow,
-      filter: blur > 0.3 ? `blur(${u(blur)}px)` : undefined, WebkitMaskImage: fm, maskImage: fm,
+      filter: [blur > 0.3 ? `blur(${u(blur)}px)` : '', p.kind === 'headline' ? `drop-shadow(0 0 ${u(16)}px rgba(0,0,0,.85))` : ''].join(' ').trim() || undefined,
+      WebkitMaskImage: fm, maskImage: fm,
     }}>
       <Img src={asset(p.src)} style={{ width: '100%', height: '100%', display: 'block' }} />
     </div>
