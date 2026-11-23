@@ -15,5 +15,5 @@ export const useRasterAsset = (name: 'logo' | 'seda' | 'seda_sheen') => {
 
 export const asset = (p: string) => staticFile(`assets/${p}`);
 
-/** posição do troféu em escala 1:1, centrado (master): 1466x1374 */
-export const TROPHY = { w: 1466, h: 1374 };
+/** troféu: imagem embutida no PDF (1340x1256) + smask original, 1:1, centrada (master) */
+export const TROPHY = { w: 1340, h: 1256, src: 'trofeu_recorte.png', alpha: 'trofeu_recorte_alpha.png', exclude: 'trofeu_recorte_exclude.png' };

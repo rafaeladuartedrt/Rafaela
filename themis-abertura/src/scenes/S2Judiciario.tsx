@@ -9,21 +9,24 @@ import { useU } from '../lib/units';
 
 /**
  * 0:07–0:13 JUDICIÁRIO (destaque igual ao JORNALISMO) + TJRS como informação no bloco.
- * Mosaico com matérias inteiras (papel, 1:1) e fotos; bloco verde central cresce.
+ * Mosaico com as matérias recortadas do fundo branco (manchete e foto em blocos
+ * separados) e nenhuma imagem repetida; bloco verde central cresce.
  */
 const B = 9.9;
+// nenhuma imagem repete o JORNALISMO nem as cenas seguintes; matérias recortadas, sem papel branco
 const TILES: TileSpec[] = [
-  { x: G.x(0), y: G.y(0), w: G.w, h: G.h, kind: 'paper', src: 'recorte8.png', iw: 761, ih: 364, inAt: 7.2, inFrom: 'top', drift: [20, 0] },
-  { x: G.x(1), y: G.y(0), w: G.w, h: G.h, kind: 'paper', src: 'recorte11.png', iw: 815, ih: 662, inAt: 7.35, inFrom: 'left' },
-  { x: G.x(2), y: G.y(0), w: G.w, h: G.h, kind: 'photo', src: 'foto2_bw.jpg', iw: 3000, ih: 2000, scale: 2.1, fx: 0.62, fy: 0.02, drift: [-60, 0], inAt: 7.5, inFrom: 'right' },
+  { x: G.x(0), y: G.y(0), w: G.w, h: G.h, kind: 'cut', src: 'manchete8.png', iw: 670, ih: 281, inAt: 7.2, inFrom: 'top', drift: [20, 0] },
+  { x: G.x(1), y: G.y(0), w: G.w, h: G.h, kind: 'cut', src: 'notfoto11.jpg', iw: 727, ih: 364, color: C.grayMid, inAt: 7.35, inFrom: 'left', drift: [-16, 0] },
+  { x: G.x(2), y: G.y(0), w: G.w, h: G.h, kind: 'cut', src: 'manchete11.png', iw: 726, ih: 190, color: C.gray, inAt: 7.5, inFrom: 'right' },
   { x: G.x(3), y: G.y(0), w: G.w, h: G.h, kind: 'color', color: C.green, label: WORDS.tjrs, inAt: 7.75, inFrom: 'bottom' },
   { x: G.x(0), y: G.y(1), w: G.w, h: G.h, kind: 'color', color: C.grayMid, support: ['6º Prêmio Themis', 'de Jornalismo'], inAt: 7.6, inFrom: 'left' },
-  { x: G.x(1), y: G.y(1), w: G.w * 2, h: G.h, kind: 'photo', src: 'foto1_bw.jpg', iw: 1478, ih: 985, scale: 1.04, fy: 0.3, drift: [50, 0], inAt: 7.3, inFrom: 'bottom' },
-  { x: G.x(3), y: G.y(1), w: G.w, h: G.h, kind: 'paper', src: 'recorte12.png', iw: 565, ih: 832, inAt: 7.9, inFrom: 'right' },
-  { x: G.x(0), y: G.y(2), w: G.w, h: G.h, kind: 'photo', src: 'foto2_bw.jpg', iw: 3000, ih: 2000, scale: 1.9, fx: 0.95, fy: 0.9, drift: [40, 0], inAt: 7.85, inFrom: 'top' },
-  { x: G.x(1), y: G.y(2), w: G.w, h: G.h, kind: 'paper', src: 'recorte10.png', iw: 816, ih: 658, inAt: 8.0, inFrom: 'left' },
-  { x: G.x(2), y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep, inAt: 8.1, inFrom: 'right' },
-  { x: G.x(3), y: G.y(2), w: G.w, h: G.h, kind: 'paper', src: 'recorte9.png', iw: 713, ih: 831, inAt: 8.2, inFrom: 'bottom' },
+  { x: G.x(1), y: G.y(1), w: G.w, h: G.h, kind: 'cut', src: 'notfoto10.jpg', iw: 710, ih: 352, inAt: 7.3, inFrom: 'bottom', drift: [24, 0] },
+  { x: G.x(2), y: G.y(1), w: G.w, h: G.h, kind: 'cut', src: 'manchete10.png', iw: 709, ih: 200, color: C.grayMid, inAt: 7.45, inFrom: 'top' },
+  { x: G.x(3), y: G.y(1), w: G.w, h: G.h, kind: 'cut', src: 'notfoto12.jpg', iw: 472, ih: 296, color: C.gray, inAt: 7.9, inFrom: 'right', drift: [0, 14] },
+  { x: G.x(0), y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.grayDeep, inAt: 7.85, inFrom: 'top' },
+  { x: G.x(1), y: G.y(2), w: G.w, h: G.h, kind: 'cut', src: 'manchete12.png', iw: 443, ih: 156, color: C.gray, inAt: 8.0, inFrom: 'left' },
+  { x: G.x(2), y: G.y(2), w: G.w, h: G.h, kind: 'color', color: C.green, inAt: 8.1, inFrom: 'right' },
+  { x: G.x(3), y: G.y(2), w: G.w, h: G.h, kind: 'cut', src: 'manchete9.png', iw: 625, ih: 301, inAt: 8.2, inFrom: 'bottom' },
 ];
 
 export const S2Judiciario: React.FC = () => {

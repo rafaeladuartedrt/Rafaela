@@ -13,7 +13,7 @@ if (typeof document !== 'undefined') {
   el.textContent = css;
   document.head.appendChild(el);
   const h = delayRender('fontes Montserrat');
-  Promise.all(["300","600","800","900"].map((w) => document.fonts.load(`${w} 100px Montserrat`, 'JUDICIÁRIO INOVAÇÃO NOTÍCIA º')))
+  Promise.all(["300","600","800","900"].map((w) => document.fonts.load(`${w} 100px Montserrat`, 'JUDICIÁRIO INOVAÇÃO NOTÍCIAS º')))
     .then(() => continueRender(h))
     .catch(() => continueRender(h));
 }

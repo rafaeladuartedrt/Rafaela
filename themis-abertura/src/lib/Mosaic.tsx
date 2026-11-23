@@ -9,11 +9,12 @@ import { Photo, Word } from './ui';
  * Mosaico em blocos (ref. A). Cada bloco entra por máscara retangular (varredura)
  * e sai deslizando em bloco. Grid base 4x3 = 875x667 px (master).
  */
-export const PAPER = 'rgb(240,238,231)';
 type Dir = 'top' | 'bottom' | 'left' | 'right';
 export type TileSpec = {
   x: number; y: number; w: number; h: number;
-  kind: 'photo' | 'paper' | 'color';
+  kind: 'photo' | 'cut' | 'color';
+  /** 'cut': peça recortada (manchete sem fundo ou foto da matéria) centrada sobre o bloco */
+  maxScale?: number;
   src?: string; iw?: number; ih?: number; fx?: number; fy?: number; scale?: number; drift?: [number, number];
   color?: string; label?: string; support?: string[];
   /** padrão de texto repetido pequeno sobre a foto (ref. A: "WORLD NEWS") */
@@ -48,14 +49,16 @@ export const Tile: React.FC<{ s: TileSpec; t0: number; t1: number }> = ({ s, t0,
   if (s.kind === 'photo') {
     body = <Photo src={asset(s.src!)} iw={s.iw!} ih={s.ih!} w={s.w} h={s.h} scale={s.scale ?? 1}
       fx={s.fx ?? 0.5} fy={s.fy ?? 0.5} dx={lerp(-dx / 2, dx / 2, dp)} dy={lerp(-dy / 2, dy / 2, dp)} />;
-  } else if (s.kind === 'paper') {
-    // matéria inteira sobre papel, em "contain" e nunca ampliada além de 100%
-    const k = Math.min(1, (s.w * 0.94) / s.iw!, (s.h * 0.94) / s.ih!);
+  } else if (s.kind === 'cut') {
+    // matéria recortada do fundo branco: peça centrada no bloco escuro, ampliação limitada
+    const k = Math.min(s.maxScale ?? 1.35, (s.w * 0.74) / s.iw!, (s.h * 0.74) / s.ih!);
     const w = s.iw! * k, h = s.ih! * k;
+    const isPhoto = s.src!.endsWith('.jpg');
     body = (
-      <AbsoluteFill style={{ background: PAPER }}>
+      <AbsoluteFill style={{ background: s.color ?? C.grayDeep }}>
         <Img src={asset(s.src!)} style={{ position: 'absolute', left: u((s.w - w) / 2 + lerp(-dx / 2, dx / 2, dp)),
-          top: u((s.h - h) / 2 + lerp(-dy / 2, dy / 2, dp)), width: u(w), height: u(h) }} />
+          top: u((s.h - h) / 2 + lerp(-dy / 2, dy / 2, dp)), width: u(w), height: u(h),
+          boxShadow: isPhoto ? `${u(14)}px ${u(20)}px ${u(36)}px rgba(0,0,0,.45)` : undefined }} />
       </AbsoluteFill>
     );
   } else {

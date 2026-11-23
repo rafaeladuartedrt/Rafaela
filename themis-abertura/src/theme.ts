@@ -23,13 +23,13 @@ export const FONT = {
   trackingSupport: '0.2em', // +200
 } as const;
 
-/** As 7 palavras-destaque, grafia exata. */
+/** As 7 palavras-destaque, grafia exata (NOTÍCIAS e IMAGENS no plural, a pedido). */
 export const WORDS = {
   jornalismo: 'JORNALISMO',
   judiciario: 'JUDICIÁRIO',
   cotidiano: 'COTIDIANO',
   inovacao: 'INOVAÇÃO',
   tjrs: 'TJRS',
-  noticia: 'NOTÍCIA',
-  imagem: 'IMAGEM',
+  noticia: 'NOTÍCIAS',
+  imagem: 'IMAGENS',
 } as const;
