@@ -1,133 +1,173 @@
 {
  "model_id": "music_v1",
+ "respect_sections_durations": true,
  "composition_plan": {
   "positive_global_styles": [
-   "organic live symphony orchestra",
-   "cinematic award ceremony theme",
-   "noble",
-   "inspiring",
-   "dignified",
-   "prestigious",
+   "grand award ceremony orchestral theme",
+   "prestigious awards night",
+   "majestic",
+   "triumphant",
+   "historic moment",
+   "sense of honor and recognition",
+   "the weight of winning",
+   "golden brass fanfare",
+   "full symphony orchestra",
+   "soaring strings",
+   "timpani and cymbals",
+   "journalistic driving staccato strings ostinato",
    "D major",
    "120 bpm",
-   "real acoustic instruments",
-   "natural concert hall reverb",
+   "continuous crescendo",
+   "ends at the peak",
    "high-end film score production"
   ],
   "negative_global_styles": [
    "vocals",
    "choir with lyrics",
    "electronic beats",
-   "synth",
    "EDM",
-   "pop drums",
-   "trailer braams",
-   "stock sound effects",
-   "repetitive identical hits",
-   "ticking clock",
-   "festive party",
-   "melodramatic horror",
-   "lo-fi",
+   "synth",
    "bass drum",
    "kick drum",
-   "taiko",
-   "boom hits",
-   "percussive impacts",
-   "sub drops"
+   "trailer braams",
+   "pop",
+   "party",
+   "playful",
+   "romantic ballad",
+   "harp",
+   "melodramatic",
+   "horror",
+   "decrescendo",
+   "fade out",
+   "quiet ending",
+   "lo-fi"
   ],
   "sections": [
    {
-    "section_name": "Opening - anticipation",
+    "section_name": "Slow opening",
     "positive_local_styles": [
+     "slow and atmospheric",
+     "sustained low strings and soft brass pad",
+     "no rhythm yet",
      "starts immediately, no silence",
-     "quiet low strings pulse",
-     "soft timpani",
-     "gentle anticipation",
-     "gradual build"
+     "anticipation"
     ],
     "negative_local_styles": [
+     "driving rhythm",
+     "staccato",
      "loud",
-     "drums"
+     "bass drum",
+     "kick drum"
     ],
     "duration_ms": 6000,
     "lines": []
    },
    {
-    "section_name": "Journalism - awakening",
+    "section_name": "Start - Journalism",
     "positive_local_styles": [
-     "bright arrival of strings and french horns blooming exactly at the start of this section",
-     "awakening",
-     "noble horn motif",
-     "flowing strings"
+     "the music kicks off exactly at the start of this section",
+     "driving staccato strings ostinato begins",
+     "bright trumpets and strings headline accent",
+     "mezzo-forte"
     ],
     "negative_local_styles": [
-     "drum hit",
+     "slow",
+     "ambient",
      "bass drum",
-     "cymbal crash",
-     "low brass hit"
+     "kick drum"
     ],
-    "duration_ms": 5000,
+    "duration_ms": 4500,
     "lines": []
    },
    {
-    "section_name": "Judiciary - authority, then tender",
+    "section_name": "Judiciary",
     "positive_local_styles": [
-     "solemn swell of low strings and trombones arriving exactly at the start of this section",
-     "dignified authority",
-     "then tender piano melody over soft sustained strings",
-     "warm",
-     "hopeful"
+     "weighty low brass and trombones chord exactly at the start of this section",
+     "authority",
+     "ostinato continues",
+     "forte"
     ],
     "negative_local_styles": [
-     "bright strings hit",
-     "drum hit",
+     "harp",
      "bass drum",
-     "sad",
-     "dark",
-     "cymbal crash"
+     "kick drum"
     ],
-    "duration_ms": 10000,
+    "duration_ms": 3000,
+    "lines": []
+   },
+   {
+    "section_name": "Words - Everyday life and Images",
+    "positive_local_styles": [
+     "warm strings swell accent exactly at the start of this section",
+     "then a french horn call accent 1.8 seconds later",
+     "ostinato continues",
+     "growing"
+    ],
+    "negative_local_styles": [
+     "bass drum",
+     "kick drum",
+     "calm"
+    ],
+    "duration_ms": 3950,
+    "lines": []
+   },
+   {
+    "section_name": "Words - Innovation and News",
+    "positive_local_styles": [
+     "bright rhythmic staccato strings accent exactly at the start of this section",
+     "then a short urgent trumpet accent 2 seconds later",
+     "snare roll building toward the next section",
+     "growing"
+    ],
+    "negative_local_styles": [
+     "bass drum",
+     "kick drum",
+     "calm"
+    ],
+    "duration_ms": 3550,
     "lines": []
    },
    {
     "section_name": "Trophy - achievement",
     "positive_local_styles": [
-     "full orchestra arrival with soaring violins and a soft suspended cymbal swell exactly at the start of this section",
-     "achievement",
-     "majestic",
-     "brass rising toward climax"
+     "fortissimo",
+     "triumphant full orchestra arrival with timpani roll and golden brass fanfare exactly at the start of this section",
+     "soaring strings",
+     "the moment of victory",
+     "majestic and heavy"
     ],
     "negative_local_styles": [
-     "drum hit",
-     "sparse",
+     "calm",
+     "romantic",
+     "decrescendo",
      "bass drum",
-     "calm"
+     "kick drum"
     ],
     "duration_ms": 6000,
     "lines": []
    },
    {
-    "section_name": "Logo - honor",
+    "section_name": "Logo - peak",
     "positive_local_styles": [
-     "warm french horns resolution with a harp glissando exactly at the start of this section",
-     "then sustained D major chord with strings ringing softly until the very end",
-     "sense of honor",
-     "gentle",
-     "no ending silence"
+     "fortississimo triumphant climax, the loudest and grandest moment of the piece",
+     "brass fanfare signature and full orchestra chord exactly at the start of this section",
+     "cymbals and timpani",
+     "sustained grand D major chord held at full power until the very last second",
+     "no decrescendo, no fade"
     ],
     "negative_local_styles": [
-     "silence",
-     "fade out early",
-     "percussion hit",
-     "drum hit",
-     "bass drum",
+     "fade out",
+     "quiet ending",
+     "harp",
+     "romantic",
      "new theme",
-     "abrupt cut"
+     "silence",
+     "bass drum",
+     "kick drum"
     ],
-    "duration_ms": 5000,
+    "duration_ms": 7000,
     "lines": []
    }
   ]
- },
- "respect_sections_durations": true
+ }
 }
