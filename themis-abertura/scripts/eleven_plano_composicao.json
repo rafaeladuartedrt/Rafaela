@@ -3,39 +3,39 @@
  "respect_sections_durations": true,
  "composition_plan": {
   "positive_global_styles": [
-   "grand award ceremony orchestral theme",
-   "prestigious awards night",
-   "majestic",
-   "triumphant",
-   "historic moment",
-   "sense of honor and recognition",
-   "the weight of winning",
-   "golden brass fanfare",
-   "full symphony orchestra",
-   "soaring strings",
-   "timpani and cymbals",
+   "historic documentary orchestral score",
+   "solemn grandeur",
+   "gravitas",
+   "the weight of recognition",
+   "noble low brass chorale of horns and trombones",
    "journalistic driving staccato strings ostinato",
-   "D major",
+   "timpani",
+   "serious and credible",
+   "D minor moving to D major at the climax",
    "120 bpm",
    "continuous crescendo",
    "ends at the peak",
+   "live symphony orchestra",
    "high-end film score production"
   ],
   "negative_global_styles": [
+   "festive",
+   "celebratory fanfare",
+   "bright trumpet fanfare",
+   "awards show glitz",
+   "party",
+   "playful",
+   "cheerful",
+   "cymbal crashes",
    "vocals",
    "choir with lyrics",
    "electronic beats",
-   "EDM",
    "synth",
    "bass drum",
    "kick drum",
    "trailer braams",
-   "pop",
-   "party",
-   "playful",
    "romantic ballad",
    "harp",
-   "melodramatic",
    "horror",
    "decrescendo",
    "fade out",
@@ -67,7 +67,7 @@
     "positive_local_styles": [
      "the music kicks off exactly at the start of this section",
      "driving staccato strings ostinato begins",
-     "bright trumpets and strings headline accent",
+     "firm strings and horns headline accent",
      "mezzo-forte"
     ],
     "negative_local_styles": [
@@ -115,7 +115,7 @@
     "section_name": "Words - Innovation and News",
     "positive_local_styles": [
      "bright rhythmic staccato strings accent exactly at the start of this section",
-     "then a short urgent trumpet accent 2 seconds later",
+     "then a short firm horn accent 2 seconds later",
      "snare roll building toward the next section",
      "growing"
     ],
@@ -131,7 +131,7 @@
     "section_name": "Trophy - achievement",
     "positive_local_styles": [
      "fortissimo",
-     "triumphant full orchestra arrival with timpani roll and golden brass fanfare exactly at the start of this section",
+     "solemn and powerful full orchestra arrival with timpani roll and noble horns and trombones chorale exactly at the start of this section",
      "soaring strings",
      "the moment of victory",
      "majestic and heavy"
@@ -149,11 +149,11 @@
    {
     "section_name": "Logo - peak",
     "positive_local_styles": [
-     "fortississimo triumphant climax, the loudest and grandest moment of the piece",
-     "brass fanfare signature and full orchestra chord exactly at the start of this section",
-     "cymbals and timpani",
-     "sustained grand D major chord held at full power until the very last second",
-     "no decrescendo, no fade"
+     "fortississimo, the most powerful moment of the piece",
+     "noble brass chorale and full orchestra resolve from minor to a grand D major chord exactly at the start of this section",
+     "timpani and strings driving",
+     "held at full power until the very last second",
+     "solemn grandeur, no decrescendo, no fade"
     ],
     "negative_local_styles": [
      "fade out",
