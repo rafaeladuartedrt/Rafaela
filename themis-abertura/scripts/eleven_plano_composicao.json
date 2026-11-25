@@ -2,7 +2,7 @@
  "model_id": "music_v1",
  "composition_plan": {
   "positive_global_styles": [
-   "orchestral",
+   "organic live symphony orchestra",
    "cinematic award ceremony theme",
    "noble",
    "inspiring",
@@ -10,33 +10,40 @@
    "prestigious",
    "D major",
    "120 bpm",
-   "live strings",
-   "warm french horns",
-   "brass",
-   "timpani",
-   "piano",
+   "real acoustic instruments",
+   "natural concert hall reverb",
    "high-end film score production"
   ],
   "negative_global_styles": [
    "vocals",
-   "choir singing lyrics",
+   "choir with lyrics",
    "electronic beats",
+   "synth",
    "EDM",
    "pop drums",
+   "trailer braams",
+   "stock sound effects",
+   "repetitive identical hits",
    "ticking clock",
    "festive party",
    "melodramatic horror",
-   "lo-fi"
+   "lo-fi",
+   "bass drum",
+   "kick drum",
+   "taiko",
+   "boom hits",
+   "percussive impacts",
+   "sub drops"
   ],
   "sections": [
    {
-    "section_name": "Solemn opening",
+    "section_name": "Opening - anticipation",
     "positive_local_styles": [
      "starts immediately, no silence",
      "quiet low strings pulse",
      "soft timpani",
-     "anticipation",
-     "gradual build into the next section"
+     "gentle anticipation",
+     "gradual build"
     ],
     "negative_local_styles": [
      "loud",
@@ -46,69 +53,78 @@
     "lines": []
    },
    {
-    "section_name": "First hit - Journalism",
+    "section_name": "Journalism - awakening",
     "positive_local_styles": [
-     "powerful orchestral hit with timpani and brass exactly at the start of this section",
-     "noble brass motif",
-     "marcato strings driving",
-     "steady build"
+     "bright arrival of strings and french horns blooming exactly at the start of this section",
+     "awakening",
+     "noble horn motif",
+     "flowing strings"
     ],
     "negative_local_styles": [
-     "soft intro"
+     "drum hit",
+     "bass drum",
+     "cymbal crash",
+     "low brass hit"
     ],
     "duration_ms": 5000,
     "lines": []
    },
    {
-    "section_name": "Second hit - Judiciary, then tender",
+    "section_name": "Judiciary - authority, then tender",
     "positive_local_styles": [
-     "powerful orchestral hit with timpani and brass exactly at the start of this section",
-     "after the hit, tender piano melody",
-     "soft sustained strings",
-     "respectful",
+     "solemn swell of low strings and trombones arriving exactly at the start of this section",
+     "dignified authority",
+     "then tender piano melody over soft sustained strings",
      "warm",
      "hopeful"
     ],
     "negative_local_styles": [
-     "heavy drums",
+     "bright strings hit",
+     "drum hit",
+     "bass drum",
      "sad",
-     "dark"
+     "dark",
+     "cymbal crash"
     ],
     "duration_ms": 10000,
     "lines": []
    },
    {
-    "section_name": "Trophy - majestic rise",
+    "section_name": "Trophy - achievement",
     "positive_local_styles": [
-     "huge orchestral hit with timpani and brass exactly at the start of this section",
+     "full orchestra arrival with soaring violins and a soft suspended cymbal swell exactly at the start of this section",
+     "achievement",
      "majestic",
-     "marcato strings",
-     "timpani on every beat",
-     "brass swelling",
-     "rising toward climax"
+     "brass rising toward climax"
     ],
     "negative_local_styles": [
-     "calm",
-     "sparse"
+     "drum hit",
+     "sparse",
+     "bass drum",
+     "calm"
     ],
     "duration_ms": 6000,
     "lines": []
    },
    {
-    "section_name": "Final climax and resolution",
+    "section_name": "Logo - honor",
     "positive_local_styles": [
-     "final majestic orchestral hit exactly at the start of this section",
-     "sustained D major chord ringing until the very end",
-     "noble",
-     "sense of honor"
+     "warm french horns resolution with a harp glissando exactly at the start of this section",
+     "then sustained D major chord with strings ringing softly until the very end",
+     "sense of honor",
+     "gentle",
+     "no ending silence"
     ],
     "negative_local_styles": [
      "silence",
      "fade out early",
-     "abrupt cut",
-     "new theme"
+     "percussion hit",
+     "drum hit",
+     "bass drum",
+     "new theme",
+     "abrupt cut"
     ],
-    "duration_ms": 3000,
+    "duration_ms": 5000,
     "lines": []
    }
   ]
