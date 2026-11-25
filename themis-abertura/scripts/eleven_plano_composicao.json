@@ -1,0 +1,184 @@
+{
+ "model_id": "music_v1",
+ "respect_sections_durations": true,
+ "composition_plan": {
+  "positive_global_styles": [
+   "orchestral score in two acts",
+   "first act: serious journalistic theme with historic weight",
+   "second act: award ceremony grandeur after a key change",
+   "driving staccato strings ostinato",
+   "noble horns and trombones",
+   "timpani",
+   "120 bpm",
+   "continuous crescendo",
+   "ends at the peak",
+   "live symphony orchestra",
+   "high-end film score production"
+  ],
+  "negative_global_styles": [
+   "dark",
+   "gloomy",
+   "ominous",
+   "horror",
+   "sad",
+   "festive party",
+   "playful",
+   "cheerful pop",
+   "vocals",
+   "choir with lyrics",
+   "electronic beats",
+   "synth",
+   "bass drum",
+   "kick drum",
+   "trailer braams",
+   "romantic ballad",
+   "harp",
+   "decrescendo",
+   "fade out",
+   "quiet ending",
+   "lo-fi"
+  ],
+  "sections": [
+   {
+    "section_name": "Slow opening",
+    "positive_local_styles": [
+     "slow and warm",
+     "sustained strings and soft horns in D",
+     "hopeful anticipation",
+     "no rhythm yet",
+     "starts immediately, no silence",
+     "serious journalistic tone",
+     "historic weight",
+     "in D, modal and grounded, not dark"
+    ],
+    "negative_local_styles": [
+     "driving rhythm",
+     "staccato",
+     "loud",
+     "bass drum",
+     "kick drum"
+    ],
+    "duration_ms": 6000,
+    "lines": []
+   },
+   {
+    "section_name": "Start - Journalism",
+    "positive_local_styles": [
+     "the music kicks off exactly at the start of this section",
+     "driving staccato strings ostinato begins",
+     "firm strings and horns headline accent",
+     "mezzo-forte",
+     "serious journalistic tone",
+     "historic weight",
+     "in D, modal and grounded, not dark"
+    ],
+    "negative_local_styles": [
+     "slow",
+     "ambient",
+     "bass drum",
+     "kick drum"
+    ],
+    "duration_ms": 4500,
+    "lines": []
+   },
+   {
+    "section_name": "Judiciary",
+    "positive_local_styles": [
+     "weighty low brass and trombones chord exactly at the start of this section",
+     "authority",
+     "ostinato continues",
+     "forte",
+     "serious journalistic tone",
+     "historic weight",
+     "in D, modal and grounded, not dark"
+    ],
+    "negative_local_styles": [
+     "harp",
+     "bass drum",
+     "kick drum"
+    ],
+    "duration_ms": 3000,
+    "lines": []
+   },
+   {
+    "section_name": "Words - Everyday life and Images",
+    "positive_local_styles": [
+     "warm strings swell accent exactly at the start of this section",
+     "then a french horn call accent 1.8 seconds later",
+     "ostinato continues",
+     "growing",
+     "serious journalistic tone",
+     "historic weight",
+     "in D, modal and grounded, not dark"
+    ],
+    "negative_local_styles": [
+     "bass drum",
+     "kick drum",
+     "calm"
+    ],
+    "duration_ms": 3950,
+    "lines": []
+   },
+   {
+    "section_name": "Words - Innovation and News",
+    "positive_local_styles": [
+     "bright rhythmic staccato strings accent exactly at the start of this section",
+     "then a short firm horn accent 2 seconds later",
+     "snare roll building toward the next section",
+     "growing",
+     "serious journalistic tone",
+     "historic weight",
+     "in D, modal and grounded, not dark"
+    ],
+    "negative_local_styles": [
+     "bass drum",
+     "kick drum",
+     "calm"
+    ],
+    "duration_ms": 3550,
+    "lines": []
+   },
+   {
+    "section_name": "Trophy - achievement",
+    "positive_local_styles": [
+     "THE TONE CHANGES HERE: upward key change to E major exactly at the start of this section",
+     "award ceremony grandeur begins",
+     "warm noble brass fanfare",
+     "soaring strings",
+     "timpani roll",
+     "the feeling of winning",
+     "fortissimo"
+    ],
+    "negative_local_styles": [
+     "same key as before",
+     "dark",
+     "calm"
+    ],
+    "duration_ms": 6000,
+    "lines": []
+   },
+   {
+    "section_name": "Logo - peak",
+    "positive_local_styles": [
+     "fortississimo, the most powerful and triumphant moment of the piece",
+     "grand E major chord with noble brass fanfare and full orchestra exactly at the start of this section",
+     "timpani and strings driving",
+     "held at full power until the very last second",
+     "honor and recognition, no decrescendo, no fade"
+    ],
+    "negative_local_styles": [
+     "fade out",
+     "quiet ending",
+     "harp",
+     "romantic",
+     "new theme",
+     "silence",
+     "bass drum",
+     "kick drum"
+    ],
+    "duration_ms": 7000,
+    "lines": []
+   }
+  ]
+ }
+}

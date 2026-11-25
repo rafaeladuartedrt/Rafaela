@@ -1,0 +1,24 @@
+{
+  "name": "themis-abertura",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vinheta de abertura em loop — 6º Prêmio Themis de Jornalismo (telão 350x200 cm)",
+  "scripts": {
+    "studio": "remotion studio",
+    "assets": "python3 -I scripts/prep_assets.py",
+    "stills": "bash scripts/stills.sh",
+    "render": "bash scripts/render.sh"
+  },
+  "dependencies": {
+    "@fontsource/montserrat": "5.1.0",
+    "@remotion/cli": "4.0.257",
+    "@remotion/motion-blur": "4.0.257",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.257"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
