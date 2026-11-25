@@ -1,4 +1,5 @@
-"""Trilha da vinheta: jornalística, com peso histórico. Nem festiva, nem dramática.
+"""Trilha da vinheta: tom de premiação (ré maior: nobre, inspirador, de reconhecimento),
+jornalística e com peso histórico. Nem festiva, nem dramática.
 Sem efeitos agudos de "tic" (nada de teclas, relógio ou dedilhados): as passagens são
 musicais, encaixadas na harmonia, com crescendos de cordas e rufos de timbale que
 deságuam em impactos nobres (metais quentes + timbale) nas cenas importantes.
@@ -12,11 +13,11 @@ import sys
 from trilha_lib import *
 
 BEAT = 0.5
-# harmonia por trecho: (início, fim, acorde, raiz do baixo)
-DM, BB, F_, C_, GM = [50, 53, 57, 62], [46, 53, 58, 62], [48, 53, 57, 60], [48, 52, 55, 60], [46, 50, 55, 58]
-HARM = [(0, 4, DM, 38), (4, 6, BB, 34), (6, 8, DM, 38), (8, 10, BB, 34), (10, 11, C_, 36), (11, 12, BB, 34),
-        (12, 14, BB, 34), (14, 16, F_, 41), (16, 18, GM, 43), (18, 20, DM, 38), (20, 21, C_, 36),
-        (21, 23, DM, 38), (23, 25, BB, 34), (25, 27, C_, 36), (27, 29, F_, 41), (29, 30, DM, 38)]
+# harmonia por trecho: (início, fim, acorde, raiz do baixo) — ré maior, progressão de elevação
+D_, G_, BM, A_, DF, EM = [50, 54, 57, 62], [43, 50, 55, 59], [47, 50, 54, 59], [45, 49, 52, 57], [42, 50, 54, 57], [40, 47, 52, 55]
+HARM = [(0, 4, D_, 38), (4, 6, G_, 43), (6, 8, D_, 38), (8, 10, BM, 35), (10, 11, A_, 33), (11, 12, G_, 43),
+        (12, 14, G_, 43), (14, 16, DF, 42), (16, 18, EM, 40), (18, 20, BM, 35), (20, 21, A_, 33),
+        (21, 23, D_, 38), (23, 25, G_, 43), (25, 27, A_, 33), (27, 29, D_, 38), (29, 30, D_, 38)]
 SENS = (12.0, 20.0)   # COTIDIANO / IMAGENS / INOVAÇÃO / NOTÍCIAS: recolhido
 
 
@@ -65,10 +66,10 @@ for t0, t1, step in ((6.0, 11.0, 2 * BEAT), (18.0, 20.0, 4 * BEAT), (21.0, 25.0,
         tt += step
 
 # 4) piano no trecho sensível: melodia simples, no tempo
-for tt, m, v in ((12.0, 74, 0.4), (13.0, 72, 0.36), (14.0, 69, 0.38), (15.0, 72, 0.36), (16.0, 70, 0.38),
-                 (17.0, 69, 0.36), (18.0, 69, 0.38), (19.0, 74, 0.38), (20.0, 72, 0.36)):
+for tt, m, v in ((12.0, 71, 0.4), (13.0, 69, 0.36), (14.0, 66, 0.38), (15.0, 69, 0.36), (16.0, 67, 0.38),
+                 (17.0, 64, 0.36), (18.0, 66, 0.38), (19.0, 74, 0.38), (20.0, 73, 0.36)):
     place(piano(m, v, dur=3.0), tt, amp=0.55, pan=0.1, rev=0.5)
-for tt, m in ((12.0, 46), (14.0, 41), (16.0, 43), (18.0, 38)):   # baixo do piano
+for tt, m in ((12.0, 43), (14.0, 42), (16.0, 40), (18.0, 35)):   # baixo do piano
     place(piano(m, 0.3, dur=3.0), tt, amp=0.45, pan=-0.1, rev=0.45)
 
 
@@ -85,20 +86,20 @@ def timp_roll(t_hit, dur, m):
         place(timp(m, 0.15 + 0.55 * (k / n) ** 1.6), tt, amp=0.5, pan=-0.1, rev=0.3)
 
 
-for t_hit, notes, m, d in ((6.0, [45, 52, 57, 61], 33, 1.5), (11.0, [48, 52, 55, 60], 36, 1.2),
-                           (21.0, [45, 52, 57, 61], 33, 1.8), (27.0, [48, 53, 55, 60], 36, 1.2)):
+for t_hit, notes, m, d in ((6.0, [45, 52, 57, 61], 33, 1.5), (11.0, [50, 54, 57, 62], 38, 1.2),
+                           (21.0, [45, 52, 57, 61], 33, 1.8), (27.0, [45, 52, 55, 61], 33, 1.2)):
     swell_into(t_hit, d, notes)
     timp_roll(t_hit, min(1.0, d), m)
 
 # varreduras de saída (7,15 s e 12,2 s): a mudança de acorde já marca; só um leve crescendo
-swell_into(8.0, 0.9, [46, 53, 58], amp=0.18)
-swell_into(12.2, 1.0, [46, 50, 58], amp=0.2)
+swell_into(8.0, 0.9, [47, 54, 59], amp=0.18)
+swell_into(12.2, 1.0, [43, 50, 59], amp=0.2)
 
 # 6) IMPACTOS nas cenas importantes: metais quentes + timbale + bumbo (prato discreto)
-STINGS = [(6.0, [38, 50, 57, 62, 65], 38, 1.0),     # JORNALISMO
-          (11.0, [34, 46, 53, 58, 62], 34, 1.0),    # JUDICIÁRIO
-          (21.0, [38, 50, 57, 62, 64, 69], 38, 1.1),  # troféu (luz estourada)
-          (27.0, [41, 53, 60, 65, 67, 69], 41, 0.95)]  # logo (fá com nona)
+STINGS = [(6.0, [38, 50, 57, 62, 66], 38, 1.0),        # JORNALISMO (ré maior)
+          (11.0, [31, 43, 50, 55, 59, 62], 43, 1.0),   # JUDICIÁRIO (sol maior, elevação)
+          (21.0, [38, 50, 57, 62, 66, 69], 38, 1.1),   # troféu (ré maior pleno)
+          (27.0, [38, 50, 57, 62, 64, 66, 69], 38, 0.95)]  # logo (ré maior com nona: honra, chegada)
 for tt, notes, root, v in STINGS:
     g = 0.6 + 0.5 * intensity(tt)          # cada impacto maior que o anterior
     place(np.vstack([stab(notes, dur=2.4, vel=v, warm=True), stab(notes, dur=2.4, vel=v, warm=True)]), tt, amp=0.7 * g, rev=0.45)
@@ -111,12 +112,12 @@ for tt, notes, root, v in STINGS:
 def horn(m, tt, dur=1.1, amp=0.5):
     place(np.vstack([stab([m, m - 12], dur=dur, vel=0.9, warm=True), stab([m, m - 12], dur=dur, vel=0.9, warm=True)]), tt, amp=amp, rev=0.5)
 
-for tt, a, b, g in ((6.0, 57, 62, 0.45), (11.0, 53, 58, 0.5), (21.0, 57, 62, 0.55), (27.0, 60, 65, 0.6)):
+for tt, a, b, g in ((6.0, 57, 62, 0.45), (11.0, 62, 67, 0.5), (21.0, 57, 62, 0.55), (27.0, 62, 69, 0.6)):
     horn(a, tt + 0.5, 0.6, g); horn(b, tt + 1.0, 1.6, g * 1.1)
 
-# 7) logo: resolução em fá (cordas sustentadas), voltando ao ré do início para o loop
-place(stereo_strings([41, 53, 57, 60, 67], 2.4, cutoff=2200, att=0.2, rel=0.9), 27.0, amp=0.3, rev=0.6)
-for tt, m, v in ((27.5, 69, 0.34), (28.0, 72, 0.32), (28.5, 77, 0.3)):
+# 7) logo: ré maior com nona sustentado, voltando ao pulso do início para o loop
+place(stereo_strings([38, 50, 54, 57, 64], 2.4, cutoff=2200, att=0.2, rel=0.9), 27.0, amp=0.3, rev=0.6)
+for tt, m, v in ((27.5, 66, 0.34), (28.0, 69, 0.32), (28.5, 74, 0.3)):
     place(piano(m, v, dur=3.0), tt, amp=0.5, pan=0.1, rev=0.55)
 
 render(sys.argv[1], wet_amt=0.42)
