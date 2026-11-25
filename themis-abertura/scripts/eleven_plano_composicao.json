@@ -1,0 +1,117 @@
+{
+ "model_id": "music_v1",
+ "composition_plan": {
+  "positive_global_styles": [
+   "orchestral",
+   "cinematic award ceremony theme",
+   "noble",
+   "inspiring",
+   "dignified",
+   "prestigious",
+   "D major",
+   "120 bpm",
+   "live strings",
+   "warm french horns",
+   "brass",
+   "timpani",
+   "piano",
+   "high-end film score production"
+  ],
+  "negative_global_styles": [
+   "vocals",
+   "choir singing lyrics",
+   "electronic beats",
+   "EDM",
+   "pop drums",
+   "ticking clock",
+   "festive party",
+   "melodramatic horror",
+   "lo-fi"
+  ],
+  "sections": [
+   {
+    "section_name": "Solemn opening",
+    "positive_local_styles": [
+     "starts immediately, no silence",
+     "quiet low strings pulse",
+     "soft timpani",
+     "anticipation",
+     "gradual build into the next section"
+    ],
+    "negative_local_styles": [
+     "loud",
+     "drums"
+    ],
+    "duration_ms": 6000,
+    "lines": []
+   },
+   {
+    "section_name": "First hit - Journalism",
+    "positive_local_styles": [
+     "powerful orchestral hit with timpani and brass exactly at the start of this section",
+     "noble brass motif",
+     "marcato strings driving",
+     "steady build"
+    ],
+    "negative_local_styles": [
+     "soft intro"
+    ],
+    "duration_ms": 5000,
+    "lines": []
+   },
+   {
+    "section_name": "Second hit - Judiciary, then tender",
+    "positive_local_styles": [
+     "powerful orchestral hit with timpani and brass exactly at the start of this section",
+     "after the hit, tender piano melody",
+     "soft sustained strings",
+     "respectful",
+     "warm",
+     "hopeful"
+    ],
+    "negative_local_styles": [
+     "heavy drums",
+     "sad",
+     "dark"
+    ],
+    "duration_ms": 10000,
+    "lines": []
+   },
+   {
+    "section_name": "Trophy - majestic rise",
+    "positive_local_styles": [
+     "huge orchestral hit with timpani and brass exactly at the start of this section",
+     "majestic",
+     "marcato strings",
+     "timpani on every beat",
+     "brass swelling",
+     "rising toward climax"
+    ],
+    "negative_local_styles": [
+     "calm",
+     "sparse"
+    ],
+    "duration_ms": 6000,
+    "lines": []
+   },
+   {
+    "section_name": "Final climax and resolution",
+    "positive_local_styles": [
+     "final majestic orchestral hit exactly at the start of this section",
+     "sustained D major chord ringing until the very end",
+     "noble",
+     "sense of honor"
+    ],
+    "negative_local_styles": [
+     "silence",
+     "fade out early",
+     "abrupt cut",
+     "new theme"
+    ],
+    "duration_ms": 3000,
+    "lines": []
+   }
+  ]
+ },
+ "respect_sections_durations": true
+}
