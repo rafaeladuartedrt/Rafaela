@@ -3,15 +3,16 @@
  "respect_sections_durations": true,
  "composition_plan": {
   "positive_global_styles": [
-   "historic documentary orchestral score",
-   "solemn grandeur",
-   "gravitas",
-   "the weight of recognition",
-   "noble low brass chorale of horns and trombones",
+   "prestigious award ceremony with historic weight",
+   "noble and inspiring",
+   "dignified grandeur",
+   "sense of honor and recognition",
+   "warm major key, D major throughout",
+   "noble horns and trombones chorale",
+   "restrained horn call motif",
    "journalistic driving staccato strings ostinato",
    "timpani",
-   "serious and credible",
-   "D minor moving to D major at the climax",
+   "uplifting but serious",
    "120 bpm",
    "continuous crescendo",
    "ends at the peak",
@@ -19,14 +20,16 @@
    "high-end film score production"
   ],
   "negative_global_styles": [
-   "festive",
-   "celebratory fanfare",
-   "bright trumpet fanfare",
-   "awards show glitz",
-   "party",
-   "playful",
+   "dark",
+   "gloomy",
+   "minor key",
+   "ominous",
+   "sad",
+   "festive party",
    "cheerful",
-   "cymbal crashes",
+   "playful",
+   "bright trumpet fanfare",
+   "cymbal crash celebration",
    "vocals",
    "choir with lyrics",
    "electronic beats",
@@ -46,11 +49,11 @@
    {
     "section_name": "Slow opening",
     "positive_local_styles": [
-     "slow and atmospheric",
-     "sustained low strings and soft brass pad",
+     "slow and warm",
+     "sustained strings and soft horns in D major",
+     "hopeful anticipation",
      "no rhythm yet",
-     "starts immediately, no silence",
-     "anticipation"
+     "starts immediately, no silence"
     ],
     "negative_local_styles": [
      "driving rhythm",
@@ -150,10 +153,10 @@
     "section_name": "Logo - peak",
     "positive_local_styles": [
      "fortississimo, the most powerful moment of the piece",
-     "noble brass chorale and full orchestra resolve from minor to a grand D major chord exactly at the start of this section",
+     "noble brass chorale and full orchestra on a grand warm D major chord exactly at the start of this section",
      "timpani and strings driving",
      "held at full power until the very last second",
-     "solemn grandeur, no decrescendo, no fade"
+     "honor and recognition, no decrescendo, no fade"
     ],
     "negative_local_styles": [
      "fade out",
